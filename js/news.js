@@ -1,25 +1,4 @@
 (function() {
-    // ==================== لوحة التحكم (عدّل القيم هنا فقط) ====================
-    var SETTINGS = {
-        title: 'جديدنا',                    // عنوان الصندوق
-        speed: 40,                           // سرعة الحركة (ثواني، أقل = أسرع)
-        maxNews: 5,                         // أقصى عدد للأخبار المعروضة
-        linkColor: '#1565C0',                // لون روابط الأخبار
-        linkHoverColor: '#0D47A1',           // لون الروابط عند التمرير
-        refreshTime: 60,                     // التحديث التلقائي (بالثواني)
-        icon: '📰',                          // الأيقونة (إيموجي أو نص أو SVG)
-        separateImg: 'https://github.com/softara1/softara/releases/download/1/favicon.ico',
-        feedMode: 'topics',                  // 'topics' للمواضيع، 'posts' للمشاركات
-        newsLocation: '.newsLocation',
-        maxTitleLength: 60,                  // أقصى طول لعنوان الخبر قبل الاختصار
-        urgencyKeywords: ['عاجل', 'هام', 'مهم', 'عاجل جدا'],  // كلمات الخبر العاجل
-        hiddenSections: [],                  // أسماء أقسام مخفية لتجاهلها (مثلاً: ['قسم الإدارة'])
-        swipeResumeDelay: 3000,              // مدة انتظار استئناف الحركة بعد السحب (مللي ثانية)
-        showCategory: true,                  // إظهار اسم القسم بجانب الخبر؟
-        categoryColor: '#888888'             // لون نص القسم
-    };
-
-    // ==================== انتظار تحميل الصفحة ====================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initNews);
     } else {
@@ -27,6 +6,26 @@
     }
 
     function initNews() {
+        // ==================== لوحة التحكم ====================
+        var SETTINGS = {
+            title: 'أخبارنا',
+            speed: 30,
+            maxNews: 10,
+            linkColor: '#1565C0',
+            linkHoverColor: '#0D47A1',
+            refreshTime: 60,
+            icon: '📰',
+            separateImg: 'https://github.com/softara1/softara/releases/download/1/favicon.ico',
+            feedMode: 'topics',
+            newsLocation: '.newsLocation',
+            maxTitleLength: 60,
+            urgencyKeywords: ['عاجل', 'هام', 'مهم', 'عاجل جدا'],
+            hiddenSections: [],
+            swipeResumeDelay: 3000,
+            showCategory: true,
+            categoryColor: '#888888'
+        };
+
         // ========== تحميل خط Cairo ==========
         if (!document.querySelector('link[href*="Cairo"]')) {
             var cLink = document.createElement('link');
@@ -35,7 +34,6 @@
             document.head.appendChild(cLink);
         }
 
-        // ========== منع التكرار وإنشاء الهيكل ==========
         var target = document.querySelector(SETTINGS.newsLocation);
         if (!target || target.querySelector('.kh-lastNewsContainer')) return;
 
@@ -54,11 +52,94 @@
             '</div>';
         target.appendChild(container);
 
-        // ========== عناصر DOM المهمة ==========
         var marqueeWrap = document.getElementById('kh-marquee-wrap');
         var marqueeInner = document.getElementById('kh-marquee-inner');
+        var isDragging = false, startX = 0, startTranslateX = 0, currentTranslateX = 0, movedDistance = 0;
+        var swipeTimer = null;
+        var marqueeBounds = { min: 0, max: 0 };
 
-        // ========== دالة جلب الأخبار ==========
+        function updateBounds() {
+            if (!marqueeWrap || !marqueeInner) return;
+            var wrapWidth = marqueeWrap.clientWidth;
+            var innerWidth = marqueeInner.scrollWidth;
+            // الشريط يتحرك من 0 إلى - (innerWidth - wrapWidth) ليكون المحتوى مرئياً
+            marqueeBounds.min = 0;
+            marqueeBounds.max = -(innerWidth - wrapWidth);
+            if (marqueeBounds.max > 0) marqueeBounds.max = 0; // إذا كان المحتوى أصغر من الحاوية
+        }
+
+        function pauseMarquee() {
+            if (!marqueeInner) return;
+            marqueeInner.style.animationPlayState = 'paused';
+            updateBounds();
+            // حساب القيمة الحالية للترجمة من الـ computed style
+            var style = window.getComputedStyle(marqueeInner);
+            var matrix = style.transform;
+            if (matrix && matrix !== 'none') {
+                var vals = matrix.match(/-?[\d.]+/g);
+                if (vals && vals.length >= 5) {
+                    currentTranslateX = parseFloat(vals[4]);
+                } else {
+                    currentTranslateX = 0;
+                }
+            } else {
+                currentTranslateX = 0;
+            }
+            // تثبيت الوضع الحالي
+            marqueeInner.style.transition = 'none';
+            marqueeInner.style.transform = 'translateX(' + currentTranslateX + 'px)';
+        }
+
+        function resumeMarqueeAfterDelay() {
+            if (swipeTimer) clearTimeout(swipeTimer);
+            swipeTimer = setTimeout(function() {
+                if (!marqueeInner) return;
+                // نعيد الأنيميشن الأصلي
+                marqueeInner.style.transition = '';
+                marqueeInner.style.transform = '';
+                marqueeInner.style.animation = '';
+                marqueeInner.style.animationPlayState = 'running';
+            }, SETTINGS.swipeResumeDelay);
+        }
+
+        // أحداث السحب
+        if (marqueeWrap) {
+            marqueeWrap.addEventListener('touchstart', function(e) {
+                if (!marqueeInner) return;
+                isDragging = true;
+                movedDistance = 0;
+                startX = e.touches[0].clientX;
+                pauseMarquee();
+                startTranslateX = currentTranslateX;
+                if (swipeTimer) clearTimeout(swipeTimer);
+            }, { passive: true });
+
+            marqueeWrap.addEventListener('touchmove', function(e) {
+                if (!isDragging || !marqueeInner) return;
+                var deltaX = e.touches[0].clientX - startX;
+                movedDistance = Math.abs(deltaX);
+                var newX = startTranslateX + deltaX;
+                // تقييد السحب بالحدود
+                if (newX > marqueeBounds.min) newX = marqueeBounds.min;
+                if (newX < marqueeBounds.max) newX = marqueeBounds.max;
+                marqueeInner.style.transform = 'translateX(' + newX + 'px)';
+                currentTranslateX = newX;
+            }, { passive: true });
+
+            marqueeWrap.addEventListener('touchend', function() {
+                isDragging = false;
+                resumeMarqueeAfterDelay();
+            });
+
+            marqueeWrap.addEventListener('click', function(e) {
+                if (movedDistance > 10) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        }
+
+        // ========== جلب الأخبار ==========
         function fetchAndUpdateNews() {
             var feedUrl = '/feed/';
             if (SETTINGS.feedMode === 'posts') feedUrl += '?mode=posts';
@@ -77,30 +158,27 @@
                             marqueeInner.innerHTML = '';
 
                             if (items.length > 0) {
-                                // بناء مصفوفة الأخبار لترتيبها حسب الأولوية
                                 var newsArray = [];
                                 var totalItems = Math.min(SETTINGS.maxNews, items.length);
                                 for (var i = 0; i < items.length; i++) {
-                                    if (newsArray.length >= SETTINGS.maxNews * 2) break; // حد أمان
+                                    if (newsArray.length >= SETTINGS.maxNews * 2) break;
                                     var item = items[i];
                                     var link = item.getElementsByTagName('link')[0]?.textContent || '#';
                                     var title = item.getElementsByTagName('title')[0]?.textContent || '';
                                     var catNode = item.getElementsByTagName('category')[0];
                                     var category = catNode ? catNode.textContent : '';
 
-                                    // تجاهل الأقسام المخفية
                                     if (SETTINGS.hiddenSections.length > 0) {
-                                        var isHidden = false;
+                                        var hidden = false;
                                         for (var h = 0; h < SETTINGS.hiddenSections.length; h++) {
                                             if (category.indexOf(SETTINGS.hiddenSections[h]) !== -1) {
-                                                isHidden = true;
+                                                hidden = true;
                                                 break;
                                             }
                                         }
-                                        if (isHidden) continue;
+                                        if (hidden) continue;
                                     }
 
-                                    // التحقق من وجود كلمة عاجلة
                                     var isUrgent = false;
                                     for (var u = 0; u < SETTINGS.urgencyKeywords.length; u++) {
                                         if (title.indexOf(SETTINGS.urgencyKeywords[u]) !== -1) {
@@ -109,7 +187,6 @@
                                         }
                                     }
 
-                                    // اختصار العنوان الطويل
                                     var displayTitle = title;
                                     if (title.length > SETTINGS.maxTitleLength) {
                                         displayTitle = title.substring(0, SETTINGS.maxTitleLength) + '...';
@@ -126,14 +203,12 @@
                                     if (newsArray.length >= SETTINGS.maxNews * 2) break;
                                 }
 
-                                // ترتيب: العاجل أولاً
                                 newsArray.sort(function(a, b) {
                                     if (a.isUrgent && !b.isUrgent) return -1;
                                     if (!a.isUrgent && b.isUrgent) return 1;
                                     return 0;
                                 });
 
-                                // عرض الأخبار حسب العدد المطلوب
                                 var limit = Math.min(SETTINGS.maxNews, newsArray.length);
                                 for (var j = 0; j < limit; j++) {
                                     var news = newsArray[j];
@@ -187,93 +262,17 @@
             xhr.send();
         }
 
-        // ========== تحميل أولي وتحديث دوري ==========
         fetchAndUpdateNews();
         setInterval(fetchAndUpdateNews, SETTINGS.refreshTime * 1000);
 
-        // ==================== السحب بالإصبع على الهاتف ====================
-        var isDragging = false;
-        var startX = 0;
-        var startTranslateX = 0;
-        var currentTranslateX = 0;
-        var swipeTimer = null;
-        var movedDistance = 0;
-
-        function getCurrentTranslateX() {
-            if (!marqueeInner) return 0;
-            var style = window.getComputedStyle(marqueeInner);
-            var matrix = style.transform || style.webkitTransform;
-            if (matrix === 'none') return 0;
-            var values = matrix.match(/-?[\d.]+/g);
-            return values && values.length >= 5 ? parseFloat(values[4]) : 0;
-        }
-
-        function pauseMarquee() {
-            if (marqueeInner) {
-                marqueeInner.style.animationPlayState = 'paused';
-                currentTranslateX = getCurrentTranslateX();
-                marqueeInner.style.transform = 'translateX(' + currentTranslateX + 'px)';
-                marqueeInner.style.animation = 'none';
-            }
-        }
-
-        function resumeMarqueeAfterDelay() {
-            if (swipeTimer) clearTimeout(swipeTimer);
-            swipeTimer = setTimeout(function() {
-                if (marqueeInner) {
-                    // إعادة تشغيل الأنيميشن من الموضع الحالي
-                    marqueeInner.style.transform = '';
-                    marqueeInner.style.animation = '';
-                    marqueeInner.style.animationPlayState = 'running';
-                }
-            }, SETTINGS.swipeResumeDelay);
-        }
-
-        if (marqueeWrap) {
-            marqueeWrap.addEventListener('touchstart', function(e) {
-                if (!marqueeInner) return;
-                isDragging = true;
-                movedDistance = 0;
-                startX = e.touches[0].clientX;
-                pauseMarquee();
-                startTranslateX = getCurrentTranslateX();
-                if (swipeTimer) clearTimeout(swipeTimer);
-            }, { passive: true });
-
-            marqueeWrap.addEventListener('touchmove', function(e) {
-                if (!isDragging || !marqueeInner) return;
-                var deltaX = e.touches[0].clientX - startX;
-                movedDistance = Math.abs(deltaX);
-                var newX = startTranslateX + deltaX;
-                // حد أقصى للسحب (لا يزيد عن 0 ولا يقل عن عرض المحتوى تقريباً)
-                if (newX > 0) newX = 0;
-                marqueeInner.style.transform = 'translateX(' + newX + 'px)';
-                currentTranslateX = newX;
-            }, { passive: true });
-
-            marqueeWrap.addEventListener('touchend', function() {
-                isDragging = false;
-                resumeMarqueeAfterDelay();
-            });
-
-            // منع فتح الرابط إذا كان المستخدم يسحب (وليس ينقر)
-            marqueeWrap.addEventListener('click', function(e) {
-                if (movedDistance > 10) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }, true);
-        }
-
-        // ==================== التنسيقات الداخلية (CSS كاملة) ====================
+        // ==================== التنسيقات ====================
         var style = document.createElement('style');
         style.textContent =
             '.kh-lastNewsContainer,.kh-lastNewsContainer *{font-family:\'Cairo\',sans-serif!important}' +
             '.kh-lastNewsContainer{display:flex;align-items:stretch;width:100%;background:#fff;border-radius:12px;' +
                 'box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;margin:20px 0;direction:rtl;box-sizing:border-box}' +
             '.kh-lastNewsTitle{display:flex;align-items:center;gap:8px;padding:12px 20px;background:#1e73be;' +
-                'color:#fff;font-weight:700;font-size:18px;white-space:nowrap;flex-shrink:0;z-index:2;' +
-                'border-radius:0 12px 12px 0}' +
+                'color:#fff;font-weight:700;font-size:18px;white-space:nowrap;flex-shrink:0;z-index:2}' +
             '.kh-title-icon{font-size:20px;line-height:1;display:inline-flex;align-items:center}' +
             '.kh-lastNewsItems-wrap{flex:1;overflow:hidden;background:#f0f6fb;display:flex;align-items:center;padding:12px 0;' +
                 'cursor:grab;user-select:none;-webkit-user-select:none}' +
@@ -305,7 +304,7 @@
             '@keyframes kh-spin{to{transform:rotate(360deg)}}' +
             '@keyframes kh-marquee{0%{transform:translate(0,0)}100%{transform:translate(100%,0)}}' +
             '@media (max-width:600px){' +
-                '.kh-lastNewsTitle{font-size:15px;padding:10px 14px;border-radius:0 10px 10px 0}' +
+                '.kh-lastNewsTitle{font-size:15px;padding:10px 14px}' +
                 '.kh-lastNews{font-size:14px}' +
                 '.kh-separateImg{margin:0 10px;width:16px;height:16px}' +
                 '.kh-urgent-badge{font-size:10px;padding:1px 5px}' +
