@@ -15,7 +15,7 @@
             separateImg = 'https://github.com/softara1/softara/releases/download/1/favicon.ico',
             newsLocation = '.newsLocation';
 
-        // تحميل خط Cairo فقط (بدون Font Awesome)
+        // تحميل خط Cairo فقط
         if (!document.querySelector('link[href*="Cairo"]')) {
             var cairoLink = document.createElement('link');
             cairoLink.rel = 'stylesheet';
@@ -30,7 +30,7 @@
         container.className = 'kh-lastNewsContainer';
         container.innerHTML = 
             '<div class="kh-lastNewsTitle">' +
-                '<svg aria-hidden="true" style="width:20px;height:20px;vertical-align:middle;fill:white" viewBox="0 0 24 24"><path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 7h3v3H8V7zm0 4h3v3H8v-3zm0 4h3v3H8v-3zm5 0h3v3h-3v-3zm0-4h3v3h-3v-3zm0-4h3v3h-3V7z"/></svg> <span>' + lastNewsTitle + '</span>' +
+                '<span style="font-size:20px;line-height:1;">&#x1F4F0;</span> <span>' + lastNewsTitle + '</span>' +
             '</div>' +
             '<div class="kh-lastNewsItems-wrap" id="kh-marquee-wrap">' +
                 '<div class="kh-lastNewsItems kh-news-marquee"></div>' +
@@ -102,7 +102,6 @@
             .kh-lastNewsContainer, .kh-lastNewsContainer * { font-family: 'Cairo', sans-serif !important; }
             .kh-lastNewsContainer { display:flex; align-items:stretch; width:100%; background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden; margin:20px 0; direction:rtl; box-sizing:border-box; }
             .kh-lastNewsTitle { display:flex; align-items:center; gap:8px; padding:12px 20px; background:#1e73be; color:#fff; font-weight:700; font-size:18px; white-space:nowrap; flex-shrink:0; z-index:2; }
-            .kh-lastNewsTitle i { font-size:20px; }
             .kh-lastNewsItems-wrap { flex:1; overflow:hidden; background:#f0f6fb; display:flex; align-items:center; padding:12px 0; }
             .kh-lastNewsItems { display:inline-block; padding-right:100%; white-space:nowrap; animation:kh-marquee ${speedOfNews}s linear infinite; }
             .kh-lastNews { display:inline-block; vertical-align:middle; color:${newsLinkColor} !important; text-decoration:none !important; font-size:16px; font-weight:600; transition:color 0.2s; }
