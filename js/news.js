@@ -1,11 +1,11 @@
-$(function getNews() {
+document.addEventListener('DOMContentLoaded', function getNews() {
     // ========== الإعدادات (قابلة للتعديل بالكامل) ==========
     var lastNewsTitle = 'أخبارنا',
-        numberOfNews = '10',           // عدد الأخبار الظاهرة
-        speedOfNews = '30',           // سرعة الحركة (أقل = أسرع)
-        newsLinkColor = '#1565C0',    // لون روابط الأخبار
-        feedMode = 'topics',          // 'topics' للمواضيع الجديدة، 'posts' لأحدث المشاركات
-        refreshInterval = 60000,      // تحديث كل 60 ثانية (بالمللي ثانية)
+        numberOfNews = '10',
+        speedOfNews = '30',
+        newsLinkColor = '#1565C0',
+        feedMode = 'topics',
+        refreshInterval = 60000,
         separateImg = 'https://github.com/softara1/softara/releases/download/1/favicon.ico',
         newsLocation = '.newsLocation';
 
@@ -48,11 +48,10 @@ $(function getNews() {
 
     // ========== دالة جلب الأخبار وتحديث الشريط (بدون jQuery) ==========
     function fetchAndUpdateNews() {
-        var feedUrl = '/feed/';  // يجلب كل مواضيع المنتدى العامة
+        var feedUrl = '/feed/';
         if (feedMode === 'posts') {
-            feedUrl += '?mode=posts';  // لآخر المشاركات
+            feedUrl += '?mode=posts';
         }
-        // إضافة متغير عشوائي لمنع الكاش
         feedUrl += (feedUrl.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
 
         var xhr = new XMLHttpRequest();
@@ -128,7 +127,7 @@ $(function getNews() {
     // ========== تحديث تلقائي كل دقيقة ==========
     setInterval(fetchAndUpdateNews, refreshInterval);
 
-    // ========== إيقاف الشريط باللمس على الهاتف (بدون jQuery) ==========
+    // ========== إيقاف الشريط باللمس على الهاتف ==========
     document.addEventListener('touchstart', function(e) {
         var wrap = e.target.closest('#kh-marquee-wrap');
         if (!wrap) return;
