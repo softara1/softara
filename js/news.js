@@ -54,47 +54,42 @@
 
         var marqueeWrap = document.getElementById('kh-marquee-wrap');
         var marqueeInner = document.getElementById('kh-marquee-inner');
-        var isDragging = false, startX = 0, startTranslateX = 0, currentTranslateX = 0, movedDistance = 0;
+        
+        // متغيرات السحب
+        var isDragging = false,
+            startX = 0,
+            startTime = 0,
+            currentTranslate = 0,
+            moved = false;
         var swipeTimer = null;
-        var marqueeBounds = { min: 0, max: 0 };
+        var dragThreshold = 5; // الحد الأدنى للحركة لاعتبارها سحبًا
 
-        function updateBounds() {
-            if (!marqueeWrap || !marqueeInner) return;
-            var wrapWidth = marqueeWrap.clientWidth;
-            var innerWidth = marqueeInner.scrollWidth;
-            // الشريط يتحرك من 0 إلى - (innerWidth - wrapWidth) ليكون المحتوى مرئياً
-            marqueeBounds.min = 0;
-            marqueeBounds.max = -(innerWidth - wrapWidth);
-            if (marqueeBounds.max > 0) marqueeBounds.max = 0; // إذا كان المحتوى أصغر من الحاوية
-        }
-
+        // إيقاف الأنيميشن وتثبيت الوضع الحالي
         function pauseMarquee() {
             if (!marqueeInner) return;
             marqueeInner.style.animationPlayState = 'paused';
-            updateBounds();
-            // حساب القيمة الحالية للترجمة من الـ computed style
+            // الحصول على قيمة translateX الحالية من الـ animation
             var style = window.getComputedStyle(marqueeInner);
             var matrix = style.transform;
             if (matrix && matrix !== 'none') {
-                var vals = matrix.match(/-?[\d.]+/g);
-                if (vals && vals.length >= 5) {
-                    currentTranslateX = parseFloat(vals[4]);
+                var values = matrix.match(/-?[\d.]+/g);
+                if (values && values.length >= 5) {
+                    currentTranslate = parseFloat(values[4]);
                 } else {
-                    currentTranslateX = 0;
+                    currentTranslate = 0;
                 }
             } else {
-                currentTranslateX = 0;
+                currentTranslate = 0;
             }
-            // تثبيت الوضع الحالي
             marqueeInner.style.transition = 'none';
-            marqueeInner.style.transform = 'translateX(' + currentTranslateX + 'px)';
+            marqueeInner.style.transform = 'translateX(' + currentTranslate + 'px)';
         }
 
-        function resumeMarqueeAfterDelay() {
+        // استئناف الأنيميشن بعد فترة
+        function resumeMarquee() {
             if (swipeTimer) clearTimeout(swipeTimer);
             swipeTimer = setTimeout(function() {
                 if (!marqueeInner) return;
-                // نعيد الأنيميشن الأصلي
                 marqueeInner.style.transition = '';
                 marqueeInner.style.transform = '';
                 marqueeInner.style.animation = '';
@@ -102,37 +97,54 @@
             }, SETTINGS.swipeResumeDelay);
         }
 
-        // أحداث السحب
+        // أحداث اللمس
         if (marqueeWrap) {
             marqueeWrap.addEventListener('touchstart', function(e) {
                 if (!marqueeInner) return;
                 isDragging = true;
-                movedDistance = 0;
+                moved = false;
                 startX = e.touches[0].clientX;
+                startTime = Date.now();
                 pauseMarquee();
-                startTranslateX = currentTranslateX;
                 if (swipeTimer) clearTimeout(swipeTimer);
-            }, { passive: true });
+                e.preventDefault(); // منع السلوك الافتراضي مثل التمرير
+            }, { passive: false });
 
             marqueeWrap.addEventListener('touchmove', function(e) {
                 if (!isDragging || !marqueeInner) return;
+                e.preventDefault(); // منع التمرير العمودي
                 var deltaX = e.touches[0].clientX - startX;
-                movedDistance = Math.abs(deltaX);
-                var newX = startTranslateX + deltaX;
-                // تقييد السحب بالحدود
-                if (newX > marqueeBounds.min) newX = marqueeBounds.min;
-                if (newX < marqueeBounds.max) newX = marqueeBounds.max;
-                marqueeInner.style.transform = 'translateX(' + newX + 'px)';
-                currentTranslateX = newX;
-            }, { passive: true });
+                if (Math.abs(deltaX) > dragThreshold) {
+                    moved = true;
+                }
+                var newTranslate = currentTranslate + deltaX;
+                // الحدود: لا نسمح بتجاوز 0 أو أقل من عرض المحتوى
+                var wrapWidth = marqueeWrap.clientWidth;
+                var innerWidth = marqueeInner.scrollWidth;
+                var minX = 0;
+                var maxX = -(innerWidth - wrapWidth);
+                if (maxX > 0) maxX = 0; // إذا كان المحتوى أصغر من الحاوية
+                if (newTranslate > minX) newTranslate = minX;
+                if (newTranslate < maxX) newTranslate = maxX;
+                marqueeInner.style.transform = 'translateX(' + newTranslate + 'px)';
+            }, { passive: false });
 
-            marqueeWrap.addEventListener('touchend', function() {
+            marqueeWrap.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
                 isDragging = false;
-                resumeMarqueeAfterDelay();
+                // إذا لم يتم السحب (مجرد لمسة)، اسمح بفتح الرابط
+                if (!moved) {
+                    // سنترك السلوك الافتراضي يحدث
+                } else {
+                    // منع النقر الفوري
+                    e.preventDefault();
+                }
+                resumeMarquee();
             });
 
+            // منع النقر إذا تم السحب (للروابط)
             marqueeWrap.addEventListener('click', function(e) {
-                if (movedDistance > 10) {
+                if (moved) {
                     e.preventDefault();
                     e.stopPropagation();
                 }
@@ -159,38 +171,28 @@
 
                             if (items.length > 0) {
                                 var newsArray = [];
-                                var totalItems = Math.min(SETTINGS.maxNews, items.length);
-                                for (var i = 0; i < items.length; i++) {
-                                    if (newsArray.length >= SETTINGS.maxNews * 2) break;
+                                for (var i = 0; i < items.length && newsArray.length < SETTINGS.maxNews * 2; i++) {
                                     var item = items[i];
                                     var link = item.getElementsByTagName('link')[0]?.textContent || '#';
                                     var title = item.getElementsByTagName('title')[0]?.textContent || '';
                                     var catNode = item.getElementsByTagName('category')[0];
                                     var category = catNode ? catNode.textContent : '';
 
+                                    // تصفية الأقسام المخفية
                                     if (SETTINGS.hiddenSections.length > 0) {
-                                        var hidden = false;
-                                        for (var h = 0; h < SETTINGS.hiddenSections.length; h++) {
-                                            if (category.indexOf(SETTINGS.hiddenSections[h]) !== -1) {
-                                                hidden = true;
-                                                break;
-                                            }
-                                        }
+                                        var hidden = SETTINGS.hiddenSections.some(function(sec) {
+                                            return category.indexOf(sec) !== -1;
+                                        });
                                         if (hidden) continue;
                                     }
 
-                                    var isUrgent = false;
-                                    for (var u = 0; u < SETTINGS.urgencyKeywords.length; u++) {
-                                        if (title.indexOf(SETTINGS.urgencyKeywords[u]) !== -1) {
-                                            isUrgent = true;
-                                            break;
-                                        }
-                                    }
+                                    // هل الخبر عاجل؟
+                                    var isUrgent = SETTINGS.urgencyKeywords.some(function(word) {
+                                        return title.indexOf(word) !== -1;
+                                    });
 
-                                    var displayTitle = title;
-                                    if (title.length > SETTINGS.maxTitleLength) {
-                                        displayTitle = title.substring(0, SETTINGS.maxTitleLength) + '...';
-                                    }
+                                    var displayTitle = title.length > SETTINGS.maxTitleLength ?
+                                        title.substring(0, SETTINGS.maxTitleLength) + '...' : title;
 
                                     newsArray.push({
                                         link: link,
@@ -199,10 +201,9 @@
                                         category: category,
                                         isUrgent: isUrgent
                                     });
-
-                                    if (newsArray.length >= SETTINGS.maxNews * 2) break;
                                 }
 
+                                // ترتيب العاجل أولاً
                                 newsArray.sort(function(a, b) {
                                     if (a.isUrgent && !b.isUrgent) return -1;
                                     if (!a.isUrgent && b.isUrgent) return 1;
@@ -214,23 +215,12 @@
                                     var news = newsArray[j];
                                     var block = document.createElement('span');
                                     block.className = 'kh-lastNewsBlock';
-
-                                    var urgencyBadge = '';
-                                    if (news.isUrgent) {
-                                        urgencyBadge = '<span class="kh-urgent-badge">عاجل</span>';
-                                    }
-
-                                    var categorySpan = '';
-                                    if (SETTINGS.showCategory && news.category) {
-                                        categorySpan = '<span class="kh-category-tag">(' + news.category + ')</span>';
-                                    }
-
                                     block.innerHTML =
-                                        urgencyBadge +
+                                        (news.isUrgent ? '<span class="kh-urgent-badge">عاجل</span>' : '') +
                                         '<a href="' + news.link + '" class="kh-lastNews" title="' + news.fullTitle.replace(/"/g, '&quot;') + '">' +
                                             news.title +
                                         '</a>' +
-                                        categorySpan +
+                                        (SETTINGS.showCategory && news.category ? '<span class="kh-category-tag">(' + news.category + ')</span>' : '') +
                                         '<img src="' + SETTINGS.separateImg + '" class="kh-separateImg" alt="">';
                                     marqueeInner.appendChild(block);
                                 }
@@ -275,7 +265,7 @@
                 'color:#fff;font-weight:700;font-size:18px;white-space:nowrap;flex-shrink:0;z-index:2}' +
             '.kh-title-icon{font-size:20px;line-height:1;display:inline-flex;align-items:center}' +
             '.kh-lastNewsItems-wrap{flex:1;overflow:hidden;background:#f0f6fb;display:flex;align-items:center;padding:12px 0;' +
-                'cursor:grab;user-select:none;-webkit-user-select:none}' +
+                'touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}' +
             '.kh-lastNewsItems-wrap:active{cursor:grabbing}' +
             '.kh-lastNewsItems{display:inline-block;padding-right:100%;white-space:nowrap;' +
                 'animation:kh-marquee ' + SETTINGS.speed + 's linear infinite;will-change:transform}' +
