@@ -15,17 +15,12 @@
             separateImg = 'https://github.com/softara1/softara/releases/download/1/favicon.ico',
             newsLocation = '.newsLocation';
 
+        // تحميل خط Cairo فقط (بدون Font Awesome)
         if (!document.querySelector('link[href*="Cairo"]')) {
             var cairoLink = document.createElement('link');
             cairoLink.rel = 'stylesheet';
             cairoLink.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';
             document.head.appendChild(cairoLink);
-        }
-        if (!document.querySelector('link[href*="font-awesome"]') && !document.querySelector('link[href*="fontawesome"]')) {
-            var faLink = document.createElement('link');
-            faLink.rel = 'stylesheet';
-            faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
-            document.head.appendChild(faLink);
         }
 
         var target = document.querySelector(newsLocation);
@@ -34,8 +29,12 @@
         var container = document.createElement('div');
         container.className = 'kh-lastNewsContainer';
         container.innerHTML = 
-            '<div class="kh-lastNewsTitle"><i class="fas fa-newspaper"></i> <span>' + lastNewsTitle + '</span></div>' +
-            '<div class="kh-lastNewsItems-wrap" id="kh-marquee-wrap"><div class="kh-lastNewsItems kh-news-marquee"></div></div>';
+            '<div class="kh-lastNewsTitle">' +
+                '<svg aria-hidden="true" style="width:20px;height:20px;vertical-align:middle;fill:white" viewBox="0 0 24 24"><path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 7h3v3H8V7zm0 4h3v3H8v-3zm0 4h3v3H8v-3zm5 0h3v3h-3v-3zm0-4h3v3h-3v-3zm0-4h3v3h-3V7z"/></svg> <span>' + lastNewsTitle + '</span>' +
+            '</div>' +
+            '<div class="kh-lastNewsItems-wrap" id="kh-marquee-wrap">' +
+                '<div class="kh-lastNewsItems kh-news-marquee"></div>' +
+            '</div>';
         target.appendChild(container);
 
         function fetchAndUpdateNews() {
