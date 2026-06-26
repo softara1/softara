@@ -53,7 +53,7 @@ style.innerHTML = `
     white-space: nowrap;
     line-height: 50px;
     left: 0;
-    animation: move-to-right 60s linear infinite;
+    animation: move-to-right 10s linear infinite;
     transform: translate3d(-50%, 0, 0);
     will-change: transform;
 }
