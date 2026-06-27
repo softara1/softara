@@ -11,7 +11,7 @@
             title: 'أخبارنا',
             speed: 30,
             maxNews: 10,
-            linkColor: '#1565C0',
+            linkColor: '#2563EB',
             linkHoverColor: '#0D47A1',
             refreshTime: 60,
             icon: '📰',
