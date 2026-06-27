@@ -5,7 +5,7 @@ style.innerHTML = `
     position: relative;
     display: flex;
     background: #ffffff;
-    border: 2px solid #1e73be;
+    border: 2px solid #2563EB ;
     border-radius: 12px;
     height: 50px;
     margin: 10px auto;
@@ -19,7 +19,7 @@ style.innerHTML = `
     right: 0;
     top: 0;
     bottom: 0;
-    background: #1e73be;
+    background: #2563EB ;
     color: #fff;
     padding: 0 12px;
     font-size: 15px;
@@ -65,7 +65,7 @@ style.innerHTML = `
 }
 
 .topic-link {
-    color: #1e73be !important;
+    color: #2563EB  !important;
     text-decoration: none !important;
     font-weight: 800;
     font-size: 20px;
@@ -74,7 +74,7 @@ style.innerHTML = `
 
 .author-tag {
     color: #fff;
-    background: #1e73be;
+    background: #2563EB ;
     padding: 0 12px;
     margin: 0 15px;
     border-radius: 4px;
@@ -96,7 +96,7 @@ style.innerHTML = `
 }
 
 .symbol-sep {
-    color: #1e73be;
+    color: #2563EB ;
     font-size: 18px;
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
