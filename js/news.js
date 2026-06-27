@@ -251,7 +251,7 @@
             '.kh-lastNewsContainer,.kh-lastNewsContainer *{font-family:\'Cairo\',sans-serif!important}' +
             '.kh-lastNewsContainer{display:flex;align-items:stretch;width:100%;background:#fff;border-radius:12px;' +
                 'box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;margin:20px 0;direction:rtl;box-sizing:border-box}' +
-            '.kh-lastNewsTitle{display:flex;align-items:center;gap:8px;padding:12px 20px;background:#1e73be;' +
+            '.kh-lastNewsTitle{display:flex;align-items:center;gap:8px;padding:12px 20px;background:#2563EB;' +
                 'color:#fff;font-weight:700;font-size:18px;white-space:nowrap;flex-shrink:0;z-index:2}' +
             '.kh-title-icon{font-size:20px;line-height:1;display:inline-flex;align-items:center}' +
             '.kh-lastNewsItems-wrap{flex:1;overflow:hidden;background:#f0f6fb;display:flex;align-items:center;padding:12px 0;' +
