@@ -1,16 +1,12 @@
 /* ============================================
    ملف الأكواد المجمعة - Softara (إصدار التنقل السلس)
-   تم إصلاح كود نسخ الأكواد - 2026-06-28
+   تاريخ التحديث: 2026-06-28
    ============================================ */
 
 (function () {
     'use strict';
 
-    // متغيرات خاصة بنسخ الأكواد لتجنب التكرار
-    var clipboardInstance = null;
-    var clipboardLibLoaded = false;
-    var clipboardLoading = false;
-
+    // الدالة الرئيسية التي تحتوي كل الأكواد
     function initAll() {
         // ==================== أكواد صفحات المواضيع فقط ====================
         if (window.location.href.indexOf('/t') !== -1) {
@@ -245,9 +241,42 @@
                 }
             }
 
-            /* ---------- 5. نسخ الأكواد (مُصلح) ---------- */
-            setupCopyCode();
+            /* ---------- 5. نسخ الأكواد ---------- */
+            if (!$('.codebox .fae_code-header').length) {
+                // نضمن وجود مكتبة Clipboard
+                if (typeof Clipboard === 'undefined') {
+                    $.getScript('https://cdn.jsdelivr.net/clipboard.js/1.5.16/clipboard.min.js', function () {
+                        installClipboard();
+                    });
+                } else {
+                    installClipboard();
+                }
 
+                function installClipboard() {
+                    window.fae_copyCode = { copy: 'نسخ الكود', copied: 'تم النسخ!' };
+                    var $boxes = $('.codebox dt, .codebox p').not('.spoiler > dt, .hidecode > dt');
+                    if (!$boxes[0]) return;
+                    $('head').append(`<style>.codebox{max-width:920px!important;width:100%!important;margin:20px auto!important;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.07);background:#fff}.fae_code-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;direction:rtl}.fae_code-title{font-weight:600;color:#334155;font-size:14.8px}.fae_copy-btn{padding:7px 18px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s ease}.fae_copy-btn:hover{background:#1d4ed8;transform:translateY(-1px)}.fae_copy-btn:active{background:#1e40af;transform:scale(.97)}.fae_copy-btn.fae_copied{background:#16a34a}.codebox .cont_code,.codebox code{margin:0!important;padding:18px 20px!important;font-size:14.3px;line-height:1.58;max-height:580px;overflow-y:auto;background:#f8fafc;color:#1e2937;border-radius:0 0 8px 8px;white-space:pre-wrap;tab-size:4;direction:ltr!important;text-align:left!important}.codebox.code-rtl .cont_code,.codebox.code-rtl code{direction:rtl!important;text-align:right!important}</style>`);
+                    $boxes.each(function () {
+                        var $el = $(this);
+                        if ($el.closest('.codebox').find('.fae_code-header').length) return;
+                        $el.before(`<div class="fae_code-header"><span class="fae_code-title">الكود:</span><button class="fae_copy-btn"><span class="fae_copy-text">${window.fae_copyCode.copy}</span></button></div>`);
+                        if ($el.text().trim() === 'الكود:' || $el.text().trim() === 'Code:') $el.hide();
+                        var $code = $el.closest('.codebox').find('.cont_code, code').first();
+                        if ($code.length) {
+                            var txt = $code.text(), arabic = (txt.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+                            if (txt.length > 50 && arabic / txt.length > 0.35) $el.closest('.codebox').addClass('code-rtl');
+                        }
+                    });
+                    new Clipboard('.fae_copy-btn', { target: btn => $(btn).closest('.codebox').find('.cont_code, code')[0] })
+                        .on('success', e => {
+                            var $btn = $(e.trigger), $text = $btn.find('.fae_copy-text');
+                            $text.text(window.fae_copyCode.copied);
+                            $btn.addClass('fae_copied');
+                            setTimeout(() => { $text.text(window.fae_copyCode.copy); $btn.removeClass('fae_copied'); }, 1600);
+                        });
+                }
+            }
         }
 
         // ==================== أكواد جميع الصفحات ====================
@@ -1370,7 +1399,7 @@
             var blurIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M15.5 2l1.5 4.5L21.5 8l-4.5 1.5L15.5 14 14 9.5 9.5 8l4.5-1.5z"/></svg>';
             var frameIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M4 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4z"/></svg>';
             var flipvIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M12 4l-6 6h4v8h4v-8h4zM12 20l6-6h-4V6h-4v8H8z"/></svg>';
-            var imglinkIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`;
+            var imglinkIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>';
 
             function createButton(className, title, iconSvg) {
                 return '<a class="sceditor-button ' + className + '" unselectable="on" title="' + title + '"><div unselectable="on" style="display:flex; align-items:center; justify-content:center; height:100%; background:none!important;">' + iconSvg + '</div></a>';
@@ -1669,71 +1698,7 @@
         }
     }
 
-    // ========== دالة إعداد نسخ الأكواد (مستقلة) ==========
-    function setupCopyCode() {
-        // لا تفعل شيئاً إذا لم تكن في صفحة موضوع
-        if (window.location.href.indexOf('/t') === -1) return;
-
-        // دالة إنشاء الأزرار وتهيئة Clipboard
-        function createAndBind() {
-            // إذا كانت هناك أزرار سابقة، أعد بنائها (قد تكون تغيرت بعد AJAX)
-            var $boxes = $('.codebox dt, .codebox p').not('.spoiler > dt, .hidecode > dt');
-            $boxes.each(function () {
-                var $el = $(this);
-                if ($el.closest('.codebox').find('.fae_code-header').length) return;
-                $el.before('<div class="fae_code-header"><span class="fae_code-title">الكود:</span><button class="fae_copy-btn"><span class="fae_copy-text">' + (window.fae_copyCode ? window.fae_copyCode.copy : 'نسخ الكود') + '</span></button></div>');
-                if ($el.text().trim() === 'الكود:' || $el.text().trim() === 'Code:') $el.hide();
-                var $code = $el.closest('.codebox').find('.cont_code, code').first();
-                if ($code.length) {
-                    var txt = $code.text(), arabic = (txt.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
-                    if (txt.length > 50 && arabic / txt.length > 0.35) $el.closest('.codebox').addClass('code-rtl');
-                }
-            });
-
-            // إنشاء أو تجديد instance Clipboard
-            if (clipboardInstance) clipboardInstance.destroy();
-            if (typeof Clipboard !== 'undefined') {
-                clipboardInstance = new Clipboard('.fae_copy-btn', {
-                    target: function(btn) {
-                        return $(btn).closest('.codebox').find('.cont_code, code')[0];
-                    }
-                });
-                clipboardInstance.on('success', function(e) {
-                    var $btn = $(e.trigger), $text = $btn.find('.fae_copy-text');
-                    $text.text(window.fae_copyCode.copied);
-                    $btn.addClass('fae_copied');
-                    setTimeout(function() { $text.text(window.fae_copyCode.copy); $btn.removeClass('fae_copied'); }, 1600);
-                });
-            }
-        }
-
-        // تحميل المكتبة إذا لزم الأمر
-        if (typeof Clipboard === 'undefined') {
-            if (!clipboardLoading) {
-                clipboardLoading = true;
-                $.getScript('https://cdn.jsdelivr.net/clipboard.js/1.5.16/clipboard.min.js', function() {
-                    clipboardLibLoaded = true;
-                    window.fae_copyCode = { copy: 'نسخ الكود', copied: 'تم النسخ!' };
-                    // أضف التنسيقات مرة واحدة
-                    if (!$('#fae-clipboard-style').length) {
-                        $('head').append('<style id="fae-clipboard-style">.codebox{max-width:920px!important;width:100%!important;margin:20px auto!important;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.07);background:#fff}.fae_code-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;direction:rtl}.fae_code-title{font-weight:600;color:#334155;font-size:14.8px}.fae_copy-btn{padding:7px 18px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s ease}.fae_copy-btn:hover{background:#1d4ed8;transform:translateY(-1px)}.fae_copy-btn:active{background:#1e40af;transform:scale(.97)}.fae_copy-btn.fae_copied{background:#16a34a}.codebox .cont_code,.codebox code{margin:0!important;padding:18px 20px!important;font-size:14.3px;line-height:1.58;max-height:580px;overflow-y:auto;background:#f8fafc;color:#1e2937;border-radius:0 0 8px 8px;white-space:pre-wrap;tab-size:4;direction:ltr!important;text-align:left!important}.codebox.code-rtl .cont_code,.codebox.code-rtl code{direction:rtl!important;text-align:right!important}</style>');
-                    }
-                    createAndBind();
-                });
-            }
-        } else {
-            if (!clipboardLibLoaded) {
-                clipboardLibLoaded = true;
-                window.fae_copyCode = { copy: 'نسخ الكود', copied: 'تم النسخ!' };
-                if (!$('#fae-clipboard-style').length) {
-                    $('head').append('<style id="fae-clipboard-style">.codebox{max-width:920px!important;width:100%!important;margin:20px auto!important;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.07);background:#fff}.fae_code-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;direction:rtl}.fae_code-title{font-weight:600;color:#334155;font-size:14.8px}.fae_copy-btn{padding:7px 18px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s ease}.fae_copy-btn:hover{background:#1d4ed8;transform:translateY(-1px)}.fae_copy-btn:active{background:#1e40af;transform:scale(.97)}.fae_copy-btn.fae_copied{background:#16a34a}.codebox .cont_code,.codebox code{margin:0!important;padding:18px 20px!important;font-size:14.3px;line-height:1.58;max-height:580px;overflow-y:auto;background:#f8fafc;color:#1e2937;border-radius:0 0 8px 8px;white-space:pre-wrap;tab-size:4;direction:ltr!important;text-align:left!important}.codebox.code-rtl .cont_code,.codebox.code-rtl code{direction:rtl!important;text-align:right!important}</style>');
-                }
-            }
-            createAndBind();
-        }
-    }
-
-    // ==================== بدء تشغيل كل الأكواد ====================
+    // ==================== تشغيل المبادرة ====================
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         setTimeout(initAll, 1);
     } else {
