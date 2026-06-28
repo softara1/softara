@@ -1,12 +1,15 @@
 /* ============================================
-   ملف الأكواد المجمعة - Softara (إصدار التنقل السلس)
-   تاريخ التحديث: 2026-06-28
+   ملف الأكواد المجمعة - Softara (إصدار نهائي)
+   يعمل مع التنقل السلس + نسخ الأكواد + ظهور آخر مواضيعي للزوار
    ============================================ */
 
 (function () {
     'use strict';
 
-    // الدالة الرئيسية التي تحتوي كل الأكواد
+    // متغيرات نسخ الأكواد
+    var clipboardInstance = null;
+    var clipboardLoaded = false;
+
     function initAll() {
         // ==================== أكواد صفحات المواضيع فقط ====================
         if (window.location.href.indexOf('/t') !== -1) {
@@ -130,26 +133,31 @@
                 }
             });
 
-            /* ---------- 3. آخر مواضيعي ---------- */
+            /* ---------- 3. آخر مواضيعي (للجميع بما فيهم الزوار) ---------- */
             document.querySelectorAll("aside.post-sidebar:not(.last-topics-processed)").forEach(function (aside) {
                 aside.classList.add('last-topics-processed');
-                let userLink = aside.querySelector('a[href*="/u"]');
-                if (!userLink) return;
-                let match = userLink.getAttribute('href').match(/\/u(\d+)/);
-                if (!match) return;
-                let userID = "u" + match[1];
+                var userLink = aside.querySelector('a[href*="/u"]');
+                var userID = null;
+                var isGuest = true;
+                if (userLink) {
+                    var match = userLink.getAttribute('href').match(/\/u(\d+)/);
+                    if (match) {
+                        userID = "u" + match[1];
+                        isGuest = false;
+                    }
+                }
 
-                let box = document.createElement("div");
+                var box = document.createElement("div");
                 box.className = "last-topics-box";
                 box.style.cssText = "margin-top:10px; border:1px solid #b30000; border-radius:8px; overflow:hidden; font-size:12px; box-shadow:0 2px 6px rgba(0,0,0,0.15);";
 
-                let header = document.createElement("div");
+                var header = document.createElement("div");
                 header.style.cssText = "cursor:pointer; font-weight:bold; color:#fff; padding:8px; display:flex; align-items:center; gap:6px; background:#2563EB;";
-                const headerBaseHTML = '<i class="fa-solid fa-folder-open"></i> آخر مواضيعي <span style="font-weight:normal;">(%s)</span>';
+                var headerBaseHTML = '<i class="fa-solid fa-folder-open"></i> آخر مواضيعي <span style="font-weight:normal;">(%s)</span>';
                 header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للعرض');
                 box.appendChild(header);
 
-                let content = document.createElement("div");
+                var content = document.createElement("div");
                 content.style.display = "none";
                 content.style.padding = "8px";
                 content.style.background = "#fff";
@@ -157,59 +165,65 @@
                 content.dataset.fetched = "false";
                 box.appendChild(content);
 
-                let contactBtns = aside.querySelector('.contact-btns');
+                var contactBtns = aside.querySelector('.contact-btns');
                 if (contactBtns) {
                     contactBtns.insertAdjacentElement('afterend', box);
                 } else {
                     aside.appendChild(box);
                 }
 
-                header.addEventListener("click", function () {
-                    if (content.style.display === "none" && content.dataset.fetched === "false") {
-                        header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للإخفاء');
-                        content.style.display = "block";
-                        content.textContent = "⏳ جاري التحميل...";
-                        fetch("/st/" + userID)
-                            .then(res => res.text())
-                            .then(html => {
-                                let doc = new DOMParser().parseFromString(html, "text/html");
-                                let topics = doc.querySelectorAll("a.topictitle");
-                                content.dataset.fetched = "true";
-                                if (topics.length > 0) {
-                                    content.textContent = "";
-                                    let list = document.createElement("ol");
-                                    list.style.cssText = "direction:rtl; text-align:right; padding-right:18px; padding-left:0; margin:4px 0; font-family:'Cairo',sans-serif; font-size:14px; line-height:1.8; color:#333;";
-                                    topics.forEach((a, i) => {
-                                        if (i < 5) {
-                                            let li = document.createElement("li");
-                                            let link = document.createElement("a");
-                                            link.href = a.getAttribute('href');
-                                            link.textContent = a.textContent.trim();
-                                            link.style.cssText = "color:#000; text-decoration:none; font-weight:500;";
-                                            link.target = "_blank";
-                                            link.onmouseover = () => link.style.textDecoration = "underline";
-                                            link.onmouseout = () => link.style.textDecoration = "none";
-                                            li.appendChild(link);
-                                            list.appendChild(li);
-                                        }
-                                    });
-                                    content.appendChild(list);
-                                } else {
-                                    content.textContent = "⚠️ لا توجد مواضيع.";
-                                }
-                            })
-                            .catch(() => {
-                                content.dataset.fetched = "true";
-                                content.textContent = "⚠️ تعذر تحميل المواضيع.";
-                            });
-                    } else if (content.style.display === "block") {
-                        content.style.display = "none";
-                        header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للعرض');
-                    } else if (content.style.display === "none" && content.dataset.fetched === "true") {
-                        content.style.display = "block";
-                        header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للإخفاء');
-                    }
-                });
+                if (isGuest) {
+                    content.textContent = "🔒 قم بتسجيل الدخول لرؤية آخر مواضيعك.";
+                    content.style.display = "block";
+                    header.innerHTML = headerBaseHTML.replace('%s', 'تسجيل الدخول');
+                } else {
+                    header.addEventListener("click", function () {
+                        if (content.style.display === "none" && content.dataset.fetched === "false") {
+                            header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للإخفاء');
+                            content.style.display = "block";
+                            content.textContent = "⏳ جاري التحميل...";
+                            fetch("/st/" + userID)
+                                .then(res => res.text())
+                                .then(html => {
+                                    var doc = new DOMParser().parseFromString(html, "text/html");
+                                    var topics = doc.querySelectorAll("a.topictitle");
+                                    content.dataset.fetched = "true";
+                                    if (topics.length > 0) {
+                                        content.textContent = "";
+                                        var list = document.createElement("ol");
+                                        list.style.cssText = "direction:rtl; text-align:right; padding-right:18px; padding-left:0; margin:4px 0; font-family:'Cairo',sans-serif; font-size:14px; line-height:1.8; color:#333;";
+                                        topics.forEach((a, i) => {
+                                            if (i < 5) {
+                                                var li = document.createElement("li");
+                                                var link = document.createElement("a");
+                                                link.href = a.getAttribute('href');
+                                                link.textContent = a.textContent.trim();
+                                                link.style.cssText = "color:#000; text-decoration:none; font-weight:500;";
+                                                link.target = "_blank";
+                                                link.onmouseover = () => link.style.textDecoration = "underline";
+                                                link.onmouseout = () => link.style.textDecoration = "none";
+                                                li.appendChild(link);
+                                                list.appendChild(li);
+                                            }
+                                        });
+                                        content.appendChild(list);
+                                    } else {
+                                        content.textContent = "⚠️ لا توجد مواضيع.";
+                                    }
+                                })
+                                .catch(() => {
+                                    content.dataset.fetched = "true";
+                                    content.textContent = "⚠️ تعذر تحميل المواضيع.";
+                                });
+                        } else if (content.style.display === "block") {
+                            content.style.display = "none";
+                            header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للعرض');
+                        } else if (content.style.display === "none" && content.dataset.fetched === "true") {
+                            content.style.display = "block";
+                            header.innerHTML = headerBaseHTML.replace('%s', 'اضغط للإخفاء');
+                        }
+                    });
+                }
             });
 
             /* ---------- 4. غلاف الموضوع العلوي ---------- */
@@ -241,41 +255,52 @@
                 }
             }
 
-            /* ---------- 5. نسخ الأكواد ---------- */
-            if (!$('.codebox .fae_code-header').length) {
-                // نضمن وجود مكتبة Clipboard
-                if (typeof Clipboard === 'undefined') {
-                    $.getScript('https://cdn.jsdelivr.net/clipboard.js/1.5.16/clipboard.min.js', function () {
-                        installClipboard();
-                    });
-                } else {
-                    installClipboard();
+            /* ---------- 5. نسخ الأكواد (مُصلح بدون كسر باقي الكود) ---------- */
+            // تحميل المكتبة مرة واحدة فقط
+            if (!clipboardLoaded && typeof Clipboard === 'undefined') {
+                $.getScript('https://cdn.jsdelivr.net/clipboard.js/1.5.16/clipboard.min.js', function () {
+                    clipboardLoaded = true;
+                    setupClipboardButtons();
+                });
+            } else if (typeof Clipboard !== 'undefined') {
+                clipboardLoaded = true;
+                setupClipboardButtons();
+            }
+
+            function setupClipboardButtons() {
+                // إضافة الأنماط مرة واحدة
+                if (!$('#fae-clipboard-style').length) {
+                    $('head').append('<style id="fae-clipboard-style">.codebox{max-width:920px!important;width:100%!important;margin:20px auto!important;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.07);background:#fff}.fae_code-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;direction:rtl}.fae_code-title{font-weight:600;color:#334155;font-size:14.8px}.fae_copy-btn{padding:7px 18px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s ease}.fae_copy-btn:hover{background:#1d4ed8;transform:translateY(-1px)}.fae_copy-btn:active{background:#1e40af;transform:scale(.97)}.fae_copy-btn.fae_copied{background:#16a34a}.codebox .cont_code,.codebox code{margin:0!important;padding:18px 20px!important;font-size:14.3px;line-height:1.58;max-height:580px;overflow-y:auto;background:#f8fafc;color:#1e2937;border-radius:0 0 8px 8px;white-space:pre-wrap;tab-size:4;direction:ltr!important;text-align:left!important}.codebox.code-rtl .cont_code,.codebox.code-rtl code{direction:rtl!important;text-align:right!important}</style>');
                 }
 
-                function installClipboard() {
-                    window.fae_copyCode = { copy: 'نسخ الكود', copied: 'تم النسخ!' };
-                    var $boxes = $('.codebox dt, .codebox p').not('.spoiler > dt, .hidecode > dt');
-                    if (!$boxes[0]) return;
-                    $('head').append(`<style>.codebox{max-width:920px!important;width:100%!important;margin:20px auto!important;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.07);background:#fff}.fae_code-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;direction:rtl}.fae_code-title{font-weight:600;color:#334155;font-size:14.8px}.fae_copy-btn{padding:7px 18px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s ease}.fae_copy-btn:hover{background:#1d4ed8;transform:translateY(-1px)}.fae_copy-btn:active{background:#1e40af;transform:scale(.97)}.fae_copy-btn.fae_copied{background:#16a34a}.codebox .cont_code,.codebox code{margin:0!important;padding:18px 20px!important;font-size:14.3px;line-height:1.58;max-height:580px;overflow-y:auto;background:#f8fafc;color:#1e2937;border-radius:0 0 8px 8px;white-space:pre-wrap;tab-size:4;direction:ltr!important;text-align:left!important}.codebox.code-rtl .cont_code,.codebox.code-rtl code{direction:rtl!important;text-align:right!important}</style>`);
-                    $boxes.each(function () {
-                        var $el = $(this);
-                        if ($el.closest('.codebox').find('.fae_code-header').length) return;
-                        $el.before(`<div class="fae_code-header"><span class="fae_code-title">الكود:</span><button class="fae_copy-btn"><span class="fae_copy-text">${window.fae_copyCode.copy}</span></button></div>`);
-                        if ($el.text().trim() === 'الكود:' || $el.text().trim() === 'Code:') $el.hide();
-                        var $code = $el.closest('.codebox').find('.cont_code, code').first();
-                        if ($code.length) {
-                            var txt = $code.text(), arabic = (txt.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
-                            if (txt.length > 50 && arabic / txt.length > 0.35) $el.closest('.codebox').addClass('code-rtl');
-                        }
-                    });
-                    new Clipboard('.fae_copy-btn', { target: btn => $(btn).closest('.codebox').find('.cont_code, code')[0] })
-                        .on('success', e => {
-                            var $btn = $(e.trigger), $text = $btn.find('.fae_copy-text');
-                            $text.text(window.fae_copyCode.copied);
-                            $btn.addClass('fae_copied');
-                            setTimeout(() => { $text.text(window.fae_copyCode.copy); $btn.removeClass('fae_copied'); }, 1600);
-                        });
-                }
+                window.fae_copyCode = { copy: 'نسخ الكود', copied: 'تم النسخ!' };
+
+                // إنشاء أزرار النسخ لجميع صناديق الأكواد بدون زر
+                $('.codebox dt, .codebox p').not('.spoiler > dt, .hidecode > dt').each(function () {
+                    var $el = $(this);
+                    if ($el.closest('.codebox').find('.fae_code-header').length) return;
+                    $el.before('<div class="fae_code-header"><span class="fae_code-title">الكود:</span><button class="fae_copy-btn"><span class="fae_copy-text">' + window.fae_copyCode.copy + '</span></button></div>');
+                    if ($el.text().trim() === 'الكود:' || $el.text().trim() === 'Code:') $el.hide();
+                    var $code = $el.closest('.codebox').find('.cont_code, code').first();
+                    if ($code.length) {
+                        var txt = $code.text(), arabic = (txt.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+                        if (txt.length > 50 && arabic / txt.length > 0.35) $el.closest('.codebox').addClass('code-rtl');
+                    }
+                });
+
+                // إعادة ربط Clipboard (تدمير السابق إن وجد)
+                if (clipboardInstance) clipboardInstance.destroy();
+                clipboardInstance = new Clipboard('.fae_copy-btn', {
+                    target: function(btn) {
+                        return $(btn).closest('.codebox').find('.cont_code, code')[0];
+                    }
+                });
+                clipboardInstance.on('success', function(e) {
+                    var $btn = $(e.trigger), $text = $btn.find('.fae_copy-text');
+                    $text.text(window.fae_copyCode.copied);
+                    $btn.addClass('fae_copied');
+                    setTimeout(function() { $text.text(window.fae_copyCode.copy); $btn.removeClass('fae_copied'); }, 1600);
+                });
             }
         }
 
@@ -1399,7 +1424,7 @@
             var blurIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M15.5 2l1.5 4.5L21.5 8l-4.5 1.5L15.5 14 14 9.5 9.5 8l4.5-1.5z"/></svg>';
             var frameIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M4 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4z"/></svg>';
             var flipvIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M12 4l-6 6h4v8h4v-8h4zM12 20l6-6h-4V6h-4v8H8z"/></svg>';
-            var imglinkIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>';
+            var imglinkIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="#555"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`;
 
             function createButton(className, title, iconSvg) {
                 return '<a class="sceditor-button ' + className + '" unselectable="on" title="' + title + '"><div unselectable="on" style="display:flex; align-items:center; justify-content:center; height:100%; background:none!important;">' + iconSvg + '</div></a>';
@@ -1698,7 +1723,7 @@
         }
     }
 
-    // ==================== تشغيل المبادرة ====================
+    // ==================== تشغيل الكل ====================
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         setTimeout(initAll, 1);
     } else {
