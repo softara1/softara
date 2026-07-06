@@ -40,19 +40,25 @@
   text-transform: uppercase;
 }
 
+/* تعديل منطقة اسم الملف لتسمح بالتفاف النص */
 .dlBox .fN {
   flex-grow: 1;
-  width: calc(100% - 200px);
+  min-width: 0;               /* ضروري للتفاف النص داخل flex */
   padding: 0 15px;
   text-align: right;
+  overflow-wrap: break-word;  /* يسمح بالتفاف الكلمات الطويلة */
 }
 
+/* إلغاء الإجبار على سطر واحد */
 .dlBox .fN > * {
   display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;        /* السماح بأسطر متعددة */
+  overflow: visible;          /* إظهار المحتوى كاملاً */
+  text-overflow: clip;        /* لا نقاط */
+  word-break: break-word;     /* يدعم كسر الكلمات الطويلة جداً */
 }
+
+
 
 .dlBox .fS {
   line-height: 16px;
