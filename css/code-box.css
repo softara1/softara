@@ -224,3 +224,27 @@ body.dm .dlBox .fS,
 .code-box-textarea:focus {
   border-color: #007bff;
 }
+/* ==================== إصلاح الأزرار الطويلة (مثل sq-button xl) ==================== */
+.sq-button.xl {
+  display: inline-block;
+  max-width: 100%;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  font-size: 14px;
+  padding: 10px 14px;
+  line-height: 1.4;
+  text-align: center;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .sq-button.xl {
+    font-size: 12px;
+    padding: 8px 12px;
+    display: block;
+    width: 100%;
+  }
+}
