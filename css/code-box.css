@@ -1,4 +1,4 @@
-/* ========== المتغيرات العامة (يُفضل أن تكون موجودة في قالبك) ========== */
+/* ========== المتغيرات العامة ========== */
 :root {
   --contentB: #ffffff;
   --linkB: #9C27B0;
@@ -28,8 +28,6 @@
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
   transform: translateY(-2px);
 }
-
-/* أيقونة نوع الملف */
 .dlBox .fT {
   flex-shrink: 0;
   width: 45px;
@@ -47,8 +45,6 @@
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }
 }
-
-/* اسم الملف والحجم */
 .dlBox .fN {
   flex-grow: 1;
   width: calc(100% - 200px);
@@ -66,8 +62,6 @@
   opacity: 0.8;
   margin-top: 2px;
 }
-
-/* منطقة الأزرار */
 .dlBox .btnGroup {
   flex-shrink: 0;
   display: flex;
@@ -75,8 +69,6 @@
   gap: 8px;
   flex-direction: row-reverse;
 }
-
-/* زر التحميل الأساسي */
 .dlBox .dl-btn {
   position: relative;
   overflow: hidden;
@@ -95,12 +87,7 @@
   transition: background 0.3s;
 }
 .dl-btn:hover { opacity: 0.9; }
-.dl-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* شريط التقدم */
+.dl-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .dl-btn .progress-bar {
   position: absolute;
   bottom: 0;
@@ -111,8 +98,6 @@
   transition: width 0.1s linear;
   border-radius: 0 0 40px 40px;
 }
-
-/* أيقونات الأزرار الإضافية */
 .dlBox .icon-btn {
   width: 36px;
   height: 36px;
@@ -128,12 +113,7 @@
   transition: 0.3s;
   position: relative;
 }
-.icon-btn:hover {
-  background: var(--linkB);
-  color: #fff;
-}
-
-/* تنبيه النسخ */
+.icon-btn:hover { background: var(--linkB); color: #fff; }
 .copy-tooltip {
   position: absolute;
   bottom: 120%;
@@ -150,8 +130,6 @@
   transition: opacity 0.2s;
 }
 .copy-tooltip.show { opacity: 1; }
-
-/* أزرار المرايا */
 .mirror-btns {
   display: flex;
   gap: 5px;
@@ -169,8 +147,6 @@
   transition: 0.3s;
 }
 .mirror-link:hover { background: var(--linkB); color: #fff; }
-
-/* عرض كلمة المرور */
 .password-reveal {
   font-size: 12px;
   color: var(--bodyCa);
@@ -180,8 +156,6 @@
   gap: 4px;
 }
 .password-reveal i { cursor: pointer; }
-
-/* صندوق QR */
 .qr-modal {
   display: none;
   position: fixed;
@@ -209,8 +183,6 @@
   border-radius: 20px;
   cursor: pointer;
 }
-
-/* تأثير التموج */
 .ripple {
   position: absolute;
   border-radius: 50%;
@@ -243,7 +215,7 @@
 .drK .dlBox .icon-btn { background: rgba(255,255,255,0.1); color: #ccc; }
 .drK .dlBox .mirror-link { background: rgba(255,255,255,0.1); }
 
-/* ==================== صندوق الأكواد (دمج بدون تعارض) ==================== */
+/* ==================== صندوق الأكواد ==================== */
 .code-box-container {
   margin: 20px 0;
   border-radius: 12px;
@@ -264,9 +236,7 @@
   align-items: center;
   border-bottom: 1px solid #444;
 }
-.code-box-header span {
-  letter-spacing: 0.5px;
-}
+.code-box-header span { letter-spacing: 0.5px; }
 .code-box-copy {
   background: #007bff;
   border: none;
@@ -280,16 +250,9 @@
   align-items: center;
   gap: 4px;
 }
-.code-box-copy:hover {
-  background: #0056b3;
-}
-.code-box-copy.copied {
-  background: #28a745;
-}
-.code-box-body {
-  padding: 15px;
-  background: #1e1e1e;
-}
+.code-box-copy:hover { background: #0056b3; }
+.code-box-copy.copied { background: #28a745; }
+.code-box-body { padding: 15px; background: #1e1e1e; }
 .code-box-textarea {
   width: 100%;
   box-sizing: border-box;
@@ -307,6 +270,4 @@
   line-height: 1.5;
   outline: none;
 }
-.code-box-textarea:focus {
-  border-color: #007bff;
-}
+.code-box-textarea:focus { border-color: #007bff; }
