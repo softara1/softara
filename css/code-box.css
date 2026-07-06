@@ -1,19 +1,17 @@
-/* ========== المتغيرات العامة ========== */
+/* ========== المتغيرات الأساسية (احتياطاً) ========== */
 :root {
   --contentB: #ffffff;
   --linkB: #9C27B0;
+  --linkC: #08102b;
   --bodyCa: #767676;
   --fontB: 'Segoe UI', Tahoma, sans-serif;
-  --darkB: #1c2733;
-  --darkBa: #263545;
-  --darkBs: #374C63;
 }
 
-/* ==================== صندوق التحميل المُطوَّر ==================== */
+/* ==================== صندوق التحميل الأساسي RTL ==================== */
 .dlBox {
   max-width: 500px;
   background: var(--contentB);
-  box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
   border-radius: 10px;
   padding: 12px;
   margin: 1.7em 0;
@@ -21,199 +19,79 @@
   align-items: center;
   font-size: 14px;
   direction: rtl;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-  position: relative;
 }
-.dlBox:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-  transform: translateY(-2px);
-}
+
 .dlBox .fT {
   flex-shrink: 0;
-  width: 45px;
-  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.05);
+  width: 45px;
+  height: 45px;
+  padding: 10px;
+  background: rgba(0,0,0,.05);
   border-radius: 5px;
-  font-size: 20px;
-  color: var(--linkB);
-  animation: iconPulse 3s infinite ease-in-out;
 }
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+
+.dlBox .fT::before {
+  content: attr(data-text);
+  opacity: .7;
+  font-weight: bold;
+  text-transform: uppercase;
 }
+
 .dlBox .fN {
   flex-grow: 1;
   width: calc(100% - 200px);
   padding: 0 15px;
   text-align: right;
 }
+
 .dlBox .fN > * {
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .dlBox .fS {
+  line-height: 16px;
   font-size: 12px;
-  opacity: 0.8;
-  margin-top: 2px;
-}
-.dlBox .btnGroup {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-direction: row-reverse;
-}
-.dlBox .dl-btn {
-  position: relative;
-  overflow: hidden;
-  padding: 8px 16px;
-  border-radius: 40px;
-  border: none;
-  background: var(--linkB);
-  color: #fff;
-  font-family: var(--fontB);
-  font-size: 13px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  transition: background 0.3s;
-}
-.dl-btn:hover { opacity: 0.9; }
-.dl-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.dl-btn .progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: rgba(255,255,255,0.7);
-  width: 0%;
-  transition: width 0.1s linear;
-  border-radius: 0 0 40px 40px;
-}
-.dlBox .icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0,0,0,0.06);
-  color: var(--bodyCa);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  transition: 0.3s;
-  position: relative;
-}
-.icon-btn:hover { background: var(--linkB); color: #fff; }
-.copy-tooltip {
-  position: absolute;
-  bottom: 120%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.copy-tooltip.show { opacity: 1; }
-.mirror-btns {
-  display: flex;
-  gap: 5px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-.mirror-btns .mirror-link {
-  background: rgba(0,0,0,0.05);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: var(--bodyCa);
-  text-decoration: none;
-  transition: 0.3s;
-}
-.mirror-link:hover { background: var(--linkB); color: #fff; }
-.password-reveal {
-  font-size: 12px;
-  color: var(--bodyCa);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.password-reveal i { cursor: pointer; }
-.qr-modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6);
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
-}
-.qr-modal.show { display: flex; }
-.qr-modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
-.qr-modal-content canvas { display: block; margin: 0 auto 10px; }
-.qr-modal .close-btn {
-  background: var(--linkB);
-  color: #fff;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-}
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.4);
-  transform: scale(0);
-  animation: ripple-animation 0.6s linear;
-  pointer-events: none;
-}
-@keyframes ripple-animation {
-  to { transform: scale(4); opacity: 0; }
+  opacity: .8;
 }
 
-/* دعم الوضع الليلي */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --contentB: var(--darkB);
-    --bodyCa: #aaa;
-  }
-  .dlBox { box-shadow: 0 5px 25px rgba(0,0,0,0.4); }
-  .dlBox .fT { background: rgba(255,255,255,0.1); }
-  .dlBox .icon-btn { background: rgba(255,255,255,0.1); color: #ccc; }
-  .dlBox .mirror-link { background: rgba(255,255,255,0.1); }
-  .qr-modal-content { background: var(--darkBa); color: #fff; }
+.dlBox .button {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 10px 15px;
+  border-radius: 40px;
+  font-size: 13px;
+  color: #fff;
+  background: var(--linkB);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: 0.3s ease;
 }
-.drK .dlBox {
-  --contentB: var(--darkB);
-  box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+
+.dlBox .button:hover {
+  opacity: 0.9;
 }
-.drK .dlBox .fT { background: rgba(255,255,255,0.1); }
-.drK .dlBox .icon-btn { background: rgba(255,255,255,0.1); color: #ccc; }
-.drK .dlBox .mirror-link { background: rgba(255,255,255,0.1); }
+
+.dlBox .button::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='7 10 12 15 17 10'%3E%3C/polyline%3E%3Cline x1='12' y1='15' x2='12' y2='3'%3E%3C/line%3E%3C/svg%3E");
+  margin-left: 6px;
+}
+
+.dlBox .button::after {
+  content: attr(aria-label);
+}
 
 /* ==================== صندوق الأكواد ==================== */
 .code-box-container {
@@ -225,6 +103,7 @@
   direction: rtl;
   background: #1e1e1e;
 }
+
 .code-box-header {
   background: #2d2d2d;
   color: #fff;
@@ -236,7 +115,11 @@
   align-items: center;
   border-bottom: 1px solid #444;
 }
-.code-box-header span { letter-spacing: 0.5px; }
+
+.code-box-header span {
+  letter-spacing: 0.5px;
+}
+
 .code-box-copy {
   background: #007bff;
   border: none;
@@ -250,9 +133,20 @@
   align-items: center;
   gap: 4px;
 }
-.code-box-copy:hover { background: #0056b3; }
-.code-box-copy.copied { background: #28a745; }
-.code-box-body { padding: 15px; background: #1e1e1e; }
+
+.code-box-copy:hover {
+  background: #0056b3;
+}
+
+.code-box-copy.copied {
+  background: #28a745;
+}
+
+.code-box-body {
+  padding: 15px;
+  background: #1e1e1e;
+}
+
 .code-box-textarea {
   width: 100%;
   box-sizing: border-box;
@@ -270,4 +164,7 @@
   line-height: 1.5;
   outline: none;
 }
-.code-box-textarea:focus { border-color: #007bff; }
+
+.code-box-textarea:focus {
+  border-color: #007bff;
+}
