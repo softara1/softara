@@ -7,7 +7,7 @@
   --fontB: 'Segoe UI', Tahoma, sans-serif;
 }
 
-/* ==================== صندوق التحميل الأساسي RTL ==================== */
+/* ========== صندوق التحميل الأساسي RTL ========== */
 .dlBox {
   max-width: 500px;
   background: var(--contentB);
@@ -19,8 +19,10 @@
   align-items: center;
   font-size: 14px;
   direction: rtl;
+  gap: 12px;                  /* مسافة موحدة بين العناصر */
 }
 
+/* الأيقونة */
 .dlBox .fT {
   flex-shrink: 0;
   display: flex;
@@ -32,7 +34,6 @@
   background: rgba(0,0,0,.05);
   border-radius: 5px;
 }
-
 .dlBox .fT::before {
   content: attr(data-text);
   opacity: .7;
@@ -40,118 +41,76 @@
   text-transform: uppercase;
 }
 
-/* تعديل منطقة اسم الملف لتسمح بالتفاف النص */
+/* حاوية اسم الملف والحجم - تسمح بالتفاف النص دون دفع الزر */
 .dlBox .fN {
-  flex-grow: 1;
-  min-width: 0;               /* ضروري للتفاف النص داخل flex */
-  padding: 0 15px;
+  flex: 1 1 auto;
+  min-width: 0;               /* ضروري جداً ليعمل text-overflow والتفاف */
   text-align: right;
   overflow-wrap: break-word;  /* يسمح بالتفاف الكلمات الطويلة */
 }
-
-/* إلغاء الإجبار على سطر واحد */
-.dlBox .fN > * {
+.dlBox .fN > span {
   display: block;
-  white-space: normal;        /* السماح بأسطر متعددة */
-  overflow: visible;          /* إظهار المحتوى كاملاً */
-  text-overflow: clip;        /* لا نقاط */
-  word-break: break-word;     /* يدعم كسر الكلمات الطويلة جداً */
 }
-
-
-
+.dlBox .fN span:first-child {
+  white-space: normal;        /* اسم الملف يلتف */
+  word-break: break-word;
+}
 .dlBox .fS {
   line-height: 16px;
   font-size: 12px;
   opacity: .8;
+  margin-top: 2px;
 }
 
-.dlBox .button {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 10px 15px;
-  border-radius: 40px;
-  font-size: 13px;
-  color: #fff;
-  background: var(--linkB);
-  text-decoration: none;
+/* زر التحميل - لا ينقسم أبداً ويبقى ثابتاً */
+.dlBox .sq-button.xl {
+  flex-shrink: 0;            /* لا يتقلص */
+  white-space: nowrap;       /* كلمة "تحميل" لا تنقسم */
   display: inline-flex;
   align-items: center;
-  transition: 0.3s ease;
+  justify-content: center;
+  min-width: fit-content;
 }
 
-.dlBox .button:hover {
-  opacity: 0.9;
-}
-
-.dlBox .button::before {
-  content: '';
-  width: 18px;
-  height: 18px;
-  background-size: 18px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='7 10 12 15 17 10'%3E%3C/polyline%3E%3Cline x1='12' y1='15' x2='12' y2='3'%3E%3C/line%3E%3C/svg%3E");
-  margin-left: 6px;
-}
-
-.dlBox .button::after {
-  content: attr(aria-label);
-}
-
-/* ==================== الوضع الليلي (كلاس dm) ==================== */
+/* ========== الوضع الليلي dm ========== */
 body.dm .dlBox,
 .dm .dlBox {
-  --contentB: #1e1e1e;          /* خلفية داكنة */
-  --linkB: #bb86fc;            /* بنفسجي فاتح في الوضع الليلي */
+  --contentB: #1e1e1e;
+  --linkB: #bb86fc;
   --bodyCa: #b0b0b0;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
   color: #eee;
 }
-
 body.dm .dlBox .fT,
 .dm .dlBox .fT {
   background: rgba(255,255,255,0.1);
 }
-
 body.dm .dlBox .fT::before,
 .dm .dlBox .fT::before {
   opacity: 0.9;
 }
-
 body.dm .dlBox .fS,
 .dm .dlBox .fS {
   color: #ccc;
 }
 
-/* ==================== تحسينات الجوال (حتى 480px) ==================== */
+/* ========== الجوال (أقل من 480px) - تخطيط عمودي ========== */
 @media (max-width: 480px) {
   .dlBox {
-    flex-wrap: wrap;          /* السماح بالتفاف العناصر */
-    padding: 15px;
-    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;     /* العناصر تمتد بالعرض */
+    gap: 8px;
   }
-
   .dlBox .fT {
-    width: 40px;
-    height: 40px;
-    padding: 8px;
-    font-size: 12px;          /* تصغير الأيقونة */
-    order: 1;                 /* الأيقونة تظهر أولاً */
+    align-self: center;
+    margin-bottom: 4px;
   }
-
   .dlBox .fN {
-    width: calc(100% - 80px); /* تأخذ المساحة المتبقية بجانب الأيقونة */
-    padding: 0 10px;
-    order: 2;                 /* بجانب الأيقونة */
-    text-align: right;
+    text-align: center;
   }
-
-  .dlBox .button {
-    order: 3;                 /* الزر يذهب لسطر جديد */
-    width: 100%;              /* عرض كامل */
+  .dlBox .sq-button.xl {
+    width: 100%;
     justify-content: center;
-    margin-top: 5px;
   }
 }
 
