@@ -1,9 +1,9 @@
-/* ========== المتغيرات الأساسية (احتياطاً) ========== */
+/* ========== المتغيرات الأساسية ========== */
 :root {
-  --contentB: #ffffff;
-  --linkB: #9C27B0;
-  --linkC: #08102b;
-  --bodyCa: #767676;
+  --contentB: #ffffff;   /* خلفية الصندوق */
+  --linkB: #9C27B0;      /* لون الزر والأيقونة */
+  --linkC: #08102b;      /* لون النص الأساسي */
+  --bodyCa: #767676;     /* لون النص الثانوي */
   --fontB: 'Segoe UI', Tahoma, sans-serif;
 }
 
@@ -93,7 +93,63 @@
   content: attr(aria-label);
 }
 
-/* ==================== صندوق الأكواد ==================== */
+/* ==================== الوضع الليلي (كلاس dm) ==================== */
+body.dm .dlBox,
+.dm .dlBox {
+  --contentB: #1e1e1e;          /* خلفية داكنة */
+  --linkB: #bb86fc;            /* بنفسجي فاتح في الوضع الليلي */
+  --bodyCa: #b0b0b0;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+  color: #eee;
+}
+
+body.dm .dlBox .fT,
+.dm .dlBox .fT {
+  background: rgba(255,255,255,0.1);
+}
+
+body.dm .dlBox .fT::before,
+.dm .dlBox .fT::before {
+  opacity: 0.9;
+}
+
+body.dm .dlBox .fS,
+.dm .dlBox .fS {
+  color: #ccc;
+}
+
+/* ==================== تحسينات الجوال (حتى 480px) ==================== */
+@media (max-width: 480px) {
+  .dlBox {
+    flex-wrap: wrap;          /* السماح بالتفاف العناصر */
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .dlBox .fT {
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    font-size: 12px;          /* تصغير الأيقونة */
+    order: 1;                 /* الأيقونة تظهر أولاً */
+  }
+
+  .dlBox .fN {
+    width: calc(100% - 80px); /* تأخذ المساحة المتبقية بجانب الأيقونة */
+    padding: 0 10px;
+    order: 2;                 /* بجانب الأيقونة */
+    text-align: right;
+  }
+
+  .dlBox .button {
+    order: 3;                 /* الزر يذهب لسطر جديد */
+    width: 100%;              /* عرض كامل */
+    justify-content: center;
+    margin-top: 5px;
+  }
+}
+
+/* ==================== صندوق الأكواد (كما هو) ==================== */
 .code-box-container {
   margin: 20px 0;
   border-radius: 12px;
