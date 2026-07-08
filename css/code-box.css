@@ -62,6 +62,14 @@
   margin-top: 2px;
 }
 
+.dlBox .fD {
+  line-height: 16px;
+  font-size: 12px;
+  opacity: .7;
+  margin-top: 2px;
+  color: var(--bodyCa);
+}
+
 /* زر التحميل - لا ينقسم أبداً ويبقى ثابتاً */
 .dlBox .sq-button.xl {
   flex-shrink: 0;            /* لا يتقلص */
