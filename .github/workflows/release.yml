@@ -10,14 +10,20 @@ on:
 permissions:
   contents: write
 
+
 jobs:
+
   release-info:
+
     runs-on: ubuntu-latest
+
 
     steps:
 
+
       - name: Checkout repository
         uses: actions/checkout@v5
+
 
 
       - name: Setup Python
@@ -26,10 +32,35 @@ jobs:
           python-version: "3.11"
 
 
+
       - name: Install Python packages
         run: |
           python -m pip install --upgrade pip
           pip install requests
+
+
+
+      - name: Download Release APK Assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+
+          mkdir -p apk_files
+
+          gh release download "${{ github.event.release.tag_name }}" \
+          --repo "${{ github.repository }}" \
+          --pattern "*.apk" \
+          --dir apk_files
+
+
+
+      - name: Show downloaded APK files
+        run: |
+
+          echo "APK files downloaded:"
+
+          ls -lh apk_files
+
 
 
       - name: Run Release Builder
@@ -37,13 +68,16 @@ jobs:
           python scripts/upload_to_vt.py
 
 
+
       - name: Generate Release Notes
         run: |
           python scripts/generate_release_notes.py
 
 
+
       - name: Create ZIP package
         run: |
+
           VERSION=${GITHUB_REF_NAME:-latest}
 
           echo "Creating release: Softara-$VERSION.zip"
@@ -54,6 +88,7 @@ jobs:
           -x "scripts/*"
 
 
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v5
         with:
@@ -61,10 +96,13 @@ jobs:
           path: Softara-*.zip
 
 
-      - name: Upload ZIP to GitHub Release
+
+      - name: Update GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
+
           files: |
             Softara-*.zip
+
           body_path: release_notes.md
