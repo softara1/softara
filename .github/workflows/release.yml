@@ -39,16 +39,21 @@ jobs:
 
       - name: Create ZIP package
         run: |
-          zip -r softara-release.zip . \
+          VERSION=${GITHUB_REF_NAME:-latest}
+
+          echo "Creating release: Softara-$VERSION.zip"
+
+          zip -r Softara-$VERSION.zip . \
           -x ".git/*" \
-          -x ".github/*"
+          -x ".github/*" \
+          -x "scripts/*"
 
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v5
         with:
-          name: softara-release
-          path: softara-release.zip
+          name: Softara-release
+          path: Softara-*.zip
 
 
       - name: Upload ZIP to GitHub Release
@@ -56,4 +61,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            softara-release.zip
+            Softara-*.zip
