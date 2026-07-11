@@ -2,7 +2,8 @@ name: Release Automation
 
 on:
   release:
-    types: [published]
+    types:
+      - published
 
 permissions:
   contents: write
@@ -32,7 +33,9 @@ jobs:
 
       - name: Install Python packages
         run: |
+          python -m pip install --upgrade pip
           pip install requests
 
       - name: Placeholder
-        run: echo "Everything is ready. Next step: VirusTotal integration."
+        run: |
+          echo "Everything is ready."
