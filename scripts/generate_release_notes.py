@@ -13,7 +13,7 @@ apk_files = []
 print("\nSearching for APK files...\n")
 
 
-for root, dirs, filenames in os.walk("."):
+for root, dirs, filenames in os.walk("apk_files"):
 
     # تجاهل ملفات GitHub الداخلية
     if ".git" in root or ".github" in root:
