@@ -27,7 +27,6 @@ jobs:
         run: |
           mkdir -p assets
           cd assets
-          # استخراج روابط التحميل لكل أصل من واجهة GitHub API
           ASSETS_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}" \
             | jq -r '.assets[] | .browser_download_url')
@@ -59,7 +58,5 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           body_path: final_body.md
-          # لا نرفع ملفات إضافية لأننا نريد فقط تحديث الوصف
-          # (الأصول موجودة أصلاً)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
