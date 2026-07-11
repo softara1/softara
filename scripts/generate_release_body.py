@@ -8,10 +8,9 @@ from pathlib import Path
 from datetime import datetime
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-REPO = os.environ.get("GITHUB_REPOSITORY")  # مثل softara1/softara
+REPO = os.environ.get("GITHUB_REPOSITORY")
 
 def get_release_assets(release_id):
-    """يجلب قائمة الأصول من GitHub API"""
     url = f"https://api.github.com/repos/{REPO}/releases/{release_id}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     resp = requests.get(url, headers=headers)
@@ -42,20 +41,15 @@ def main():
         with open("vt_results.json") as f:
             vt_results = json.load(f)
 
-    # الحصول على الأصول من الـ Release
     assets = get_release_assets(release_id)
 
-    # تجميع معلومات الملفات
     files_info = []
     for asset in assets:
         name = asset["name"]
         if not name.lower().endswith(".apk"):
             continue
-        # نقوم بتحميل الملف محلياً (الأصل موجود بمجلد assets/)
         local_path = f"assets/{name}"
         if not os.path.exists(local_path):
-            # أحياناً لا نحتاج التنزيل مجدداً لأننا نزلناه في خطوة سابقة
-            # لكننا هنا نعتمد على وجوده
             print(f"تحذير: الملف {local_path} غير موجود محلياً، سيتم تخطي SHA256")
             size_mb = asset["size"] / (1024*1024)
             sha256_short = "غير متوفر"
@@ -69,7 +63,6 @@ def main():
             "sha256_short": sha256_short,
         })
 
-    # بناء الـ body
     lines = []
     lines.append(f"# {tag}\n")
     lines.append("## 📦 التحميلات\n")
