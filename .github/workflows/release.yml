@@ -18,16 +18,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Release Assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir assets
-          gh release download "${{ github.event.release.tag_name }}" -D assets
-
-      - name: List downloaded files
-        run: ls -lh assets
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -38,6 +28,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-            - name: Run Python Script
+      - name: Run Python Script
         run: |
           python scripts/upload_to_vt.py
