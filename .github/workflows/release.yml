@@ -15,19 +15,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+
 
       - name: Install Python packages
         run: |
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Run Python Script
+
+      - name: Run Release Builder
         run: |
           python scripts/upload_to_vt.py
+
+
+      - name: Create ZIP package
+        run: |
+          zip -r softara-release.zip . \
+          -x ".git/*" \
+          -x ".github/*"
+
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: softara-release
+          path: softara-release.zip
+
+
+      - name: Upload ZIP to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            softara-release.zip
