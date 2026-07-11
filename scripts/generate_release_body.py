@@ -1,29 +1,47 @@
 import os
 import json
-import hashlib
 import sys
 import argparse
 import requests
-from pathlib import Path
+import re
 from datetime import datetime
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 REPO = os.environ.get("GITHUB_REPOSITORY")
 
-def get_release_assets(release_id):
+def get_current_release_body(release_id):
+    """جلب الوصف الحالي للإصدار من GitHub API"""
     url = f"https://api.github.com/repos/{REPO}/releases/{release_id}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     resp = requests.get(url, headers=headers)
     resp.raise_for_status()
     release = resp.json()
-    return release.get("assets", [])
+    return release.get("body", "")
 
-def calc_sha256(filepath):
-    sha = hashlib.sha256()
-    with open(filepath, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            sha.update(chunk)
-    return sha.hexdigest()
+def build_vt_table(assets, vt_results):
+    """إنشاء صفوف جدول VirusTotal المدمج"""
+    rows = []
+    for asset in assets:
+        name = asset["name"]
+        if not name.lower().endswith(".apk"):
+            continue
+        download_url = asset["browser_download_url"]
+        vt = vt_results.get(name, {})
+        if vt and "error" not in vt:
+            malicious = vt["malicious"]
+            total = vt["total"]
+            permalink = vt["permalink"]
+            badge_color = "brightgreen" if malicious == 0 else "red"
+            badge_url = f"https://img.shields.io/badge/{malicious}%2F{total}-Clean-{badge_color}"
+            # اسم الملف كرابط تحميل
+            file_link = f"[{name}]({download_url})"
+            # شارة الحالة مع رابط التقرير (يمكن جعل الشارة نفسها رابطًا)
+            status_badge = f"[![]( {badge_url} )]({permalink})"
+            report_link = f"[View Report]({permalink})"
+            rows.append(f"| {file_link} | {status_badge} | {report_link} |")
+        else:
+            rows.append(f"| {name} | ⚠️ فشل الفحص | - |")
+    return rows
 
 def main():
     parser = argparse.ArgumentParser()
@@ -35,70 +53,53 @@ def main():
     release_id = args.release_id
     tag = args.tag
 
-    # تحميل نتائج VirusTotal
+    # 1. تحميل نتائج VirusTotal
     vt_results = {}
     if os.path.exists("vt_results.json"):
         with open("vt_results.json") as f:
             vt_results = json.load(f)
 
-    assets = get_release_assets(release_id)
+    # 2. الحصول على أصول الإصدار الحالية
+    url = f"https://api.github.com/repos/{REPO}/releases/{release_id}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
+    release = resp.json()
+    assets = release.get("assets", [])
 
-    files_info = []
-    for asset in assets:
-        name = asset["name"]
-        if not name.lower().endswith(".apk"):
-            continue
-        local_path = f"assets/{name}"
-        if not os.path.exists(local_path):
-            print(f"تحذير: الملف {local_path} غير موجود محلياً، سيتم تخطي SHA256")
-            size_mb = asset["size"] / (1024*1024)
-            sha256_short = "غير متوفر"
-        else:
-            size_mb = os.path.getsize(local_path) / (1024*1024)
-            sha256_short = calc_sha256(local_path)[:12] + "..."
-        files_info.append({
-            "name": name,
-            "download_url": asset["browser_download_url"],
-            "size_mb": f"{size_mb:.2f}",
-            "sha256_short": sha256_short,
-        })
+    # 3. بناء صفوف الجدول المدمج
+    table_rows = build_vt_table(assets, vt_results)
+    if not table_rows:
+        table_rows.append("| لم يتم العثور على ملفات APK | - | - |")
 
-    lines = []
-    lines.append(f"# {tag}\n")
-    lines.append("## 📦 التحميلات\n")
-    lines.append("| الملف | الحجم | SHA-256 (مختصر) | تحميل |")
-    lines.append("|-------|-------|----------------|-------|")
-    for info in files_info:
-        lines.append(
-            f"| {info['name']} | {info['size_mb']} MB | `{info['sha256_short']}` | [تحميل]({info['download_url']}) |"
-        )
-    lines.append("")
-    lines.append("---")
-    lines.append("## 🛡️ فحص VirusTotal")
-    lines.append("| الملف | الحالة | تقرير مفصل |")
-    lines.append("|-------|--------|------------|")
-    for info in files_info:
-        name = info["name"]
-        vt = vt_results.get(name, {})
-        if vt and "error" not in vt:
-            malicious = vt["malicious"]
-            total = vt["total"]
-            permalink = vt["permalink"]
-            badge_color = "brightgreen" if malicious == 0 else "red"
-            badge_url = f"https://img.shields.io/badge/{malicious}%2F{total}-Clean-{badge_color}"
-            lines.append(
-                f"| {name} | ![]({badge_url}) | [عرض التقرير]({permalink}) |"
-            )
-        else:
-            lines.append(f"| {name} | ⚠️ فشل الفحص | - |")
-    lines.append("")
-    lines.append("---")
+    # 4. تكوين الجدول
+    table_header = [
+        "| Build Variant | VirusTotal Status | Detailed Report |",
+        "|---------------|-------------------|-----------------|"
+    ]
+    full_table = "\n".join(table_header + table_rows)
+
+    # 5. قراءة الوصف الحالي للإصدار
+    current_body = release.get("body", "")
+    # البحث عن أي علامة لبداية جدول VirusTotal سابق (لنستبدله)
+    # نمط يبحث عن "🛡️ VirusTotal Analysis" أو "## 🛡️ VirusTotal Analysis" حتى نهاية النص
+    pattern = r"(^|\n)(🛡️ VirusTotal Analysis|## 🛡️ VirusTotal Analysis).*$"
+    match = re.search(pattern, current_body, re.MULTILINE | re.DOTALL)
+    if match:
+        # إزالة الجدول القديم وكل ما بعده
+        new_body = current_body[:match.start()].rstrip()
+    else:
+        # لا يوجد جدول قديم، نضيف الجدول بعد المحتوى الحالي مع فاصل
+        new_body = current_body.rstrip() + "\n\n---\n"
+    
+    # إضافة الجدول الجديد
+    new_body += f"\n## 🛡️ VirusTotal Analysis\n\n{full_table}\n\n"
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    lines.append(f"*تم التوليد تلقائياً في {now}*")
+    new_body += f"*تم التحديث تلقائياً في {now}*"
 
-    final = "\n".join(lines)
+    # 6. حفظ body الجديد في ملف
     with open(args.output, "w", encoding="utf-8") as f:
-        f.write(final)
+        f.write(new_body)
     print(f"✅ تم إنشاء {args.output}")
 
 if __name__ == "__main__":
