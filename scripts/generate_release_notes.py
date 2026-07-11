@@ -1,116 +1,112 @@
 import os
+import json
 import hashlib
+import sys
+import argparse
+import requests
+from pathlib import Path
+from datetime import datetime
 
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+REPO = os.environ.get("GITHUB_REPOSITORY")  # مثل softara1/softara
 
-print("=" * 50)
-print("Generating Release Notes...")
-print("=" * 50)
+def get_release_assets(release_id):
+    """يجلب قائمة الأصول من GitHub API"""
+    url = f"https://api.github.com/repos/{REPO}/releases/{release_id}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
+    release = resp.json()
+    return release.get("assets", [])
 
+def calc_sha256(filepath):
+    sha = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha.update(chunk)
+    return sha.hexdigest()
 
-apk_files = []
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--release-id", required=True)
+    parser.add_argument("--tag", required=True)
+    parser.add_argument("--output", default="final_body.md")
+    args = parser.parse_args()
 
+    release_id = args.release_id
+    tag = args.tag
 
-print("\nSearching for APK files...\n")
+    # تحميل نتائج VirusTotal
+    vt_results = {}
+    if os.path.exists("vt_results.json"):
+        with open("vt_results.json") as f:
+            vt_results = json.load(f)
 
+    # الحصول على الأصول من الـ Release
+    assets = get_release_assets(release_id)
 
-for root, dirs, filenames in os.walk("apk_files"):
+    # تجميع معلومات الملفات
+    files_info = []
+    for asset in assets:
+        name = asset["name"]
+        if not name.lower().endswith(".apk"):
+            continue
+        # نقوم بتحميل الملف محلياً (الأصل موجود بمجلد assets/)
+        local_path = f"assets/{name}"
+        if not os.path.exists(local_path):
+            # أحياناً لا نحتاج التنزيل مجدداً لأننا نزلناه في خطوة سابقة
+            # لكننا هنا نعتمد على وجوده
+            print(f"تحذير: الملف {local_path} غير موجود محلياً، سيتم تخطي SHA256")
+            size_mb = asset["size"] / (1024*1024)
+            sha256_short = "غير متوفر"
+        else:
+            size_mb = os.path.getsize(local_path) / (1024*1024)
+            sha256_short = calc_sha256(local_path)[:12] + "..."
+        files_info.append({
+            "name": name,
+            "download_url": asset["browser_download_url"],
+            "size_mb": f"{size_mb:.2f}",
+            "sha256_short": sha256_short,
+        })
 
-    # تجاهل ملفات GitHub الداخلية
-    if ".git" in root or ".github" in root:
-        continue
-
-    for filename in filenames:
-
-        if filename.lower().endswith(".apk"):
-
-            path = os.path.join(root, filename)
-
-            print("FOUND APK:")
-            print(path)
-
-            size = os.path.getsize(path) / (1024 * 1024)
-
-            sha256 = hashlib.sha256()
-
-            with open(path, "rb") as f:
-
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256.update(chunk)
-
-
-            apk_files.append({
-
-                "name": filename,
-                "size": f"{size:.2f} MB",
-                "sha": sha256.hexdigest()
-
-            })
-
-
-print("\nTotal APK files found:", len(apk_files))
-
-
-with open("release_notes.md", "w", encoding="utf-8") as f:
-
-
-    f.write("# What's New\n\n")
-
-    f.write("- تحسينات وإصلاحات\n\n")
-
-
-    f.write("---\n\n")
-
-
-    f.write("## 📦 Downloads\n\n")
-
-
-    f.write("| File | Size | SHA-256 |\n")
-    f.write("|------|------|---------|\n")
-
-
-    if apk_files:
-
-
-        for item in apk_files:
-
-            f.write(
-                f"| {item['name']} | {item['size']} | `{item['sha'][:12]}...` |\n"
+    # بناء الـ body
+    lines = []
+    lines.append(f"# {tag}\n")
+    lines.append("## 📦 التحميلات\n")
+    lines.append("| الملف | الحجم | SHA-256 (مختصر) | تحميل |")
+    lines.append("|-------|-------|----------------|-------|")
+    for info in files_info:
+        lines.append(
+            f"| {info['name']} | {info['size_mb']} MB | `{info['sha256_short']}` | [تحميل]({info['download_url']}) |"
+        )
+    lines.append("")
+    lines.append("---")
+    lines.append("## 🛡️ فحص VirusTotal")
+    lines.append("| الملف | الحالة | تقرير مفصل |")
+    lines.append("|-------|--------|------------|")
+    for info in files_info:
+        name = info["name"]
+        vt = vt_results.get(name, {})
+        if vt and "error" not in vt:
+            malicious = vt["malicious"]
+            total = vt["total"]
+            permalink = vt["permalink"]
+            badge_color = "brightgreen" if malicious == 0 else "red"
+            badge_url = f"https://img.shields.io/badge/{malicious}%2F{total}-Clean-{badge_color}"
+            lines.append(
+                f"| {name} | ![]({badge_url}) | [عرض التقرير]({permalink}) |"
             )
+        else:
+            lines.append(f"| {name} | ⚠️ فشل الفحص | - |")
+    lines.append("")
+    lines.append("---")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lines.append(f"*تم التوليد تلقائياً في {now}*")
 
+    final = "\n".join(lines)
+    with open(args.output, "w", encoding="utf-8") as f:
+        f.write(final)
+    print(f"✅ تم إنشاء {args.output}")
 
-    else:
-
-
-        f.write("| No APK files found | - | - |\n")
-
-
-
-    f.write("\n---\n\n")
-
-
-    f.write("## 🛡 VirusTotal Analysis\n\n")
-
-
-    f.write("| Build Variant | Status | Report |\n")
-    f.write("|---------------|--------|--------|\n")
-
-
-
-    if apk_files:
-
-
-        for item in apk_files:
-
-            f.write(
-                f"| {item['name']} | ⏳ Pending | - |\n"
-            )
-
-
-    else:
-
-
-        f.write("| No APK files found | - | - |\n")
-
-
-
-print("\nrelease_notes.md created successfully")
+if __name__ == "__main__":
+    main()
