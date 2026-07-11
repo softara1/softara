@@ -38,6 +38,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Run Python Script
-       run: |
+            - name: Run Python Script
+        run: |
           python scripts/upload_to_vt.py
