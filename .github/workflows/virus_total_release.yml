@@ -21,6 +21,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y jq wget
           pip install requests
 
       - name: Download release assets
@@ -38,11 +40,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug - list assets
+        run: |
+          echo "Assets downloaded:"
+          ls -la assets/
+
       - name: Scan APKs with VirusTotal & build report
         run: |
           python scripts/vt_scan.py assets/
         env:
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
+
+      - name: Debug - show vt results
+        run: |
+          echo "vt_results.json:"
+          cat vt_results.json || echo "File not found"
 
       - name: Generate final release body
         run: |
