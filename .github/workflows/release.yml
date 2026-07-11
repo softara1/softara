@@ -37,6 +37,11 @@ jobs:
           python scripts/upload_to_vt.py
 
 
+      - name: Generate Release Notes
+        run: |
+          python scripts/generate_release_notes.py
+
+
       - name: Create ZIP package
         run: |
           VERSION=${GITHUB_REF_NAME:-latest}
@@ -62,3 +67,4 @@ jobs:
         with:
           files: |
             Softara-*.zip
+          body_path: release_notes.md
