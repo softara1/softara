@@ -14,19 +14,17 @@ VT_URL = "https://www.virustotal.com/api/v3/files"
 HEADERS = {"x-apikey": VT_API_KEY}
 
 def upload_file(filepath):
-    """يرفع ملفاً إلى VirusTotal ويعيد analysis ID"""
     with open(filepath, "rb") as f:
         files = {"file": (os.path.basename(filepath), f)}
         resp = requests.post(VT_URL, headers=HEADERS, files=files)
     if resp.status_code == 200:
         data = resp.json()
-        return data["data"]["id"]  # هذا هو analysis ID
+        return data["data"]["id"]
     else:
         print(f"Failed to upload {filepath}, status {resp.status_code}")
         return None
 
 def get_analysis(analysis_id):
-    """ينتظر حتى اكتمال التحليل ويعيد نتائج (positives, total, permalink)"""
     url = f"https://www.virustotal.com/api/v3/analyses/{analysis_id}"
     while True:
         resp = requests.get(url, headers=HEADERS)
@@ -36,7 +34,7 @@ def get_analysis(analysis_id):
             if status == "completed":
                 stats = data["data"]["attributes"]["stats"]
                 malicious = stats.get("malicious", 0)
-                total = sum(stats.values())  # مجموع كل المحركات
+                total = sum(stats.values())
                 permalink = f"https://www.virustotal.com/gui/file/{data['meta']['file_info']['sha256']}/detection"
                 return malicious, total, permalink
             else:
@@ -60,7 +58,6 @@ def main():
         print("لم يتم العثور على ملفات APK في المجلد.")
         sys.exit(0)
 
-    # سنحفظ النتائج في ملف JSON مؤقت
     results = {}
     for apk_path in apk_files:
         name = apk_path.name
@@ -78,10 +75,8 @@ def main():
             "total": total,
             "permalink": permalink
         }
-        # احترام الحدود: 4 طلبات في الدقيقة للحسابات المجانية
-        time.sleep(16)  # 15 ثانية بين كل طلب لضمان الالتزام
+        time.sleep(16)   # احترام حدود API المجاني
 
-    # حفظ النتائج لملف JSON ليستخدمه السكربت التالي
     with open("vt_results.json", "w") as f:
         json.dump(results, f, indent=2)
     print("\n✅ اكتمل فحص جميع الملفات.")
