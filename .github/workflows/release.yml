@@ -1,108 +1,65 @@
-name: Release Automation
+name: Auto Release with VirusTotal
 
 on:
-  workflow_dispatch:
-
   release:
-    types:
-      - published
+    types: [published]
 
 permissions:
   contents: write
 
-
 jobs:
-
-  release-info:
-
+  process-release:
     runs-on: ubuntu-latest
-
-
     steps:
-
-
       - name: Checkout repository
-        uses: actions/checkout@v5
-
-
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-
-
-      - name: Install Python packages
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install requests
 
-
-
-      - name: Download Release APK Assets
+      - name: Download release assets
+        run: |
+          mkdir -p assets
+          cd assets
+          # استخراج روابط التحميل لكل أصل من واجهة GitHub API
+          ASSETS_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}" \
+            | jq -r '.assets[] | .browser_download_url')
+          for url in $ASSETS_URL; do
+            echo "Downloading $url"
+            wget -q "$url"
+          done
+          cd ..
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan APKs with VirusTotal & build report
         run: |
+          python scripts/vt_scan.py assets/
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
 
-          mkdir -p apk_files
-
-          gh release download "${{ github.event.release.tag_name }}" \
-          --repo "${{ github.repository }}" \
-          --pattern "*.apk" \
-          --dir apk_files
-
-
-
-      - name: Show downloaded APK files
+      - name: Generate final release body
         run: |
+          python scripts/generate_release_body.py \
+            --release-id ${{ github.event.release.id }} \
+            --tag ${{ github.ref_name }} \
+            --output final_body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          echo "APK files downloaded:"
-
-          ls -lh apk_files
-
-
-
-      - name: Run Release Builder
-        run: |
-          python scripts/upload_to_vt.py
-
-
-
-      - name: Generate Release Notes
-        run: |
-          python scripts/generate_release_notes.py
-
-
-
-      - name: Create ZIP package
-        run: |
-
-          VERSION=${GITHUB_REF_NAME:-latest}
-
-          echo "Creating release: Softara-$VERSION.zip"
-
-          zip -r Softara-$VERSION.zip . \
-          -x ".git/*" \
-          -x ".github/*" \
-          -x "scripts/*"
-
-
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: Softara-release
-          path: Softara-*.zip
-
-
-
-      - name: Update GitHub Release
-        if: github.event_name == 'release'
+      - name: Update release description
         uses: softprops/action-gh-release@v2
         with:
-
-          files: |
-            Softara-*.zip
-
-          body_path: release_notes.md
+          tag_name: ${{ github.ref_name }}
+          body_path: final_body.md
+          # لا نرفع ملفات إضافية لأننا نريد فقط تحديث الوصف
+          # (الأصول موجودة أصلاً)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
