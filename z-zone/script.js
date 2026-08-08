@@ -732,8 +732,8 @@ async function loadPremiumCategories(skipPush = false) {
                             lpTitle = topicLink.getAttribute('title') || topicLink.textContent.trim();
                         }
                     }
-                    if (lpTitle.length > 30) {
-                        lpTitle = lpTitle.substring(0, 30) + '...';
+                    if (lpTitle.length > 14) {
+                        lpTitle = lpTitle.substring(0, 14) + '...';
                     }
                     if (!isCategoryEmpty) {
                         const authorNode = lpEl.querySelector('.forum-lastpost-author a[href^="/u"], .forum-lastpost-author strong');
