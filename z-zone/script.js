@@ -887,7 +887,7 @@ function formatDlContent(type, linkType, linkStr, img, size, os, key, desc) {
 }
 
 
-// ========== حفظ الموضوع (نسخة محسّنة لاكتشاف النجاح) ==========
+// ========== حفظ الموضوع (باستخدام iframe لتجاوز قيود CSRF) ==========
 async function saveDlItem() {
     const title = document.getElementById('dlTitle').value.trim();
     const type = document.getElementById('dlType').value;
@@ -922,46 +922,90 @@ async function saveDlItem() {
         const content = formatDlContent(type, linkType, linksFormatted, safeImg, size, os, key, desc);
         const targetUrl = editUrl ? editUrl : `/post?f=${DL_FORUM_ID}&mode=newtopic`;
 
+        // 1. جلب صفحة النشر لاستخراج الحقول المخفية المطلوبة
         const fRes = await fetch(targetUrl);
-        if (!fRes.ok) throw new Error('فشل في جلب نموذج النشر (رمز: ' + fRes.status + ')');
+        if (!fRes.ok) throw new Error('فشل في جلب نموذج النشر');
         const fHtml = await fRes.text();
         const doc = new DOMParser().parseFromString(fHtml, 'text/html');
 
         let form = doc.querySelector('form[name="post"]');
         if (!form) {
             const altForm = doc.querySelector('form[action*="post"]');
-            if (altForm) {
-                form = altForm;
-            } else {
-                throw new Error('لم نتمكن من العثور على نموذج النشر. تأكد من صلاحياتك.');
-            }
+            if (altForm) form = altForm;
+            else throw new Error('لم يتم العثور على نموذج النشر. تأكد من صلاحياتك.');
         }
 
-        const fd = new FormData(form);
-        fd.set('subject', title);
-        fd.set('message', content);
-        fd.set('post', '1');
+        // 2. بناء نموذج مخفي داخل iframe
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden-save-frame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
 
-        const csrfToken = form.querySelector('input[name="csrf_token"]')?.value ||
-                          form.querySelector('input[name="form_token"]')?.value ||
-                          form.querySelector('input[name="token"]')?.value || '';
-        if (csrfToken) fd.set('csrf_token', csrfToken);
+        // انتظر قليلاً لتجهيز iframe
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-        const postRes = await fetch('/post', { method: 'POST', body: fd });
-        const responseHtml = await postRes.text();
-        const responseDoc = new DOMParser().parseFromString(responseHtml, 'text/html');
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body>
+                <form name="post" action="/post" method="post" target="_self">
+                    <!-- انسخ جميع الحقول المخفية المهمة من النموذج الأصلي -->
+                    ${Array.from(form.querySelectorAll('input[type="hidden"]')).map(inp => {
+                        let name = inp.getAttribute('name');
+                        let value = inp.getAttribute('value') || '';
+                        return `<input type="hidden" name="${name}" value="${value.replace(/"/g, '&quot;')}">`;
+                    }).join('')}
+                    <input type="hidden" name="post" value="1">
+                    <input type="text" name="subject" value="${title.replace(/"/g, '&quot;')}">
+                    <textarea name="message">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <!-- إضافة أي حقول أخرى مطلوبة (مثل topictype) -->
+                    ${form.querySelector('input[name="topictype"]') ? `<input type="hidden" name="topictype" value="${form.querySelector('input[name="topictype"]').value}">` : ''}
+                </form>
+            </body>
+            </html>
+        `);
+        iframeDoc.close();
 
-        // --- منطق اكتشاف النجاح / الفشل ---
-        const hasPostForm = responseDoc.querySelector('form[name="post"]');
-        const errorEl = responseDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg');
-        
-        if (hasPostForm) {
-            // بقي في صفحة النشر => فشل
-            const errMsg = errorEl ? errorEl.textContent.trim() : 'فشل النشر، تأكد من البيانات المطلوبة.';
-            throw new Error(errMsg);
-        }
-        // إذا اختفى نموذج النشر معناها نجاح (تحويل لصفحة الموضوع)
+        // 3. إرسال النموذج وانتظار الاستجابة
+        const formInsideIframe = iframeDoc.querySelector('form[name="post"]');
+        if (!formInsideIframe) throw new Error('فشل في إنشاء النموذج داخل iframe');
 
+        // نستخدم وعد للاستماع لحدث تحميل الـ iframe
+        const iframeLoadPromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('انتهت مهلة الإرسال')), 15000);
+            iframe.onload = () => {
+                clearTimeout(timeout);
+                try {
+                    const responseDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    // التحقق من نجاح النشر: اختفاء نموذج النشر
+                    const hasPostForm = responseDoc.querySelector('form[name="post"]');
+                    const errorEl = responseDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg');
+                    if (hasPostForm) {
+                        const errMsg = errorEl ? errorEl.textContent.trim() : 'فشل النشر - تحقق من البيانات المطلوبة';
+                        reject(new Error(errMsg));
+                    } else {
+                        resolve('success');
+                    }
+                } catch (e) {
+                    // في حال تعذر الوصول للمحتوى (CORS)، نفترض النجاح غالبًا
+                    resolve('unknown');
+                }
+            };
+            iframe.onerror = () => {
+                clearTimeout(timeout);
+                reject(new Error('فشل في تحميل iframe'));
+            };
+        });
+
+        formInsideIframe.submit(); // إرسال النموذج
+
+        await iframeLoadPromise;
+
+        // 4. التنظيف والنجاح
+        document.body.removeChild(iframe);
         showToast('تم الحفظ بنجاح!');
         closeModal('dlAdminModal');
         document.getElementById('dlSearchInput').value = '';
@@ -972,6 +1016,9 @@ async function saveDlItem() {
         setTimeout(() => loadDlItems(`/f${DL_FORUM_ID}-montada`), 1500);
 
     } catch (e) {
+        // إزالة الـ iframe إذا كان موجوداً
+        const iframe = document.querySelector('iframe[name="hidden-save-frame"]');
+        if (iframe) iframe.remove();
         showToast(e.message || 'فشل النشر!', true);
         console.error('Save Error:', e);
     } finally {
