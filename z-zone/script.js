@@ -3,7 +3,7 @@
    الإصدار 2.0 | متوافق مع Ahlamontada / AwesomeBB
    ============================================================ */
 
-const DL_FORUM_ID = 30; // <-- غيّر هذا الرقم حسب رقم القسم الذي تريد سحب البيانات منه
+const DL_FORUM_ID = 14; // <-- غيّر هذا الرقم حسب رقم القسم الذي تريد سحب البيانات منه
 window.allTopicsData = [];
 let currentViewMode = 'grid';
 let searchTimeout;
