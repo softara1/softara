@@ -886,7 +886,8 @@ function formatDlContent(type, linkType, linkStr, img, size, os, key, desc) {
     return `DL_TYPE:${type}\nDL_LINK_TYPE:${linkType}\nDL_LINK:${linkStr}\nDL_IMG:${img}\nDL_SIZE:${size}\nDL_OS:${os}\nDL_KEY:${key}\nDL_DESC:${desc}`;
 }
 
-// ========== حفظ الموضوع (مصححة) ==========
+
+// ========== حفظ الموضوع (نسخة محسّنة لاكتشاف النجاح) ==========
 async function saveDlItem() {
     const title = document.getElementById('dlTitle').value.trim();
     const type = document.getElementById('dlType').value;
@@ -926,7 +927,7 @@ async function saveDlItem() {
         const fHtml = await fRes.text();
         const doc = new DOMParser().parseFromString(fHtml, 'text/html');
 
-        let form = doc.querySelector('form[name="post"]'); // استخدمنا let هنا
+        let form = doc.querySelector('form[name="post"]');
         if (!form) {
             const altForm = doc.querySelector('form[action*="post"]');
             if (altForm) {
@@ -948,25 +949,28 @@ async function saveDlItem() {
 
         const postRes = await fetch('/post', { method: 'POST', body: fd });
         const responseHtml = await postRes.text();
+        const responseDoc = new DOMParser().parseFromString(responseHtml, 'text/html');
 
-        const successIndicators = ['بنجاح', 'تم إرسال', 'تم إنشاء', 'تم حفظ', 'تم النشر', 'تم التعديل', 'Success'];
-        const isSuccess = successIndicators.some(ind => responseHtml.includes(ind));
-
-        if (isSuccess) {
-            showToast('تم الحفظ بنجاح!');
-            closeModal('dlAdminModal');
-            document.getElementById('dlSearchInput').value = '';
-            document.getElementById('dlSearchClear').style.display = 'none';
-            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.f-btn').classList.add('active');
-            sessionStorage.removeItem('zzone_cache');
-            setTimeout(() => loadDlItems(`/f${DL_FORUM_ID}-montada`), 1500);
-        } else {
-            const errDoc = new DOMParser().parseFromString(responseHtml, 'text/html');
-            const errorEl = errDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg');
-            const errMsg = errorEl ? errorEl.textContent.trim() : 'حدث خطأ غير معروف أثناء النشر.';
+        // --- منطق اكتشاف النجاح / الفشل ---
+        const hasPostForm = responseDoc.querySelector('form[name="post"]');
+        const errorEl = responseDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg');
+        
+        if (hasPostForm) {
+            // بقي في صفحة النشر => فشل
+            const errMsg = errorEl ? errorEl.textContent.trim() : 'فشل النشر، تأكد من البيانات المطلوبة.';
             throw new Error(errMsg);
         }
+        // إذا اختفى نموذج النشر معناها نجاح (تحويل لصفحة الموضوع)
+
+        showToast('تم الحفظ بنجاح!');
+        closeModal('dlAdminModal');
+        document.getElementById('dlSearchInput').value = '';
+        document.getElementById('dlSearchClear').style.display = 'none';
+        document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.f-btn').classList.add('active');
+        sessionStorage.removeItem('zzone_cache');
+        setTimeout(() => loadDlItems(`/f${DL_FORUM_ID}-montada`), 1500);
+
     } catch (e) {
         showToast(e.message || 'فشل النشر!', true);
         console.error('Save Error:', e);
