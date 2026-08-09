@@ -2,8 +2,8 @@
 // كود حماية حقوق التصميم 
 // ==========================================
 (function() {
-    const myUrl = "https://www.facebook.com/Flying1free"; 
-    const myName = "تصميم و برمجة :- الطائر الحر";
+    const myUrl = "https://www.facebook.com/awad.alsudan"; 
+    const myName = "تصميم و برمجة :- عوض السوداني";
 
     function checkDesignerRights() {
         var linkEl = document.getElementById('designer-copy-link');
