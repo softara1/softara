@@ -77,6 +77,15 @@ AwadTech.theme = (function () {
     // Apply detected theme
     var theme = detectTheme();
     applyTheme(theme);
+
+    // Bind all theme toggle controls after the DOM is ready.
+    var toggleButtons = document.querySelectorAll('.theme-toggle');
+    for (var i = 0; i < toggleButtons.length; i++) {
+      toggleButtons[i].addEventListener('click', function (e) {
+        e.preventDefault();
+        toggle();
+      });
+    }
   }
 
   return {
@@ -251,6 +260,15 @@ AwadTech.header = (function () {
     var overlay = document.querySelector('.mobile-menu-overlay');
     if (overlay) {
       overlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // Close mobile menu from its dedicated close button.
+    var closeButton = document.querySelector('.mobile-menu-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        closeMobileMenu();
+      });
     }
 
     // Close mobile menu on Escape key
@@ -1329,8 +1347,13 @@ AwadTech.favorites = (function () {
       });
     }
 
-    // Close panel on overlay click
+    // Close the panel when clicking its backdrop, even when no separate
+    // overlay element is present in the Blogger template.
     if (panel) {
+      panel.addEventListener('click', function (e) {
+        if (e.target === panel) hidePanel();
+      });
+
       var overlay = panel.querySelector('.fav-overlay');
       if (overlay) {
         overlay.addEventListener('click', hidePanel);
