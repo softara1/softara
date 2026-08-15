@@ -11,6 +11,7 @@
   --color-primary: #0a0e27;
   --color-primary-alt: #111842;
   --color-accent: #00d4ff;
+  --accent: #00d4ff;
   --color-purple: #7c3aed;
   --color-cyan: #06b6d4;
 
@@ -95,6 +96,7 @@
   --neon-glow-subtle: 0 0 10px rgba(0, 212, 255, 0.08);
   --color-primary: #f8fafc;
   --color-primary-alt: #f1f5f9;
+  --accent: #7c3aed;
 }
 
 /* ========================================================================
@@ -252,7 +254,7 @@ ol {
   box-shadow: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(124, 58, 237, 0.3);
 }
 
-@media (prefers-reduced-motion: no-animation) {
+@media (prefers-reduced-motion: reduce) {
   .progress-fill {
     transition: none;
   }
@@ -586,7 +588,7 @@ ol {
   animation-direction: reverse;
 }
 
-@media (prefers-reduced-motion: no-animation) {
+@media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
   }
@@ -2059,13 +2061,13 @@ ol {
   font-weight: 600;
 }
 
-.fav-item-title a {
+.fav-item-title {
   color: var(--text);
   text-decoration: none;
   transition: color var(--transition-fast);
+  display: block;
 }
-
-.fav-item-title a:hover {
+.fav-item-title:hover {
   color: var(--accent);
 }
 
