@@ -746,6 +746,9 @@
 .awad-modal-lg {
     max-width: 900px;
 }
+.awad-modal-md {
+    max-width: 600px;
+}
 .awad-modal-sm {
     max-width: 420px;
 }
@@ -1099,6 +1102,162 @@
     padding-top: 16px;
     border-top: 1px solid var(--awad-border);
     font-size: .8rem;
+}
+
+/* ============ الأنماط الجديدة من الصفحة المقدمة ============ */
+/* زر إضافة عائم */
+.awad-admin-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--awad-primary);
+    color: #fff;
+    font-size: 1.8rem;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--awad-shadow-lg);
+    z-index: 9997;
+    border: none;
+    cursor: pointer;
+    transition: all var(--awad-transition);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.awad-admin-fab:hover {
+    background: var(--awad-primary-600);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px var(--awad-primary-100);
+}
+@media (max-width: 600px) {
+    .awad-admin-fab {
+        bottom: 16px;
+        left: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+}
+
+/* نافذة الرفع */
+.awad-upload-placeholder {
+    color: var(--awad-text-secondary);
+    font-size: 0.9rem;
+}
+
+/* حقول النموذج داخل نافذة الإدارة */
+.awad-admin-form .form-group {
+    margin-bottom: 15px;
+}
+.awad-admin-form label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--awad-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+.awad-admin-form input,
+.awad-admin-form select,
+.awad-admin-form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--awad-radius-sm);
+    border: 1px solid var(--awad-border);
+    background: var(--awad-bg);
+    color: var(--awad-text);
+    font-family: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.awad-admin-form input:focus,
+.awad-admin-form select:focus,
+.awad-admin-form textarea:focus {
+    outline: none;
+    border-color: var(--awad-primary);
+    box-shadow: 0 0 0 3px var(--awad-primary-100);
+}
+.awad-admin-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+.awad-admin-form .awad-btn {
+    margin-top: 8px;
+}
+.awad-admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+.awad-admin-tab {
+    padding: 8px 14px;
+    background: var(--awad-surface-2);
+    border: 1px solid var(--awad-border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--awad-text-secondary);
+    transition: all var(--awad-transition);
+}
+.awad-admin-tab.awad-active {
+    background: var(--awad-primary);
+    color: #fff;
+    border-color: var(--awad-primary);
+}
+.awad-admin-tab:hover {
+    border-color: var(--awad-primary);
+    color: var(--awad-primary);
+}
+.awad-admin-tab-content {
+    display: none;
+}
+.awad-admin-tab-content.awad-active {
+    display: block;
+}
+.awad-admin-part-row,
+.awad-admin-server-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+@media (max-width: 600px) {
+    .awad-admin-part-row,
+    .awad-admin-server-row {
+        grid-template-columns: 1fr;
+    }
+}
+.awad-admin-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: var(--awad-surface);
+    border: 1px solid var(--awad-border);
+    border-radius: var(--awad-radius-sm);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.awad-admin-item-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* نافذة التأكيد */
+.awad-confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+.awad-confirm-actions .awad-btn {
+    flex: 1;
+    max-width: 150px;
 }
 
 /* استجابة */
