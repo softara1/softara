@@ -1,0 +1,1827 @@
+/* ============================================================
+   عوض تك - مكتبة التحميل الرقمية
+   JavaScript خارجي
+   يعمل داخل #awad-download-library
+============================================================ */
+(function() {
+    'use strict';
+
+    const root = document.getElementById('awad-download-library');
+    if (!root) return;
+
+    const defaultLang = root.dataset.lang || 'ar';
+    const defaultTheme = root.dataset.theme || 'light';
+    const PAGE_SIZE = 6;
+
+    let currentLang = localStorage.getItem('awad_lang') || defaultLang;
+    let currentTheme = localStorage.getItem('awad_theme') || defaultTheme;
+    let products = [];
+
+    const state = {
+        query: '',
+        sort: 'latest',
+        visibleCount: PAGE_SIZE,
+        favorites: new Set(JSON.parse(localStorage.getItem('awad_favs') || '[]')),
+        selected: new Set(),
+        recentlyViewed: JSON.parse(localStorage.getItem('awad_recent') || '[]'),
+        filters: {
+            platform: [],
+            category: [],
+            price: [],
+            size: [],
+            downloadType: [],
+            status: [],
+            favoritesOnly: false
+        },
+        modalPartsSelection: new Set()
+    };
+
+    // ===== الترجمات =====
+    const translations = {
+        ar: {
+            app_name: 'عوض تك',
+            app_name_en: 'Awad Tech',
+            nav_home: 'الرئيسية',
+            nav_categories: 'التصنيفات',
+            nav_featured: 'مميزة',
+            nav_library: 'المكتبة',
+            nav_popular: 'الأكثر تحميلًا',
+            nav_favorites: 'المفضلة',
+            hero_title: 'مكتبة البرامج والتطبيقات الرقمية',
+            hero_subtitle: 'حمّل أحدث برامج Windows وتطبيقات Android وiOS والكتب الإلكترونية والأدوات بسرعة وأمان.',
+            search_placeholder: 'ابحث عن برنامج، تطبيق، كتاب...',
+            search_btn: 'بحث',
+            stats_programs: 'برامج',
+            stats_apps: 'تطبيقات',
+            stats_books: 'كتب',
+            stats_files: 'ملفات',
+            categories_title: 'التصنيفات',
+            featured_title: 'مميزة',
+            library_title: 'المكتبة',
+            popular_title: 'الأكثر تحميلًا',
+            latest_title: 'أحدث الإضافات',
+            favorites_title: 'المفضلة',
+            recently_viewed: 'المشاهدات الأخيرة',
+            filter_toggle: 'فلاتر',
+            reset_filters: 'إعادة تعيين',
+            sort_label: 'ترتيب:',
+            sort_latest: 'الأحدث',
+            sort_oldest: 'الأقدم',
+            sort_downloads: 'الأكثر تحميلًا',
+            sort_popular: 'الأكثر شعبية',
+            sort_name_asc: 'الاسم A-Z',
+            sort_name_desc: 'الاسم Z-A',
+            sort_size_asc: 'الحجم من الأصغر',
+            sort_size_desc: 'الحجم من الأكبر',
+            filter_platform: 'النظام',
+            filter_category: 'التصنيف',
+            filter_price: 'السعر',
+            filter_size: 'الحجم',
+            filter_download_type: 'نوع التحميل',
+            filter_status: 'الحالة',
+            free: 'مجاني',
+            paid: 'مدفوع',
+            lt50: 'أقل من 50 MB',
+            '50-100': '50-100 MB',
+            '100-500': '100-500 MB',
+            '500-1024': '500 MB-1 GB',
+            gt1024: 'أكثر من 1 GB',
+            single: 'ملف واحد',
+            multipart: 'متعدد الأجزاء',
+            new: 'جديد',
+            updated: 'محدّث',
+            popular: 'شائع',
+            featured: 'مميز',
+            favorites_only: 'المفضلة فقط',
+            load_more: 'عرض المزيد',
+            showing_results: 'عرض {count} من أصل {total} نتيجة',
+            no_results_title: 'لا توجد نتائج',
+            no_results_desc: 'جرّب تغيير كلمات البحث أو إزالة بعض الفلاتر.',
+            details: 'تفاصيل',
+            download: 'تحميل',
+            favorite_add: 'أضف للمفضلة',
+            favorite_remove: 'إزالة من المفضلة',
+            share: 'مشاركة',
+            copy_link: 'نسخ الرابط',
+            link_copied: 'تم نسخ الرابط',
+            download_started: 'بدأ التحميل',
+            invalid_url: 'رابط غير صالح',
+            added_fav: 'تمت الإضافة للمفضلة',
+            removed_fav: 'تمت الإزالة من المفضلة',
+            filters_reset: 'تمت إعادة تعيين الفلاتر',
+            download_selected: 'تحميل المحدد',
+            clear_selection: 'إلغاء التحديد',
+            download_all_parts: 'تحميل جميع الأجزاء',
+            select_all_parts: 'تحديد الكل',
+            clear_parts: 'إلغاء التحديد',
+            download_selected_parts: 'تحميل المحدد',
+            total_size: 'الحجم الإجمالي',
+            parts: 'جزء',
+            extract_note: 'حمّل جميع الأجزاء وضعها في مجلد واحد، ثم ابدأ فك الضغط من الجزء الأول.',
+            optional_files: 'ملفات اختيارية',
+            version_label: 'الإصدار',
+            requirements_label: 'المتطلبات',
+            size_label: 'الحجم',
+            category_label: 'التصنيف',
+            platform_label: 'النظام',
+            type_label: 'النوع',
+            downloads_label: 'التحميلات',
+            updated_label: 'آخر تحديث',
+            status_label: 'الحالة',
+            keywords_label: 'كلمات مفتاحية',
+            favorites_empty_title: 'لا توجد مفضلة بعد',
+            favorites_empty_desc: 'اضغط على أيقونة القلب لحفظ العناصر هنا.',
+            footer_desc: 'مكتبة رقمية احترافية لتحميل البرامج والتطبيقات والكتب والأدوات.',
+            footer_categories: 'التصنيفات',
+            footer_links: 'روابط مهمة',
+            footer_about: 'من نحن',
+            footer_contact: 'اتصل بنا',
+            footer_privacy: 'سياسة الخصوصية',
+            footer_terms: 'الشروط والأحكام',
+            footer_social: 'تابعنا',
+            footer_copyright: '© 2026 عوض تك. جميع الحقوق محفوظة.'
+        },
+        en: {
+            app_name: 'Awad Tech',
+            app_name_en: 'عوض تك',
+            nav_home: 'Home',
+            nav_categories: 'Categories',
+            nav_featured: 'Featured',
+            nav_library: 'Library',
+            nav_popular: 'Most Downloaded',
+            nav_favorites: 'Favorites',
+            hero_title: 'Digital Software & Apps Library',
+            hero_subtitle: 'Download the latest Windows programs, Android & iOS apps, ebooks, and tools safely and fast.',
+            search_placeholder: 'Search for a program, app, book...',
+            search_btn: 'Search',
+            stats_programs: 'Programs',
+            stats_apps: 'Apps',
+            stats_books: 'Books',
+            stats_files: 'Files',
+            categories_title: 'Categories',
+            featured_title: 'Featured',
+            library_title: 'Library',
+            popular_title: 'Most Downloaded',
+            latest_title: 'Latest Additions',
+            favorites_title: 'Favorites',
+            recently_viewed: 'Recently Viewed',
+            filter_toggle: 'Filters',
+            reset_filters: 'Reset',
+            sort_label: 'Sort:',
+            sort_latest: 'Latest',
+            sort_oldest: 'Oldest',
+            sort_downloads: 'Most Downloaded',
+            sort_popular: 'Most Popular',
+            sort_name_asc: 'Name A-Z',
+            sort_name_desc: 'Name Z-A',
+            sort_size_asc: 'Size Smallest',
+            sort_size_desc: 'Size Largest',
+            filter_platform: 'Platform',
+            filter_category: 'Category',
+            filter_price: 'Price',
+            filter_size: 'Size',
+            filter_download_type: 'Download Type',
+            filter_status: 'Status',
+            free: 'Free',
+            paid: 'Paid',
+            lt50: 'Under 50 MB',
+            '50-100': '50-100 MB',
+            '100-500': '100-500 MB',
+            '500-1024': '500 MB-1 GB',
+            gt1024: 'Over 1 GB',
+            single: 'Single File',
+            multipart: 'Multi-Part',
+            new: 'New',
+            updated: 'Updated',
+            popular: 'Popular',
+            featured: 'Featured',
+            favorites_only: 'Favorites only',
+            load_more: 'Load More',
+            showing_results: 'Showing {count} of {total} results',
+            no_results_title: 'No results found',
+            no_results_desc: 'Try changing search words or removing some filters.',
+            details: 'Details',
+            download: 'Download',
+            favorite_add: 'Add to Favorites',
+            favorite_remove: 'Remove from Favorites',
+            share: 'Share',
+            copy_link: 'Copy Link',
+            link_copied: 'Link copied',
+            download_started: 'Download started',
+            invalid_url: 'Invalid URL',
+            added_fav: 'Added to Favorites',
+            removed_fav: 'Removed from Favorites',
+            filters_reset: 'Filters reset',
+            download_selected: 'Download Selected',
+            clear_selection: 'Clear Selection',
+            download_all_parts: 'Download All Parts',
+            select_all_parts: 'Select All',
+            clear_parts: 'Clear',
+            download_selected_parts: 'Download Selected Parts',
+            total_size: 'Total Size',
+            parts: 'parts',
+            extract_note: 'Download all parts and place them in the same folder before extracting Part 1.',
+            optional_files: 'Optional Files',
+            version_label: 'Version',
+            requirements_label: 'Requirements',
+            size_label: 'Size',
+            category_label: 'Category',
+            platform_label: 'Platform',
+            type_label: 'Type',
+            downloads_label: 'Downloads',
+            updated_label: 'Updated',
+            status_label: 'Status',
+            keywords_label: 'Keywords',
+            favorites_empty_title: 'No favorites yet',
+            favorites_empty_desc: 'Click the heart icon to save items here.',
+            footer_desc: 'Professional digital library for downloading software, apps, books, and tools.',
+            footer_categories: 'Categories',
+            footer_links: 'Important Links',
+            footer_about: 'About',
+            footer_contact: 'Contact',
+            footer_privacy: 'Privacy Policy',
+            footer_terms: 'Terms & Conditions',
+            footer_social: 'Follow Us',
+            footer_copyright: '© 2026 Awad Tech. All rights reserved.'
+        }
+    };
+
+    const platformKeys = ['Windows', 'Android', 'iOS', 'PDF', 'Other'];
+    const allCategories = [
+        { key: 'Windows', icon: '🪟' },
+        { key: 'Android', icon: '🤖' },
+        { key: 'iOS', icon: '🍎' },
+        { key: 'Books', icon: '📚' },
+        { key: 'Tools', icon: '🛠️' },
+        { key: 'Office', icon: '📊' },
+        { key: 'Multimedia', icon: '🎬' },
+        { key: 'Graphics', icon: '🎨' },
+        { key: 'Security', icon: '🛡️' },
+        { key: 'Internet', icon: '🌐' },
+        { key: 'Education', icon: '🎓' },
+        { key: 'Development', icon: '💻' }
+    ];
+
+    // ===== دوال مساعدة =====
+    function t(key) { return translations[currentLang][key] || key; }
+    function getTitle(p) { return currentLang === 'ar' ? (p.title || p.titleEn) : (p.titleEn || p.title); }
+    function getDesc(p) { return currentLang === 'ar' ? (p.description || p.descriptionEn) : (p.descriptionEn || p.description); }
+    function getCatLabel(key) {
+        const map = {
+            ar: { Windows:'ويندوز', Android:'أندرويد', iOS:'آيفون', Books:'كتب', Tools:'أدوات', Office:'أوفيس', Multimedia:'وسائط', Graphics:'تصميم', Security:'حماية', Internet:'إنترنت', Education:'تعليم', Development:'تطوير' },
+            en: { Windows:'Windows', Android:'Android', iOS:'iOS', Books:'Books', Tools:'Tools', Office:'Office', Multimedia:'Multimedia', Graphics:'Graphics', Security:'Security', Internet:'Internet', Education:'Education', Development:'Development' }
+        };
+        return map[currentLang][key] || key;
+    }
+    function formatNum(num) {
+        if (num >= 1000000) return (num/1000000).toFixed(1)+'M';
+        if (num >= 1000) return (num/1000).toFixed(1)+'K';
+        return num;
+    }
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '—';
+        return new Intl.DateTimeFormat(currentLang === 'ar' ? 'ar' : 'en', { year:'numeric', month:'short', day:'numeric' }).format(d);
+    }
+    function parseSizeToMB(size) {
+        const m = String(size).match(/([\d.]+)\s*(KB|MB|GB|TB)/i);
+        if (!m) return 0;
+        let v = parseFloat(m[1]);
+        switch(m[2].toUpperCase()) {
+            case 'KB': return v/1024;
+            case 'MB': return v;
+            case 'GB': return v*1024;
+            case 'TB': return v*1024*1024;
+        }
+        return 0;
+    }
+    function formatMB(mb) {
+        if (mb >= 1024) return (mb/1024).toFixed(2)+' GB';
+        return Math.round(mb)+' MB';
+    }
+    function isWithinDays(dateStr, days) {
+        const d = new Date(dateStr);
+        const diff = (new Date() - d) / (1000*60*60*24);
+        return diff >= 0 && diff <= days;
+    }
+    function sortedParts(item) { return [...(item.parts || [])].sort((a,b)=>(a.id||0)-(b.id||0)); }
+    function getTotalSize(item) {
+        if (item.downloadType === 'multipart' && item.parts?.length) {
+            const total = item.parts.reduce((sum,p) => sum + parseSizeToMB(p.size), 0);
+            return formatMB(total);
+        }
+        return item.size;
+    }
+    function getBadges(p) {
+        const badges = [];
+        if (isWithinDays(p.createdAt, 30)) badges.push({text:t('new'), cls:'awad-badge-success'});
+        if (isWithinDays(p.updated, 30)) badges.push({text:t('updated'), cls:'awad-badge-primary'});
+        if (p.featured) badges.push({text:t('featured'), cls:'awad-badge-warning'});
+        if (p.popular) badges.push({text:t('popular'), cls:'awad-badge-danger'});
+        if (p.downloadType === 'multipart') badges.push({text:t('multipart'), cls:'awad-badge-primary'});
+        badges.push({text: p.status, cls: p.status === 'Free' ? 'awad-badge-success' : 'awad-badge-danger'});
+        return badges.slice(0,4);
+    }
+    function safeUrl(url) {
+        if (!url) return '';
+        const trimmed = String(url).trim();
+        return /^https?:\/\//i.test(trimmed) ? trimmed : '';
+    }
+    function openSafe(url) {
+        const safe = safeUrl(url);
+        if (!safe) { showToast(t('invalid_url')); return false; }
+        window.open(safe, '_blank', 'noopener,noreferrer');
+        return true;
+    }
+    function showToast(msg) {
+        const container = document.getElementById('awad-toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'awad-toast';
+        toast.textContent = msg;
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('awad-show'));
+        setTimeout(() => {
+            toast.classList.remove('awad-show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+    async function copyText(text) {
+        try { await navigator.clipboard.writeText(text); return true; }
+        catch {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position='fixed'; ta.style.opacity='0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); ta.remove();
+            return true;
+        }
+    }
+
+    // ===== إنشاء البطاقات =====
+    function createCard(product) {
+        const card = document.createElement('article');
+        card.className = 'awad-card';
+        card.dataset.id = product.id;
+
+        const media = document.createElement('div');
+        media.className = 'awad-card-media';
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.alt = getTitle(product);
+        img.src = safeUrl(product.image) || 'https://picsum.photos/seed/fallback/600/400';
+        img.onerror = () => { img.src = 'https://picsum.photos/seed/fallback/600/400'; };
+        media.appendChild(img);
+
+        const badges = document.createElement('div');
+        badges.className = 'awad-badges';
+        getBadges(product).forEach(b => {
+            const span = document.createElement('span');
+            span.className = `awad-badge ${b.cls}`;
+            span.textContent = b.text;
+            badges.appendChild(span);
+        });
+        media.appendChild(badges);
+
+        const checkWrap = document.createElement('label');
+        checkWrap.className = 'awad-checkbox-wrapper';
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.className = 'awad-select-check';
+        check.dataset.id = product.id;
+        check.checked = state.selected.has(product.id);
+        checkWrap.appendChild(check);
+        const checkmark = document.createElement('span');
+        checkmark.className = 'awad-checkmark';
+        checkWrap.appendChild(checkmark);
+        media.appendChild(checkWrap);
+
+        const favBtn = document.createElement('button');
+        favBtn.className = 'awad-fav-btn';
+        favBtn.dataset.action = 'favorite';
+        favBtn.dataset.id = product.id;
+        favBtn.classList.toggle('awad-active', state.favorites.has(product.id));
+        favBtn.textContent = state.favorites.has(product.id) ? '♥' : '♡';
+        media.appendChild(favBtn);
+
+        card.appendChild(media);
+
+        const body = document.createElement('div');
+        body.className = 'awad-card-body';
+        const title = document.createElement('h3');
+        title.className = 'awad-card-title';
+        title.textContent = getTitle(product);
+        body.appendChild(title);
+        const desc = document.createElement('p');
+        desc.className = 'awad-card-desc';
+        desc.textContent = getDesc(product);
+        body.appendChild(desc);
+        const meta = document.createElement('div');
+        meta.className = 'awad-card-meta';
+        const platformTag = document.createElement('span');
+        platformTag.className = 'awad-platform-tag';
+        platformTag.textContent = product.platform;
+        meta.appendChild(platformTag);
+        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`📦 ${product.size}`}));
+        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`v${product.version}`}));
+        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`⬇ ${formatNum(product.downloads)}`}));
+        body.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'awad-card-actions';
+        const detailsBtn = document.createElement('button');
+        detailsBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
+        detailsBtn.dataset.action = 'details';
+        detailsBtn.dataset.id = product.id;
+        detailsBtn.textContent = t('details');
+        actions.appendChild(detailsBtn);
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'awad-btn awad-btn-primary awad-btn-sm';
+        dlBtn.dataset.action = 'download';
+        dlBtn.dataset.id = product.id;
+        dlBtn.textContent = t('download');
+        actions.appendChild(dlBtn);
+        body.appendChild(actions);
+
+        card.appendChild(body);
+        return card;
+    }
+
+    function createMiniCard(product) {
+        const card = document.createElement('article');
+        card.className = 'awad-mini-card';
+        card.dataset.action = 'details';
+        card.dataset.id = product.id;
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.alt = getTitle(product);
+        img.src = safeUrl(product.image) || 'https://picsum.photos/seed/fallback/600/400';
+        card.appendChild(img);
+        const body = document.createElement('div');
+        body.className = 'awad-mini-body';
+        const title = document.createElement('strong');
+        title.className = 'awad-mini-title';
+        title.textContent = getTitle(product);
+        body.appendChild(title);
+        const platform = document.createElement('span');
+        platform.className = 'awad-mini-platform';
+        platform.textContent = product.platform;
+        body.appendChild(platform);
+        card.appendChild(body);
+        return card;
+    }
+
+    function renderSkeletons(grid, count) {
+        grid.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        for (let i=0; i<count; i++) {
+            const card = document.createElement('div');
+            card.className = 'awad-card awad-skeleton-card';
+            const media = document.createElement('div');
+            media.className = 'awad-skeleton-block awad-skeleton-media';
+            card.appendChild(media);
+            const body = document.createElement('div');
+            body.className = 'awad-skeleton-body';
+            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line'}));
+            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line short'}));
+            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line medium'}));
+            card.appendChild(body);
+            frag.appendChild(card);
+        }
+        grid.appendChild(frag);
+    }
+
+    // ===== دوال العرض =====
+    function renderCategories() {
+        const grid = document.getElementById('awad-categories-grid');
+        grid.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        allCategories.forEach(cat => {
+            const isPlatform = platformKeys.includes(cat.key);
+            const count = products.filter(p => isPlatform ? p.platform===cat.key : p.category===cat.key).length;
+            const btn = document.createElement('button');
+            btn.className = 'awad-cat-card';
+            btn.dataset.category = cat.key;
+            const icon = document.createElement('span');
+            icon.className = 'awad-cat-icon';
+            icon.textContent = cat.icon;
+            btn.appendChild(icon);
+            const name = document.createElement('span');
+            name.className = 'awad-cat-name';
+            name.textContent = getCatLabel(cat.key);
+            btn.appendChild(name);
+            const countSpan = document.createElement('span');
+            countSpan.className = 'awad-cat-count';
+            countSpan.textContent = count;
+            btn.appendChild(countSpan);
+            frag.appendChild(btn);
+        });
+        grid.appendChild(frag);
+    }
+
+    function renderStats() {
+        document.getElementById('awad-stat-programs').textContent = products.filter(p=>p.type==='Software').length;
+        document.getElementById('awad-stat-apps').textContent = products.filter(p=>p.type==='App').length;
+        document.getElementById('awad-stat-books').textContent = products.filter(p=>p.type==='Book').length;
+        document.getElementById('awad-stat-files').textContent = products.length;
+    }
+
+    function renderFeatured() {
+        const grid = document.getElementById('awad-featured-grid');
+        grid.innerHTML = '';
+        const featured = products.filter(p => p.featured);
+        if (!featured.length) return;
+        const frag = document.createDocumentFragment();
+        featured.forEach(p => frag.appendChild(createCard(p)));
+        grid.appendChild(frag);
+    }
+
+    function renderPopular() {
+        const grid = document.getElementById('awad-popular-grid');
+        grid.innerHTML = '';
+        const popular = [...products].sort((a,b)=>b.downloads-a.downloads).slice(0,4);
+        const frag = document.createDocumentFragment();
+        popular.forEach(p => frag.appendChild(createCard(p)));
+        grid.appendChild(frag);
+    }
+
+    function renderLatest() {
+        const grid = document.getElementById('awad-latest-grid');
+        grid.innerHTML = '';
+        const latest = [...products].sort((a,b)=>new Date(b.updated)-new Date(a.updated)).slice(0,4);
+        const frag = document.createDocumentFragment();
+        latest.forEach(p => frag.appendChild(createCard(p)));
+        grid.appendChild(frag);
+    }
+
+    function renderFavorites() {
+        const grid = document.getElementById('awad-favorites-grid');
+        const empty = document.getElementById('awad-favorites-empty');
+        grid.innerHTML = '';
+        const favItems = [...state.favorites].map(id => products.find(p=>p.id===id)).filter(Boolean);
+        empty.hidden = favItems.length !== 0;
+        if (favItems.length) {
+            const frag = document.createDocumentFragment();
+            favItems.forEach(p => frag.appendChild(createCard(p)));
+            grid.appendChild(frag);
+        }
+        document.getElementById('awad-fav-count').textContent = state.favorites.size;
+    }
+
+    function renderRecent() {
+        const grid = document.getElementById('awad-recent-grid');
+        grid.innerHTML = '';
+        const items = state.recentlyViewed.map(id => products.find(p=>p.id===id)).filter(Boolean);
+        if (!items.length) return;
+        const frag = document.createDocumentFragment();
+        items.forEach(p => frag.appendChild(createMiniCard(p)));
+        grid.appendChild(frag);
+    }
+
+    function renderFilterPanel() {
+        const panel = document.getElementById('awad-filter-panel');
+        panel.innerHTML = '';
+        const groups = [
+            { key:'platform', label:t('filter_platform'), options: platformKeys.map(v=>({value:v,label:getCatLabel(v)})) },
+            { key:'category', label:t('filter_category'), options: ['Office','Multimedia','Graphics','Internet','Security','Education','Tools','Development','Books'].map(v=>({value:v,label:getCatLabel(v)})) },
+            { key:'price', label:t('filter_price'), options: [{value:'Free',label:t('free')},{value:'Paid',label:t('paid')}] },
+            { key:'size', label:t('filter_size'), options: [{value:'lt50',label:t('lt50')},{value:'50-100',label:t('50-100')},{value:'100-500',label:t('100-500')},{value:'500-1024',label:t('500-1024')},{value:'gt1024',label:t('gt1024')}] },
+            { key:'downloadType', label:t('filter_download_type'), options: [{value:'single',label:t('single')},{value:'multipart',label:t('multipart')}] },
+            { key:'status', label:t('filter_status'), options: [{value:'new',label:t('new')},{value:'updated',label:t('updated')},{value:'popular',label:t('popular')},{value:'featured',label:t('featured')}] }
+        ];
+        const frag = document.createDocumentFragment();
+        groups.forEach(group => {
+            const div = document.createElement('div');
+            div.className = 'awad-filter-group';
+            const h4 = document.createElement('h4');
+            h4.textContent = group.label;
+            div.appendChild(h4);
+            const opts = document.createElement('div');
+            opts.className = 'awad-filter-options';
+            group.options.forEach(opt => {
+                const label = document.createElement('label');
+                label.className = 'awad-filter-chip';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.dataset.filterType = group.key;
+                input.dataset.filterValue = opt.value;
+                input.checked = state.filters[group.key]?.includes(opt.value) || false;
+                label.appendChild(input);
+                const span = document.createElement('span');
+                span.textContent = opt.label;
+                label.appendChild(span);
+                opts.appendChild(label);
+            });
+            div.appendChild(opts);
+            frag.appendChild(div);
+        });
+        // favorites only
+        const favDiv = document.createElement('div');
+        favDiv.className = 'awad-filter-group';
+        const h4 = document.createElement('h4');
+        h4.textContent = t('favorites_title');
+        favDiv.appendChild(h4);
+        const label = document.createElement('label');
+        label.className = 'awad-filter-chip';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.dataset.filterType = 'favoritesOnly';
+        input.checked = state.filters.favoritesOnly;
+        label.appendChild(input);
+        const span = document.createElement('span');
+        span.textContent = t('favorites_only');
+        label.appendChild(span);
+        favDiv.appendChild(label);
+        frag.appendChild(favDiv);
+        panel.appendChild(frag);
+    }
+
+    function matchesSizeFilter(key, sizeStr) {
+        const mb = parseSizeToMB(sizeStr);
+        switch(key) {
+            case 'lt50': return mb < 50;
+            case '50-100': return mb >= 50 && mb <= 100;
+            case '100-500': return mb > 100 && mb <= 500;
+            case '500-1024': return mb > 500 && mb <= 1024;
+            case 'gt1024': return mb > 1024;
+            default: return true;
+        }
+    }
+    function matchesStatusFilter(key, p) {
+        const isNew = isWithinDays(p.createdAt, 30);
+        const isUpdated = isWithinDays(p.updated, 30);
+        switch(key) {
+            case 'new': return isNew;
+            case 'updated': return isUpdated;
+            case 'popular': return !!p.popular;
+            case 'featured': return !!p.featured;
+            default: return true;
+        }
+    }
+
+    function getFilteredSortedProducts() {
+        let list = [...products];
+        if (state.query) {
+            const q = state.query.toLowerCase();
+            list = list.filter(p =>
+                (getTitle(p)?.toLowerCase().includes(q)) ||
+                (getDesc(p)?.toLowerCase().includes(q)) ||
+                (p.keywords || []).some(k => k.toLowerCase().includes(q)) ||
+                p.category?.toLowerCase().includes(q) ||
+                p.platform?.toLowerCase().includes(q) ||
+                p.type?.toLowerCase().includes(q)
+            );
+        }
+        if (state.filters.favoritesOnly) list = list.filter(p => state.favorites.has(p.id));
+        if (state.filters.platform.length) list = list.filter(p => state.filters.platform.includes(p.platform));
+        if (state.filters.category.length) list = list.filter(p => state.filters.category.includes(p.category));
+        if (state.filters.price.length) list = list.filter(p => state.filters.price.includes(p.status));
+        if (state.filters.downloadType.length) list = list.filter(p => state.filters.downloadType.includes(p.downloadType));
+        if (state.filters.size.length) list = list.filter(p => state.filters.size.some(s => matchesSizeFilter(s, p.size)));
+        if (state.filters.status.length) list = list.filter(p => state.filters.status.some(s => matchesStatusFilter(s, p)));
+
+        switch(state.sort) {
+            case 'latest': list.sort((a,b)=>new Date(b.updated)-new Date(a.updated)); break;
+            case 'oldest': list.sort((a,b)=>new Date(a.updated)-new Date(b.updated)); break;
+            case 'downloads': list.sort((a,b)=>b.downloads-a.downloads); break;
+            case 'popular': list.sort((a,b)=>(b.popular?1:0)-(a.popular?1:0)); break;
+            case 'name_asc': list.sort((a,b)=>getTitle(a).localeCompare(getTitle(b), currentLang==='ar'?'ar':'en')); break;
+            case 'name_desc': list.sort((a,b)=>getTitle(b).localeCompare(getTitle(a), currentLang==='ar'?'ar':'en')); break;
+            case 'size_asc': list.sort((a,b)=>parseSizeToMB(a.size)-parseSizeToMB(b.size)); break;
+            case 'size_desc': list.sort((a,b)=>parseSizeToMB(b.size)-parseSizeToMB(a.size)); break;
+        }
+        return list;
+    }
+
+    function renderProducts() {
+        const grid = document.getElementById('awad-products-grid');
+        const empty = document.getElementById('awad-empty-state');
+        const loadMoreBtn = document.getElementById('awad-load-more');
+        const resultsCount = document.getElementById('awad-results-count');
+
+        const filtered = getFilteredSortedProducts();
+        const visible = filtered.slice(0, state.visibleCount);
+        grid.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        visible.forEach(p => frag.appendChild(createCard(p)));
+        grid.appendChild(frag);
+        resultsCount.textContent = t('showing_results').replace('{count}', visible.length).replace('{total}', filtered.length);
+        empty.hidden = filtered.length !== 0;
+        loadMoreBtn.hidden = filtered.length <= visible.length;
+    }
+
+    function renderAll() {
+        renderCategories();
+        renderStats();
+        renderFeatured();
+        renderPopular();
+        renderLatest();
+        renderProducts();
+        renderFavorites();
+        renderRecent();
+        updateBottomBar();
+    }
+
+    // ===== الفلاتر والفرز =====
+    function resetFilters() {
+        state.filters = { platform:[], category:[], price:[], size:[], downloadType:[], status:[], favoritesOnly:false };
+        state.query = '';
+        const searchInput = document.getElementById('awad-search-input');
+        if (searchInput) searchInput.value = '';
+        renderFilterPanel();
+        renderProducts();
+        showToast(t('filters_reset'));
+    }
+
+    function toggleSelect(id) {
+        id = Number(id);
+        if (state.selected.has(id)) state.selected.delete(id);
+        else state.selected.add(id);
+        document.querySelectorAll(`.awad-select-check[data-id="${id}"]`).forEach(cb => cb.checked = state.selected.has(id));
+        updateBottomBar();
+    }
+
+    function updateBottomBar() {
+        const bar = document.getElementById('awad-bottom-bar');
+        const count = state.selected.size;
+        bar.hidden = count === 0;
+        document.getElementById('awad-selected-count').textContent = count;
+    }
+
+    function clearSelection() {
+        state.selected.clear();
+        document.querySelectorAll('.awad-select-check').forEach(cb => cb.checked = false);
+        updateBottomBar();
+        showToast(t('clear_selection'));
+    }
+
+    function downloadSelected() {
+        [...state.selected].forEach(id => downloadItem(id));
+        clearSelection();
+    }
+
+    function toggleFavorite(id) {
+        id = Number(id);
+        if (state.favorites.has(id)) {
+            state.favorites.delete(id);
+            showToast(t('removed_fav'));
+        } else {
+            state.favorites.add(id);
+            showToast(t('added_fav'));
+        }
+        localStorage.setItem('awad_favs', JSON.stringify([...state.favorites]));
+        renderFavorites();
+        document.querySelectorAll(`[data-action="favorite"][data-id="${id}"]`).forEach(btn => {
+            const isFav = state.favorites.has(id);
+            btn.classList.toggle('awad-active', isFav);
+            if (btn.classList.contains('awad-fav-btn')) btn.textContent = isFav ? '♥' : '♡';
+            else btn.textContent = isFav ? t('favorite_remove') : t('favorite_add');
+        });
+    }
+
+    // ===== التحميل =====
+    function downloadItem(id) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        if (item.downloadType === 'multipart') {
+            sortedParts(item).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
+        } else {
+            openSafe(item.downloadUrl || item.servers?.[0]?.url);
+        }
+        showToast(t('download_started'));
+    }
+
+    // ===== المودال =====
+    function openModal() {
+        const backdrop = document.getElementById('awad-modal-backdrop');
+        backdrop.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        const backdrop = document.getElementById('awad-modal-backdrop');
+        backdrop.hidden = true;
+        document.body.style.overflow = '';
+        document.getElementById('awad-modal-body').innerHTML = '';
+        state.modalPartsSelection.clear();
+    }
+
+    function addRecent(id) {
+        id = Number(id);
+        state.recentlyViewed = [id, ...state.recentlyViewed.filter(x => x !== id)].slice(0, 8);
+        localStorage.setItem('awad_recent', JSON.stringify(state.recentlyViewed));
+        renderRecent();
+    }
+
+    function showDetails(id) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        addRecent(id);
+        state.modalPartsSelection.clear();
+        const body = document.getElementById('awad-modal-body');
+        body.innerHTML = '';
+
+        const media = document.createElement('div');
+        media.className = 'awad-modal-media';
+        const img = document.createElement('img');
+        img.alt = getTitle(item);
+        img.src = safeUrl(item.image) || 'https://picsum.photos/seed/fallback/600/400';
+        media.appendChild(img);
+        body.appendChild(media);
+
+        const title = document.createElement('h2');
+        title.className = 'awad-modal-title';
+        title.textContent = getTitle(item);
+        body.appendChild(title);
+        if (currentLang === 'ar' && item.titleEn && item.titleEn !== item.title) {
+            const sub = document.createElement('p');
+            sub.className = 'awad-modal-sub';
+            sub.textContent = item.titleEn;
+            body.appendChild(sub);
+        }
+        const desc = document.createElement('p');
+        desc.className = 'awad-modal-desc';
+        desc.textContent = getDesc(item);
+        body.appendChild(desc);
+
+        const meta = document.createElement('div');
+        meta.className = 'awad-modal-meta';
+        const metaItems = [
+            [t('category_label'), getCatLabel(item.category)],
+            [t('platform_label'), item.platform],
+            [t('version_label'), item.version || '—'],
+            [t('size_label'), getTotalSize(item)],
+            [t('requirements_label'), item.requirements || '—'],
+            [t('status_label'), item.status],
+            [t('downloads_label'), formatNum(item.downloads)],
+            [t('updated_label'), formatDate(item.updated)]
+        ];
+        metaItems.forEach(([lbl, val]) => {
+            const div = document.createElement('div');
+            div.className = 'awad-meta-item';
+            const strong = document.createElement('strong');
+            strong.textContent = lbl;
+            div.appendChild(strong);
+            div.appendChild(document.createTextNode(val));
+            meta.appendChild(div);
+        });
+        body.appendChild(meta);
+        if (item.keywords?.length) {
+            const kw = document.createElement('p');
+            kw.style.fontSize = '.8rem';
+            kw.style.color = 'var(--awad-text-secondary)';
+            kw.textContent = `${t('keywords_label')}: ${item.keywords.join(', ')}`;
+            body.appendChild(kw);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'awad-modal-actions';
+        const favBtn = document.createElement('button');
+        favBtn.className = 'awad-btn awad-btn-secondary';
+        favBtn.dataset.action = 'favorite';
+        favBtn.dataset.id = item.id;
+        favBtn.textContent = state.favorites.has(item.id) ? t('favorite_remove') : t('favorite_add');
+        actions.appendChild(favBtn);
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'awad-btn awad-btn-secondary';
+        shareBtn.dataset.action = 'share';
+        shareBtn.dataset.id = item.id;
+        shareBtn.textContent = t('share');
+        actions.appendChild(shareBtn);
+        body.appendChild(actions);
+
+        body.appendChild(buildDownloadSection(item));
+        openModal();
+    }
+
+    function buildDownloadSection(item) {
+        const section = document.createElement('div');
+        section.className = 'awad-download-section';
+        const heading = document.createElement('h3');
+        heading.className = 'awad-download-heading';
+        heading.textContent = t('download');
+        section.appendChild(heading);
+
+        if (item.downloadType === 'multipart') {
+            const parts = sortedParts(item);
+            const totalMB = parts.reduce((sum,p) => sum + parseSizeToMB(p.size), 0);
+            const info = document.createElement('p');
+            info.style.fontSize = '.85rem';
+            info.style.color = 'var(--awad-text-secondary)';
+            info.textContent = `${t('total_size')}: ${formatMB(totalMB)} • ${parts.length} ${t('parts')}`;
+            section.appendChild(info);
+
+            const note = document.createElement('p');
+            note.className = 'awad-parts-note';
+            note.textContent = t('extract_note');
+            section.appendChild(note);
+
+            const controls = document.createElement('div');
+            controls.style.display = 'flex';
+            controls.style.gap = '6px';
+            controls.style.flexWrap = 'wrap';
+            controls.style.marginBottom = '8px';
+
+            const selectAllBtn = document.createElement('button');
+            selectAllBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
+            selectAllBtn.textContent = t('select_all_parts');
+            selectAllBtn.dataset.action = 'select-all-parts';
+            selectAllBtn.dataset.id = item.id;
+            controls.appendChild(selectAllBtn);
+
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'awad-btn awad-btn-ghost awad-btn-sm';
+            clearBtn.textContent = t('clear_parts');
+            clearBtn.dataset.action = 'clear-parts';
+            controls.appendChild(clearBtn);
+
+            const downloadSelectedBtn = document.createElement('button');
+            downloadSelectedBtn.className = 'awad-btn awad-btn-primary awad-btn-sm';
+            downloadSelectedBtn.textContent = t('download_selected_parts');
+            downloadSelectedBtn.dataset.action = 'download-selected-parts';
+            downloadSelectedBtn.dataset.id = item.id;
+            controls.appendChild(downloadSelectedBtn);
+            section.appendChild(controls);
+
+            const downloadAllBtn = document.createElement('button');
+            downloadAllBtn.className = 'awad-btn awad-btn-primary';
+            downloadAllBtn.style.marginBottom = '8px';
+            downloadAllBtn.textContent = t('download_all_parts');
+            downloadAllBtn.dataset.action = 'download-all-parts';
+            downloadAllBtn.dataset.id = item.id;
+            section.appendChild(downloadAllBtn);
+
+            const list = document.createElement('div');
+            list.className = 'awad-parts-list';
+            parts.forEach((part, index) => {
+                const row = document.createElement('div');
+                row.className = 'awad-part-row';
+                const checkLabel = document.createElement('label');
+                checkLabel.className = 'awad-part-check-label';
+                const check = document.createElement('input');
+                check.type = 'checkbox';
+                check.className = 'awad-part-check';
+                check.dataset.partId = part.id;
+                check.checked = state.modalPartsSelection.has(part.id);
+                checkLabel.appendChild(check);
+                row.appendChild(checkLabel);
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'awad-part-info';
+                const partName = document.createElement('strong');
+                partName.className = 'awad-part-name';
+                partName.textContent = part.name;
+                infoDiv.appendChild(partName);
+                const partFile = document.createElement('span');
+                partFile.className = 'awad-part-file';
+                partFile.textContent = part.filename;
+                infoDiv.appendChild(partFile);
+                const partSize = document.createElement('span');
+                partSize.className = 'awad-part-size';
+                partSize.textContent = part.size;
+                infoDiv.appendChild(partSize);
+                row.appendChild(infoDiv);
+
+                const partActions = document.createElement('div');
+                partActions.className = 'awad-part-actions';
+                if (part.servers && part.servers.length > 0) {
+                    const select = document.createElement('select');
+                    select.className = 'awad-server-select';
+                    part.servers.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = safeUrl(s.url);
+                        opt.textContent = s.name;
+                        select.appendChild(opt);
+                    });
+                    partActions.appendChild(select);
+                }
+                const dlPartBtn = document.createElement('button');
+                dlPartBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
+                dlPartBtn.dataset.action = 'download-part';
+                dlPartBtn.dataset.id = item.id;
+                dlPartBtn.dataset.partIndex = index;
+                dlPartBtn.textContent = t('download');
+                partActions.appendChild(dlPartBtn);
+                row.appendChild(partActions);
+                list.appendChild(row);
+            });
+            section.appendChild(list);
+
+            if (item.files?.length) {
+                const optHeading = document.createElement('h4');
+                optHeading.style.marginTop = '8px';
+                optHeading.style.fontSize = '.9rem';
+                optHeading.textContent = t('optional_files');
+                section.appendChild(optHeading);
+                const filesList = document.createElement('div');
+                filesList.className = 'awad-server-list';
+                item.files.forEach(f => {
+                    const btn = document.createElement('button');
+                    btn.className = 'awad-server-btn';
+                    btn.dataset.action = 'download-server';
+                    btn.dataset.url = safeUrl(f.url);
+                    btn.textContent = f.name + (f.size ? ` (${f.size})` : '');
+                    filesList.appendChild(btn);
+                });
+                section.appendChild(filesList);
+            }
+        } else {
+            const url = safeUrl(item.downloadUrl || item.servers?.[0]?.url);
+            if (url) {
+                const btn = document.createElement('button');
+                btn.className = 'awad-btn awad-btn-primary';
+                btn.dataset.action = 'download-server';
+                btn.dataset.url = url;
+                btn.textContent = t('download');
+                section.appendChild(btn);
+            }
+            if (item.servers && item.servers.length > 1) {
+                const serverList = document.createElement('div');
+                serverList.className = 'awad-server-list';
+                item.servers.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'awad-server-btn';
+                    btn.dataset.action = 'download-server';
+                    btn.dataset.url = safeUrl(s.url);
+                    btn.textContent = s.name;
+                    serverList.appendChild(btn);
+                });
+                section.appendChild(serverList);
+            }
+            if (item.files?.length) {
+                const optHeading = document.createElement('h4');
+                optHeading.style.marginTop = '8px';
+                optHeading.style.fontSize = '.9rem';
+                optHeading.textContent = t('optional_files');
+                section.appendChild(optHeading);
+                const filesList = document.createElement('div');
+                filesList.className = 'awad-server-list';
+                item.files.forEach(f => {
+                    const btn = document.createElement('button');
+                    btn.className = 'awad-server-btn';
+                    btn.dataset.action = 'download-server';
+                    btn.dataset.url = safeUrl(f.url);
+                    btn.textContent = f.name + (f.size ? ` (${f.size})` : '');
+                    filesList.appendChild(btn);
+                });
+                section.appendChild(filesList);
+            }
+        }
+        return section;
+    }
+
+    function downloadPart(id, index, btn) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        const parts = sortedParts(item);
+        const part = parts[index];
+        if (!part) return;
+        const row = btn.closest('.awad-part-row');
+        const select = row?.querySelector('.awad-server-select');
+        const url = safeUrl(select?.value || part.downloadUrl || part.servers?.[0]?.url);
+        openSafe(url);
+        showToast(t('download_started'));
+    }
+
+    function downloadAllParts(id) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        sortedParts(item).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
+        showToast(t('download_started'));
+    }
+
+    function downloadSelectedParts(id) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        sortedParts(item)
+            .filter(p => state.modalPartsSelection.has(p.id))
+            .forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
+        showToast(t('download_started'));
+    }
+
+    function selectAllParts(id, checked) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        const parts = sortedParts(item);
+        parts.forEach(p => checked ? state.modalPartsSelection.add(p.id) : state.modalPartsSelection.delete(p.id));
+        document.querySelectorAll('.awad-part-check').forEach(ch => {
+            ch.checked = state.modalPartsSelection.has(Number(ch.dataset.partId));
+        });
+    }
+
+    function clearPartsSelection() {
+        state.modalPartsSelection.clear();
+        document.querySelectorAll('.awad-part-check').forEach(ch => ch.checked = false);
+    }
+
+    async function shareItem(id) {
+        const item = products.find(p => p.id === Number(id));
+        if (!item) return;
+        const url = window.location.href.split('#')[0] + '#awad-item-' + id;
+        if (navigator.share) {
+            try { await navigator.share({ title: getTitle(item), text: getDesc(item), url }); } catch {}
+        } else {
+            if (await copyText(url)) showToast(t('link_copied'));
+        }
+    }
+
+    // ===== اللغة والثيم =====
+    function applyTheme() {
+        root.setAttribute('data-theme', currentTheme);
+        root.style.colorScheme = currentTheme;
+        localStorage.setItem('awad_theme', currentTheme);
+        const btn = document.getElementById('awad-theme-toggle');
+        if (btn) btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function applyLanguage() {
+        root.setAttribute('lang', currentLang);
+        root.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+        localStorage.setItem('awad_lang', currentLang);
+        document.title = currentLang === 'ar' ? 'عوض تك | مكتبة التحميل الرقمية' : 'Awad Tech | Digital Download Library';
+        const langBtn = document.getElementById('awad-lang-toggle');
+        if (langBtn) langBtn.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+
+        // تحديث النصوص الثابتة
+        document.querySelectorAll('#awad-download-library [data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
+        });
+        document.querySelectorAll('#awad-download-library [data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (translations[currentLang][key]) el.placeholder = translations[currentLang][key];
+        });
+    }
+
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme();
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        applyLanguage();
+        renderFilterPanel();
+        renderCategories();
+        renderStats();
+        renderFeatured();
+        renderPopular();
+        renderLatest();
+        renderProducts();
+        renderFavorites();
+        renderRecent();
+        updateBottomBar();
+    }
+
+    // ===== Event Delegation =====
+    root.addEventListener('click', e => {
+        const target = e.target.closest('[data-action], [data-category], [data-nav]');
+        if (!target) return;
+        const action = target.dataset.action;
+        const id = target.dataset.id ? Number(target.dataset.id) : null;
+        const category = target.dataset.category;
+
+        if (action === 'toggle-theme') toggleTheme();
+        else if (action === 'toggle-language') toggleLanguage();
+        else if (action === 'toggle-menu') {
+            document.getElementById('awad-nav').classList.toggle('awad-open');
+            document.getElementById('awad-menu-toggle').setAttribute('aria-expanded',
+                document.getElementById('awad-nav').classList.contains('awad-open'));
+        }
+        else if (action === 'focus-search') document.getElementById('awad-search-input').focus();
+        else if (action === 'search-submit') {
+            state.query = document.getElementById('awad-search-input').value.trim();
+            state.visibleCount = PAGE_SIZE;
+            renderProducts();
+            document.getElementById('awad-products-section').scrollIntoView({behavior:'smooth'});
+        }
+        else if (action === 'go-favorites') document.getElementById('awad-favorites-section').scrollIntoView({behavior:'smooth'});
+        else if (action === 'toggle-filters') {
+            const panel = document.getElementById('awad-filter-panel');
+            panel.classList.toggle('awad-open');
+            document.getElementById('awad-filter-toggle').setAttribute('aria-expanded', panel.classList.contains('awad-open'));
+        }
+        else if (action === 'reset-filters') resetFilters();
+        else if (action === 'details') showDetails(id);
+        else if (action === 'download') downloadItem(id);
+        else if (action === 'favorite') toggleFavorite(id);
+        else if (action === 'share') shareItem(id);
+        else if (action === 'close-modal') closeModal();
+        else if (action === 'download-selected') downloadSelected();
+        else if (action === 'clear-selection') clearSelection();
+        else if (action === 'download-all-parts') downloadAllParts(id);
+        else if (action === 'select-all-parts') selectAllParts(id, true);
+        else if (action === 'clear-parts') clearPartsSelection();
+        else if (action === 'download-selected-parts') downloadSelectedParts(id);
+        else if (action === 'download-part') downloadPart(id, Number(target.dataset.partIndex), target);
+        else if (action === 'download-server') {
+            openSafe(target.dataset.url);
+            showToast(t('download_started'));
+        }
+        else if (category) handleCategoryClick(category);
+        else if (target.dataset.nav) {
+            const map = {
+                hero: 'awad-hero',
+                categories: 'awad-categories-section',
+                featured: 'awad-featured-section',
+                products: 'awad-products-section',
+                popular: 'awad-popular-section',
+                favorites: 'awad-favorites-section'
+            };
+            const sectionId = map[target.dataset.nav];
+            if (sectionId) document.getElementById(sectionId).scrollIntoView({behavior:'smooth'});
+        }
+    });
+
+    root.addEventListener('change', e => {
+        const target = e.target;
+        if (target.classList.contains('awad-select-check')) {
+            toggleSelect(target.dataset.id);
+        } else if (target.matches('[data-filter-type]')) {
+            handleFilterChange(target);
+        } else if (target.classList.contains('awad-part-check')) {
+            const partId = Number(target.dataset.partId);
+            if (target.checked) state.modalPartsSelection.add(partId);
+            else state.modalPartsSelection.delete(partId);
+        } else if (target.id === 'awad-sort-select') {
+            state.sort = target.value;
+            state.visibleCount = PAGE_SIZE;
+            renderProducts();
+        }
+    });
+
+    function handleFilterChange(input) {
+        const type = input.dataset.filterType;
+        if (type === 'favoritesOnly') {
+            state.filters.favoritesOnly = input.checked;
+        } else {
+            const value = input.dataset.filterValue;
+            const arr = state.filters[type];
+            if (input.checked) {
+                if (!arr.includes(value)) arr.push(value);
+            } else {
+                state.filters[type] = arr.filter(v => v !== value);
+            }
+        }
+        state.visibleCount = PAGE_SIZE;
+        renderProducts();
+    }
+
+    function handleCategoryClick(key) {
+        state.filters = { platform:[], category:[], price:[], size:[], downloadType:[], status:[], favoritesOnly:false };
+        if (platformKeys.includes(key)) state.filters.platform = [key];
+        else state.filters.category = [key];
+        state.visibleCount = PAGE_SIZE;
+        renderProducts();
+        document.getElementById('awad-products-section').scrollIntoView({behavior:'smooth'});
+    }
+
+    // Debounce للبحث
+    let searchDebounce;
+    document.getElementById('awad-search-input').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            state.query = document.getElementById('awad-search-input').value.trim();
+            state.visibleCount = PAGE_SIZE;
+            renderProducts();
+        }, 250);
+    });
+
+    // زر الصعود
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('awad-scroll-top');
+        btn.classList.toggle('awad-visible', window.scrollY > 300);
+    });
+    document.getElementById('awad-scroll-top').addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // زر تحميل المزيد
+    document.getElementById('awad-load-more').addEventListener('click', () => {
+        state.visibleCount += PAGE_SIZE;
+        renderProducts();
+    });
+
+    // إغلاق المودال بالنقر خارجها أو ESC
+    document.getElementById('awad-modal-backdrop').addEventListener('click', e => {
+        if (e.target === document.getElementById('awad-modal-backdrop')) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !document.getElementById('awad-modal-backdrop').hidden) closeModal();
+    });
+
+    // ===== بيانات المنتجات التجريبية =====
+    products = [
+        {
+            id: 1,
+            title: 'أدوبي فوتوشوب 2026',
+            titleEn: 'Adobe Photoshop 2026',
+            description: 'برنامج احترافي لتحرير الصور والتصميم الجرافيكي.',
+            descriptionEn: 'Professional image editing and graphic design software.',
+            image: 'https://picsum.photos/seed/awadtech-photoshop/600/400',
+            category: 'Graphics',
+            platform: 'Windows',
+            type: 'Software',
+            size: '5.35 GB',
+            version: '2026',
+            requirements: 'Windows 10/11',
+            status: 'Paid',
+            featured: true,
+            popular: true,
+            updated: '2026-08-20',
+            createdAt: '2026-08-18',
+            downloads: 24800,
+            keywords: ['photoshop', 'adobe', 'تصميم', 'graphics', 'design'],
+            downloadType: 'multipart',
+            parts: [
+                { id: 1, name: 'Part 1', filename: 'Photoshop_Part1.rar', size: '1.50 GB', downloadUrl: 'https://example.com/photoshop-part1', servers: [{name:'Direct', url:'https://example.com/photoshop-part1'}, {name:'Google Drive', url:'https://example.com/drive-ps-part1'}] },
+                { id: 2, name: 'Part 2', filename: 'Photoshop_Part2.rar', size: '1.50 GB', downloadUrl: 'https://example.com/photoshop-part2', servers: [{name:'Direct', url:'https://example.com/photoshop-part2'}, {name:'Google Drive', url:'https://example.com/drive-ps-part2'}] },
+                { id: 3, name: 'Part 3', filename: 'Photoshop_Part3.rar', size: '1.50 GB', downloadUrl: 'https://example.com/photoshop-part3', servers: [{name:'Direct', url:'https://example.com/photoshop-part3'}, {name:'Google Drive', url:'https://example.com/drive-ps-part3'}] },
+                { id: 4, name: 'Part 4', filename: 'Photoshop_Part4.rar', size: '850 MB', downloadUrl: 'https://example.com/photoshop-part4', servers: [{name:'Direct', url:'https://example.com/photoshop-part4'}, {name:'Google Drive', url:'https://example.com/drive-ps-part4'}] }
+            ],
+            files: [{name:'Readme', size:'12 KB', url:'https://example.com/readme'}]
+        },
+        {
+            id: 2,
+            title: 'أدوبي بريمير برو 2026',
+            titleEn: 'Adobe Premiere Pro 2026',
+            description: 'مونتاج فيديو احترافي بواجهة قوية.',
+            descriptionEn: 'Professional video editing with powerful tools.',
+            image: 'https://picsum.photos/seed/awadtech-premiere/600/400',
+            category: 'Multimedia',
+            platform: 'Windows',
+            type: 'Software',
+            size: '5.2 GB',
+            version: '2026',
+            requirements: 'Windows 10/11',
+            status: 'Paid',
+            featured: true,
+            popular: true,
+            updated: '2026-08-19',
+            createdAt: '2026-08-15',
+            downloads: 18900,
+            keywords: ['premiere', 'video', 'مونتاج', 'editing'],
+            downloadType: 'multipart',
+            parts: [
+                { id: 1, name: 'Part 1', filename: 'Premiere_Part1.rar', size: '2.00 GB', downloadUrl: 'https://example.com/premiere-part1', servers: [{name:'Direct', url:'https://example.com/premiere-part1'}, {name:'MediaFire', url:'https://example.com/mf-premiere-part1'}] },
+                { id: 2, name: 'Part 2', filename: 'Premiere_Part2.rar', size: '2.00 GB', downloadUrl: 'https://example.com/premiere-part2', servers: [{name:'Direct', url:'https://example.com/premiere-part2'}, {name:'MediaFire', url:'https://example.com/mf-premiere-part2'}] },
+                { id: 3, name: 'Part 3', filename: 'Premiere_Part3.rar', size: '1.20 GB', downloadUrl: 'https://example.com/premiere-part3', servers: [{name:'Direct', url:'https://example.com/premiere-part3'}, {name:'MediaFire', url:'https://example.com/mf-premiere-part3'}] }
+            ]
+        },
+        {
+            id: 3,
+            title: 'مايكروسوفت أوفيس 2026',
+            titleEn: 'Microsoft Office 2026',
+            description: 'حزمة المكتب الكاملة: Word وExcel وPowerPoint.',
+            descriptionEn: 'Complete office suite: Word, Excel, PowerPoint.',
+            image: 'https://picsum.photos/seed/awadtech-office/600/400',
+            category: 'Office',
+            platform: 'Windows',
+            type: 'Software',
+            size: '3.2 GB',
+            version: '2026',
+            requirements: 'Windows 10/11',
+            status: 'Paid',
+            featured: false,
+            popular: true,
+            updated: '2026-08-21',
+            createdAt: '2026-08-10',
+            downloads: 32100,
+            keywords: ['office', 'word', 'excel', 'powerpoint'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/office',
+            servers: [
+                {name:'Direct', url:'https://example.com/office-direct'},
+                {name:'Google Drive', url:'https://example.com/office-drive'},
+                {name:'MediaFire', url:'https://example.com/office-mediafire'},
+                {name:'Mega', url:'https://example.com/office-mega'}
+            ]
+        },
+        {
+            id: 4,
+            title: 'ويندوز 11 برو',
+            titleEn: 'Windows 11 Pro',
+            description: 'أحدث إصدار من نظام التشغيل ويندوز 11 برو.',
+            descriptionEn: 'Latest Windows 11 Pro operating system.',
+            image: 'https://picsum.photos/seed/awadtech-win11/600/400',
+            category: 'Tools',
+            platform: 'Windows',
+            type: 'Software',
+            size: '5.1 GB',
+            version: '24H2',
+            requirements: '64-bit processor',
+            status: 'Free',
+            featured: true,
+            popular: true,
+            updated: '2026-08-22',
+            createdAt: '2026-08-05',
+            downloads: 45200,
+            keywords: ['windows 11', 'os', 'تشغيل', 'system'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/windows11',
+            servers: [
+                {name:'Direct', url:'https://example.com/win11-direct'},
+                {name:'Google Drive', url:'https://example.com/win11-drive'}
+            ]
+        },
+        {
+            id: 5,
+            title: 'إنترنت داونلود مانجر',
+            titleEn: 'Internet Download Manager',
+            description: 'أداة تحميل سريعة مع استكمال التحميل.',
+            descriptionEn: 'Fast download manager with resume support.',
+            image: 'https://picsum.photos/seed/awadtech-idm/600/400',
+            category: 'Internet',
+            platform: 'Windows',
+            type: 'Tool',
+            size: '18 MB',
+            version: '6.42',
+            requirements: 'Windows 7/10/11',
+            status: 'Paid',
+            featured: false,
+            popular: true,
+            updated: '2026-08-18',
+            createdAt: '2026-08-01',
+            downloads: 28400,
+            keywords: ['idm', 'downloader', 'تحميل', 'manager'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/idm',
+            servers: [
+                {name:'Direct', url:'https://example.com/idm-direct'},
+                {name:'Google Drive', url:'https://example.com/idm-drive'},
+                {name:'Mega', url:'https://example.com/idm-mega'}
+            ]
+        },
+        {
+            id: 6,
+            title: 'وينرار',
+            titleEn: 'WinRAR',
+            description: 'أداة ضغط وفك ضغط الملفات.',
+            descriptionEn: 'File compression and extraction tool.',
+            image: 'https://picsum.photos/seed/awadtech-winrar/600/400',
+            category: 'Tools',
+            platform: 'Windows',
+            type: 'Tool',
+            size: '3 MB',
+            version: '7.01',
+            requirements: 'Windows 7+',
+            status: 'Free',
+            featured: false,
+            popular: false,
+            updated: '2026-08-10',
+            createdAt: '2026-07-20',
+            downloads: 19800,
+            keywords: ['winrar', 'ضغط', 'zip', 'rar'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/winrar'
+        },
+        {
+            id: 7,
+            title: 'جوجل كروم',
+            titleEn: 'Google Chrome',
+            description: 'متصفح ويب سريع وآمن.',
+            descriptionEn: 'Fast and secure web browser.',
+            image: 'https://picsum.photos/seed/awadtech-chrome/600/400',
+            category: 'Internet',
+            platform: 'Windows',
+            type: 'Software',
+            size: '95 MB',
+            version: '128',
+            requirements: 'Windows 10/11',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-21',
+            createdAt: '2026-07-15',
+            downloads: 50200,
+            keywords: ['chrome', 'browser', 'متصفح', 'google'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/chrome'
+        },
+        {
+            id: 8,
+            title: 'VLC ميديا بلاير',
+            titleEn: 'VLC Media Player',
+            description: 'مشغل وسائط متعدد الصيغ.',
+            descriptionEn: 'Versatile media player supporting all formats.',
+            image: 'https://picsum.photos/seed/awadtech-vlc/600/400',
+            category: 'Multimedia',
+            platform: 'Windows',
+            type: 'Software',
+            size: '42 MB',
+            version: '3.0.21',
+            requirements: 'Windows 7+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-12',
+            createdAt: '2026-06-20',
+            downloads: 27300,
+            keywords: ['vlc', 'media', 'player', 'مشغل'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/vlc'
+        },
+        {
+            id: 9,
+            title: 'فيجوال ستوديو كود',
+            titleEn: 'Visual Studio Code',
+            description: 'محرر أكواد قوي وقابل للتخصيص.',
+            descriptionEn: 'Powerful and customizable code editor.',
+            image: 'https://picsum.photos/seed/awadtech-vscode/600/400',
+            category: 'Development',
+            platform: 'Windows',
+            type: 'Tool',
+            size: '88 MB',
+            version: '1.93',
+            requirements: 'Windows 10/11',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-22',
+            createdAt: '2026-07-10',
+            downloads: 36500,
+            keywords: ['vscode', 'code', 'editor', 'تطوير'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/vscode'
+        },
+        {
+            id: 10,
+            title: 'أفاست أنتي فايروس',
+            titleEn: 'Avast Free Antivirus',
+            description: 'حماية مجانية من الفيروسات والتهديدات.',
+            descriptionEn: 'Free antivirus and threat protection.',
+            image: 'https://picsum.photos/seed/awadtech-avast/600/400',
+            category: 'Security',
+            platform: 'Windows',
+            type: 'Software',
+            size: '250 MB',
+            version: '24.8',
+            requirements: 'Windows 10/11',
+            status: 'Free',
+            featured: false,
+            popular: false,
+            updated: '2026-08-15',
+            createdAt: '2026-06-01',
+            downloads: 21400,
+            keywords: ['avast', 'antivirus', 'حماية', 'security'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/avast'
+        },
+        {
+            id: 11,
+            title: 'سناب سيد',
+            titleEn: 'Snapseed',
+            description: 'محرر صور احترافي من Google.',
+            descriptionEn: 'Professional photo editor by Google.',
+            image: 'https://picsum.photos/seed/awadtech-snapseed/600/400',
+            category: 'Graphics',
+            platform: 'iOS',
+            type: 'App',
+            size: '78 MB',
+            version: '2.22',
+            requirements: 'iOS 15+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-18',
+            createdAt: '2026-07-25',
+            downloads: 17800,
+            keywords: ['snapseed', 'photo', 'editor', 'صور'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/snapseed'
+        },
+        {
+            id: 12,
+            title: 'كانفا',
+            titleEn: 'Canva',
+            description: 'تصميم جرافيكي سهل وسريع.',
+            descriptionEn: 'Easy and fast graphic design.',
+            image: 'https://picsum.photos/seed/awadtech-canva/600/400',
+            category: 'Graphics',
+            platform: 'iOS',
+            type: 'App',
+            size: '145 MB',
+            version: '5.50',
+            requirements: 'iOS 14+',
+            status: 'Free',
+            featured: true,
+            popular: true,
+            updated: '2026-08-20',
+            createdAt: '2026-08-10',
+            downloads: 21200,
+            keywords: ['canva', 'design', 'تصميم', 'app'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/canva'
+        },
+        {
+            id: 13,
+            title: 'واتساب ماسنجر',
+            titleEn: 'WhatsApp Messenger',
+            description: 'مراسلة فورية ومكالمات صوتية وفيديو.',
+            descriptionEn: 'Instant messaging, voice & video calls.',
+            image: 'https://picsum.photos/seed/awadtech-whatsapp/600/400',
+            category: 'Internet',
+            platform: 'Android',
+            type: 'App',
+            size: '42 MB',
+            version: '2.24.17',
+            requirements: 'Android 8+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-21',
+            createdAt: '2026-07-01',
+            downloads: 56000,
+            keywords: ['whatsapp', 'chat', 'واتساب', 'مراسلة'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/whatsapp'
+        },
+        {
+            id: 14,
+            title: 'تيك توك',
+            titleEn: 'TikTok',
+            description: 'منصة فيديوهات قصيرة ترفيهية.',
+            descriptionEn: 'Short video entertainment platform.',
+            image: 'https://picsum.photos/seed/awadtech-tiktok/600/400',
+            category: 'Multimedia',
+            platform: 'iOS',
+            type: 'App',
+            size: '210 MB',
+            version: '32.5',
+            requirements: 'iOS 14+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-20',
+            createdAt: '2026-06-15',
+            downloads: 49800,
+            keywords: ['tiktok', 'video', 'فيديو', 'ترفيه'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/tiktok'
+        },
+        {
+            id: 15,
+            title: 'تيليجرام',
+            titleEn: 'Telegram',
+            description: 'مراسلة آمنة وسريعة.',
+            descriptionEn: 'Secure and fast messaging.',
+            image: 'https://picsum.photos/seed/awadtech-telegram/600/400',
+            category: 'Internet',
+            platform: 'Android',
+            type: 'App',
+            size: '38 MB',
+            version: '10.14',
+            requirements: 'Android 6+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-22',
+            createdAt: '2026-07-05',
+            downloads: 43100,
+            keywords: ['telegram', 'chat', 'تيليجرام'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/telegram'
+        },
+        {
+            id: 16,
+            title: 'كلين ماستر',
+            titleEn: 'Clean Master',
+            description: 'تنظيف الجهاز وتحسين الأداء.',
+            descriptionEn: 'Device cleaning and performance optimization.',
+            image: 'https://picsum.photos/seed/awadtech-cleanmaster/600/400',
+            category: 'Tools',
+            platform: 'Android',
+            type: 'App',
+            size: '22 MB',
+            version: '7.5',
+            requirements: 'Android 7+',
+            status: 'Free',
+            featured: false,
+            popular: false,
+            updated: '2026-08-10',
+            createdAt: '2026-06-10',
+            downloads: 15400,
+            keywords: ['clean', 'master', 'تنظيف', 'android'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/cleanmaster'
+        },
+        {
+            id: 17,
+            title: 'قارئ PDF برو',
+            titleEn: 'PDF Reader Pro',
+            description: 'قارئ ومحرر ملفات PDF.',
+            descriptionEn: 'PDF reader and editor.',
+            image: 'https://picsum.photos/seed/awadtech-pdfreader/600/400',
+            category: 'Office',
+            platform: 'Android',
+            type: 'App',
+            size: '28 MB',
+            version: '4.2',
+            requirements: 'Android 8+',
+            status: 'Paid',
+            featured: false,
+            popular: false,
+            updated: '2026-08-08',
+            createdAt: '2026-06-20',
+            downloads: 9800,
+            keywords: ['pdf', 'reader', 'قارئ', 'ملفات'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/pdfreader'
+        },
+        {
+            id: 18,
+            title: 'كتاب تعلم البرمجة بلغة بايثون',
+            titleEn: 'Learn Python Programming',
+            description: 'دليل شامل لتعلم لغة بايثون من الصفر.',
+            descriptionEn: 'Comprehensive guide to learning Python from scratch.',
+            image: 'https://picsum.photos/seed/awadtech-pythonbook/600/400',
+            category: 'Books',
+            platform: 'PDF',
+            type: 'Book',
+            size: '25 MB',
+            version: 'الطبعة الثالثة',
+            requirements: 'PDF Reader',
+            status: 'Free',
+            featured: true,
+            popular: false,
+            updated: '2026-08-01',
+            createdAt: '2026-07-01',
+            downloads: 8200,
+            keywords: ['python', 'programming', 'برمجة', 'كتاب'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/python-book'
+        },
+        {
+            id: 19,
+            title: 'رواية مئة عام من العزلة',
+            titleEn: 'One Hundred Years of Solitude',
+            description: 'رواية خالدة للكاتب غابرييل غارسيا ماركيز.',
+            descriptionEn: 'Timeless novel by Gabriel García Márquez.',
+            image: 'https://picsum.photos/seed/awadtech-book/600/400',
+            category: 'Books',
+            platform: 'PDF',
+            type: 'Book',
+            size: '8 MB',
+            version: 'الطبعة العربية',
+            requirements: 'PDF Reader',
+            status: 'Paid',
+            featured: false,
+            popular: false,
+            updated: '2026-07-20',
+            createdAt: '2026-07-10',
+            downloads: 5300,
+            keywords: ['رواية', 'أدب', 'كتاب', 'novel'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/book-100-years'
+        },
+        {
+            id: 20,
+            title: 'دوالينجو',
+            titleEn: 'Duolingo',
+            description: 'تطبيق لتعلم اللغات بطريقة ممتعة.',
+            descriptionEn: 'Language learning app with fun lessons.',
+            image: 'https://picsum.photos/seed/awadtech-duolingo/600/400',
+            category: 'Education',
+            platform: 'iOS',
+            type: 'App',
+            size: '92 MB',
+            version: '7.0',
+            requirements: 'iOS 14+',
+            status: 'Free',
+            featured: false,
+            popular: true,
+            updated: '2026-08-22',
+            createdAt: '2026-08-12',
+            downloads: 22100,
+            keywords: ['duolingo', 'learn', 'تعليم', 'لغات'],
+            downloadType: 'single',
+            downloadUrl: 'https://example.com/duolingo'
+        }
+    ];
+
+    // ===== التهيئة =====
+    function init() {
+        applyTheme();
+        applyLanguage();
+        renderFilterPanel();
+        renderSkeletons(document.getElementById('awad-featured-grid'), 4);
+        renderSkeletons(document.getElementById('awad-products-grid'), 6);
+        renderSkeletons(document.getElementById('awad-popular-grid'), 4);
+        renderSkeletons(document.getElementById('awad-latest-grid'), 4);
+
+        setTimeout(() => {
+            renderCategories();
+            renderStats();
+            renderFeatured();
+            renderPopular();
+            renderLatest();
+            renderProducts();
+            renderFavorites();
+            renderRecent();
+            updateBottomBar();
+        }, 400);
+    }
+
+    init();
+
+})();
