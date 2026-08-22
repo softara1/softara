@@ -13,7 +13,7 @@
     if (!root) return;
 
     // ===== إعدادات المنتدى =====
-    const DL_FORUM_ID = 30; // رقم القسم المخصص للمكتبة في المنتدى
+    const DL_FORUM_ID = 20; // رقم القسم المخصص للمكتبة في المنتدى
 
     // ===== إعدادات عامة =====
     const defaultLang = root.dataset.lang || 'ar';
