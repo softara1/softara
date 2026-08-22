@@ -13,7 +13,7 @@
     if (!root) return;
 
     // إعدادات المنتدى
-    const DL_FORUM_ID = 20; // رقم القسم المخصص للمكتبة في المنتدى
+    const DL_FORUM_ID = 30; // رقم القسم المخصص للمكتبة في المنتدى
     const ITEMS_PER_PAGE = 8; // عدد العناصر في كل صفحة ترقيم داخل الأقسام
 
     // الإعدادات العامة
@@ -1878,244 +1878,233 @@
 
     // ===== نافذة الإدارة (Add/Edit) =====
     function openAdminModal(itemId = null) {
-        const isEdit = itemId !== null;
-        const item = isEdit ? state.allTopicsData.find(t => t.topicId === itemId)?.parsedData : null;
-        const body = document.getElementById('awad-admin-modal-body');
-        if (!body) return;
-        body.innerHTML = '';
+    const isEdit = itemId !== null;
+    const item = isEdit ? state.allTopicsData.find(t => t.topicId === itemId)?.parsedData : null;
+    const body = document.getElementById('awad-admin-modal-body');
+    if (!body) return;
+    body.innerHTML = '';
 
-        const title = document.createElement('h2');
-        title.className = 'awad-modal-title';
-        title.textContent = isEdit ? t('admin_title_edit') : t('admin_title_add');
-        body.appendChild(title);
+    const title = document.createElement('h2');
+    title.className = 'awad-modal-title';
+    title.textContent = isEdit ? t('admin_title_edit') : t('admin_title_add');
+    body.appendChild(title);
 
-        // Tabs
-        const tabs = document.createElement('div');
-        tabs.className = 'awad-admin-tabs';
-        const tabNames = [
-            { key: 'general', label: t('admin_general_tab') },
-            { key: 'media', label: t('admin_media_tab') },
-            { key: 'download', label: t('admin_download_tab') },
-            { key: 'publish', label: t('admin_publish_tab') }
-        ];
-        tabNames.forEach((tab, i) => {
-            const btn = document.createElement('button');
-            btn.className = 'awad-admin-tab' + (i === 0 ? ' awad-active' : '');
-            btn.dataset.tab = tab.key;
-            btn.textContent = tab.label;
-            tabs.appendChild(btn);
+    // تبويبات
+    const tabs = document.createElement('div');
+    tabs.className = 'awad-admin-tabs';
+    const tabNames = [
+        { key: 'general', label: t('admin_general_tab') },
+        { key: 'media', label: t('admin_media_tab') },
+        { key: 'download', label: t('admin_download_tab') },
+        { key: 'publish', label: t('admin_publish_tab') }
+    ];
+    tabNames.forEach((tab, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'awad-admin-tab' + (i === 0 ? ' awad-active' : '');
+        btn.dataset.tab = tab.key;
+        btn.textContent = tab.label;
+        btn.addEventListener('click', () => {
+            body.querySelectorAll('.awad-admin-tab').forEach(t => t.classList.remove('awad-active'));
+            body.querySelectorAll('.awad-admin-tab-content').forEach(c => c.classList.remove('awad-active'));
+            btn.classList.add('awad-active');
+            body.querySelector(`[data-tab-content="${tab.key}"]`).classList.add('awad-active');
         });
-        body.appendChild(tabs);
+        tabs.appendChild(btn);
+    });
+    body.appendChild(tabs);
 
-        const form = document.createElement('form');
-        form.id = 'awad-admin-form';
-        form.className = 'awad-admin-form';
+    // نموذج
+    const form = document.createElement('form');
+    form.id = 'awad-admin-form';
+    form.className = 'awad-admin-form';
 
-        // General Tab
-        const generalDiv = document.createElement('div');
-        generalDiv.className = 'awad-admin-tab-content awad-active';
-        generalDiv.dataset.tabContent = 'general';
-        generalDiv.innerHTML = `
-            <label>${t('admin_title_label')}</label>
-            <input type="text" name="title" value="${item?.title || ''}" required>
-            <label>${t('admin_title_en_label')}</label>
-            <input type="text" name="titleEn" value="${item?.titleEn || ''}">
-            <label>${t('admin_desc_label')}</label>
-            <textarea name="description" rows="3">${item?.desc || ''}</textarea>
-            <label>${t('admin_type_label')}</label>
-            <select name="type">
-                <option value="software" ${item?.type === 'software' ? 'selected' : ''}>برامج</option>
-                <option value="app" ${item?.type === 'app' ? 'selected' : ''}>تطبيقات</option>
-                <option value="pcgame" ${item?.type === 'pcgame' ? 'selected' : ''}>ألعاب PC</option>
-                <option value="psgame" ${item?.type === 'psgame' ? 'selected' : ''}>ألعاب PS</option>
-                <option value="ebook" ${item?.type === 'ebook' ? 'selected' : ''}>كتب</option>
-            </select>
-            <label>${t('admin_platform_label')}</label>
-            <select name="platform">
-                ${platformKeys.map(p => `<option value="${p}" ${item?.platform === p ? 'selected' : ''}>${p}</option>`).join('')}
-            </select>
-            <label>${t('admin_category_label')}</label>
-            <select name="category">
-                ${['Office','Multimedia','Graphics','Internet','Security','Education','Tools','Development','Books'].map(c => `<option value="${c}" ${item?.category === c ? 'selected' : ''}>${getCatLabel(c)}</option>`).join('')}
-            </select>
-            <label>${t('admin_status_label')}</label>
-            <select name="status">
-                <option value="Free" ${item?.status === 'Free' ? 'selected' : ''}>Free</option>
-                <option value="Paid" ${item?.status === 'Paid' ? 'selected' : ''}>Paid</option>
-            </select>
-            <label>${t('admin_version_label')}</label>
-            <input type="text" name="version" value="${item?.version || ''}">
-            <label>${t('admin_size_label')}</label>
-            <input type="text" name="size" value="${item?.size || ''}">
-            <label>${t('admin_requirements_label')}</label>
-            <input type="text" name="requirements" value="${item?.os || ''}">
-            <label>${t('admin_updated_label')}</label>
-            <input type="date" name="updated" value="${item?.updated || ''}">
-            <label>${t('admin_downloads_label')}</label>
-            <input type="number" name="downloads" value="${item?.downloads || 0}">
-        `;
-        form.appendChild(generalDiv);
+    // التبويب العام
+    const generalDiv = document.createElement('div');
+    generalDiv.className = 'awad-admin-tab-content awad-active';
+    generalDiv.dataset.tabContent = 'general';
+    generalDiv.innerHTML = `
+        <label>${t('admin_title_label')}</label>
+        <input type="text" name="title" value="${item?.title || ''}" required>
+        <label>${t('admin_title_en_label')}</label>
+        <input type="text" name="titleEn" value="${item?.titleEn || ''}">
+        <label>${t('admin_desc_label')}</label>
+        <textarea name="description" rows="3">${item?.desc || ''}</textarea>
+        <label>${t('admin_type_label')}</label>
+        <select name="type">
+            <option value="software" ${item?.type === 'software' ? 'selected' : ''}>برامج</option>
+            <option value="app" ${item?.type === 'app' ? 'selected' : ''}>تطبيقات</option>
+            <option value="pcgame" ${item?.type === 'pcgame' ? 'selected' : ''}>ألعاب PC</option>
+            <option value="psgame" ${item?.type === 'psgame' ? 'selected' : ''}>ألعاب PS</option>
+            <option value="ebook" ${item?.type === 'ebook' ? 'selected' : ''}>كتب</option>
+        </select>
+        <label>${t('admin_platform_label')}</label>
+        <select name="platform">
+            ${platformKeys.map(p => `<option value="${p}" ${item?.platform === p ? 'selected' : ''}>${p}</option>`).join('')}
+        </select>
+        <label>${t('admin_category_label')}</label>
+        <select name="category">
+            ${['Office','Multimedia','Graphics','Internet','Security','Education','Tools','Development','Books'].map(c => `<option value="${c}" ${item?.category === c ? 'selected' : ''}>${getCatLabel(c)}</option>`).join('')}
+        </select>
+        <label>${t('admin_status_label')}</label>
+        <select name="status">
+            <option value="Free" ${item?.status === 'Free' ? 'selected' : ''}>Free</option>
+            <option value="Paid" ${item?.status === 'Paid' ? 'selected' : ''}>Paid</option>
+        </select>
+        <label>${t('admin_version_label')}</label>
+        <input type="text" name="version" value="${item?.version || ''}">
+        <label>${t('admin_size_label')}</label>
+        <input type="text" name="size" value="${item?.size || ''}">
+        <label>${t('admin_requirements_label')}</label>
+        <input type="text" name="requirements" value="${item?.os || ''}">
+        <label>${t('admin_updated_label')}</label>
+        <input type="date" name="updated" value="${item?.updated || ''}">
+        <label>${t('admin_downloads_label')}</label>
+        <input type="number" name="downloads" value="${item?.downloads || 0}">
+    `;
+    form.appendChild(generalDiv);
 
-        // Media Tab
-        const mediaDiv = document.createElement('div');
-        mediaDiv.className = 'awad-admin-tab-content';
-        mediaDiv.dataset.tabContent = 'media';
-        mediaDiv.innerHTML = `
-            <label>${t('admin_image_label')}</label>
-            <input type="url" name="image" id="awad-admin-image-input" value="${item?.img || ''}">
-            <div id="awad-admin-image-preview" class="awad-admin-image-preview">
-                ${item?.img ? `<img src="${safeUrl(item.img)}" style="max-width:100%;max-height:200px;">` : ''}
+    // تبويب الوسائط
+    const mediaDiv = document.createElement('div');
+    mediaDiv.className = 'awad-admin-tab-content';
+    mediaDiv.dataset.tabContent = 'media';
+    mediaDiv.innerHTML = `
+        <label>${t('admin_image_label')}</label>
+        <input type="url" name="image" id="awad-admin-image-input" value="${item?.img || ''}">
+        <div id="awad-admin-image-preview" class="awad-admin-image-preview">
+            ${item?.img ? `<img src="${safeUrl(item.img)}" style="max-width:100%;max-height:200px;">` : ''}
+        </div>
+    `;
+    form.appendChild(mediaDiv);
+
+    // تبويب التحميل
+    const downloadDiv = document.createElement('div');
+    downloadDiv.className = 'awad-admin-tab-content';
+    downloadDiv.dataset.tabContent = 'download';
+    downloadDiv.innerHTML = `
+        <label>${t('admin_download_type_label')}</label>
+        <select name="downloadType" id="awad-admin-download-type">
+            <option value="single" ${item?.downloadType !== 'multipart' ? 'selected' : ''}>${t('admin_single_file')}</option>
+            <option value="multipart" ${item?.downloadType === 'multipart' ? 'selected' : ''}>${t('admin_multi_part')}</option>
+        </select>
+        <div id="awad-admin-single-download">
+            <label>${t('admin_download_url_label')}</label>
+            <input type="url" name="downloadUrl" value="${item?.downloadUrl || ''}">
+        </div>
+        <div id="awad-admin-parts-container">
+            <h4>${t('admin_parts_tab')}</h4>
+            <div id="awad-admin-parts-list">
+                ${item?.parts && item.downloadType === 'multipart' ? item.parts.map((p, i) => `
+                    <div class="awad-admin-part-row">
+                        <input type="text" name="part_name_${i}" placeholder="${t('admin_part_name_label')}" value="${p.name}">
+                        <input type="text" name="part_filename_${i}" placeholder="${t('admin_part_filename_label')}" value="${p.filename}">
+                        <input type="text" name="part_size_${i}" placeholder="${t('admin_part_size_label')}" value="${p.size}">
+                        <input type="url" name="part_url_${i}" placeholder="${t('admin_part_url_label')}" value="${p.downloadUrl}">
+                    </div>
+                `).join('') : ''}
             </div>
+            <button type="button" class="awad-btn awad-btn-secondary awad-btn-sm" id="awad-admin-add-part">${t('admin_add_part')}</button>
+        </div>
+    `;
+    form.appendChild(downloadDiv);
+
+    // تبويب النشر
+    const publishDiv = document.createElement('div');
+    publishDiv.className = 'awad-admin-tab-content';
+    publishDiv.dataset.tabContent = 'publish';
+    publishDiv.innerHTML = `
+        <label><input type="checkbox" name="featured" ${item?.featured ? 'checked' : ''}> ${t('admin_featured_label')}</label>
+        <label><input type="checkbox" name="popular" ${item?.popular ? 'checked' : ''}> ${t('admin_popular_label')}</label>
+    `;
+    form.appendChild(publishDiv);
+
+    // أزرار
+    const actions = document.createElement('div');
+    actions.className = 'awad-admin-actions';
+    actions.style.marginTop = '20px';
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'submit';
+    saveBtn.className = 'awad-btn awad-btn-primary';
+    saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> ' + t('admin_save');
+    actions.appendChild(saveBtn);
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'awad-btn awad-btn-ghost';
+    cancelBtn.textContent = t('admin_cancel');
+    cancelBtn.addEventListener('click', () => closeModal('awad-admin-modal-backdrop'));
+    actions.appendChild(cancelBtn);
+    form.appendChild(actions);
+
+    body.appendChild(form);
+    openModal('awad-admin-modal-backdrop');
+
+    // ربط إضافة جزء
+    document.getElementById('awad-admin-add-part')?.addEventListener('click', () => {
+        const list = document.getElementById('awad-admin-parts-list');
+        const index = list.children.length;
+        const row = document.createElement('div');
+        row.className = 'awad-admin-part-row';
+        row.innerHTML = `
+            <input type="text" name="part_name_${index}" placeholder="${t('admin_part_name_label')}">
+            <input type="text" name="part_filename_${index}" placeholder="${t('admin_part_filename_label')}">
+            <input type="text" name="part_size_${index}" placeholder="${t('admin_part_size_label')}">
+            <input type="url" name="part_url_${index}" placeholder="${t('admin_part_url_label')}">
         `;
-        form.appendChild(mediaDiv);
+        list.appendChild(row);
+    });
 
-        // Download Tab
-        const downloadDiv = document.createElement('div');
-        downloadDiv.className = 'awad-admin-tab-content';
-        downloadDiv.dataset.tabContent = 'download';
-        downloadDiv.innerHTML = `
-            <label>${t('admin_download_type_label')}</label>
-            <select name="downloadType">
-                <option value="single" ${item?.downloadType !== 'multipart' ? 'selected' : ''}>${t('admin_single_file')}</option>
-                <option value="multipart" ${item?.downloadType === 'multipart' ? 'selected' : ''}>${t('admin_multi_part')}</option>
-            </select>
-            <div id="awad-admin-single-download">
-                <label>${t('admin_download_url_label')}</label>
-                <input type="url" name="downloadUrl" value="${item?.downloadUrl || ''}">
-            </div>
-            <div id="awad-admin-parts-container">
-                <h4>${t('admin_parts_tab')}</h4>
-                <div id="awad-admin-parts-list">
-                    ${item?.parts && item.downloadType === 'multipart' ? item.parts.map((p, i) => `
-                        <div class="awad-admin-part-row">
-                            <input type="text" name="part_name_${i}" placeholder="${t('admin_part_name_label')}" value="${p.name}">
-                            <input type="text" name="part_filename_${i}" placeholder="${t('admin_part_filename_label')}" value="${p.filename}">
-                            <input type="text" name="part_size_${i}" placeholder="${t('admin_part_size_label')}" value="${p.size}">
-                            <input type="url" name="part_url_${i}" placeholder="${t('admin_part_url_label')}" value="${p.downloadUrl}">
-                        </div>
-                    `).join('') : ''}
-                </div>
-                <button type="button" class="awad-btn awad-btn-secondary awad-btn-sm" id="awad-admin-add-part">${t('admin_add_part')}</button>
-            </div>
-        `;
-        form.appendChild(downloadDiv);
+    // معاينة الصورة
+    const imageInput = document.getElementById('awad-admin-image-input');
+    imageInput?.addEventListener('input', () => {
+        const preview = document.getElementById('awad-admin-image-preview');
+        const url = safeUrl(imageInput.value);
+        if (preview) preview.innerHTML = url ? `<img src="${url}" style="max-width:100%;max-height:200px;">` : '';
+    });
 
-        // Publish Tab
-        const publishDiv = document.createElement('div');
-        publishDiv.className = 'awad-admin-tab-content';
-        publishDiv.dataset.tabContent = 'publish';
-        publishDiv.innerHTML = `
-            <label><input type="checkbox" name="featured" ${item?.featured ? 'checked' : ''}> ${t('admin_featured_label')}</label>
-            <label><input type="checkbox" name="popular" ${item?.popular ? 'checked' : ''}> ${t('admin_popular_label')}</label>
-        `;
-        form.appendChild(publishDiv);
+    // إرسال النموذج
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
 
-        const actions = document.createElement('div');
-        actions.className = 'awad-admin-actions';
-        actions.style.marginTop = '20px';
-        const saveBtn = document.createElement('button');
-        saveBtn.type = 'submit';
-        saveBtn.className = 'awad-btn awad-btn-primary';
-        saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> ' + t('admin_save');
-        actions.appendChild(saveBtn);
-        const cancelBtn = document.createElement('button');
-        cancelBtn.type = 'button';
-        cancelBtn.className = 'awad-btn awad-btn-ghost';
-        cancelBtn.dataset.action = 'close-admin-modal';
-        cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> ' + t('admin_cancel');
-        actions.appendChild(cancelBtn);
-        form.appendChild(actions);
+        // بناء كائن البيانات
+        const newItem = {
+            title: formData.get('title') || '',
+            titleEn: formData.get('titleEn') || '',
+            desc: formData.get('description') || '',
+            img: formData.get('image') || '',
+            type: formData.get('type') || 'software',
+            platform: formData.get('platform') || 'Windows',
+            category: formData.get('category') || 'Tools',
+            status: formData.get('status') || 'Free',
+            version: formData.get('version') || '',
+            size: formData.get('size') || '',
+            os: formData.get('requirements') || '',
+            updated: formData.get('updated') || new Date().toISOString().split('T')[0],
+            downloads: Number(formData.get('downloads')) || 0,
+            featured: formData.get('featured') === 'on',
+            popular: formData.get('popular') === 'on',
+            downloadType: formData.get('downloadType') || 'single',
+            downloadUrl: formData.get('downloadUrl') || '',
+            parts: []
+        };
 
-        body.appendChild(form);
-        openModal('awad-admin-modal-backdrop');
-
-        // ربط التبويبات
-        body.querySelectorAll('.awad-admin-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                body.querySelectorAll('.awad-admin-tab').forEach(t => t.classList.remove('awad-active'));
-                body.querySelectorAll('.awad-admin-tab-content').forEach(c => c.classList.remove('awad-active'));
-                tab.classList.add('awad-active');
-                body.querySelector(`[data-tab-content="${tab.dataset.tab}"]`).classList.add('awad-active');
-            });
+        // جمع الأجزاء إذا كانت متعددة
+        const partRows = form.querySelectorAll('.awad-admin-part-row');
+        partRows.forEach((row, index) => {
+            const name = formData.get(`part_name_${index}`) || `Part ${index+1}`;
+            const filename = formData.get(`part_filename_${index}`) || '';
+            const size = formData.get(`part_size_${index}`) || '';
+            const url = formData.get(`part_url_${index}`) || '';
+            newItem.parts.push({ id: index+1, name, filename, size, downloadUrl: url, servers: [] });
         });
 
-        // معاينة الصورة
-        const imageInput = document.getElementById('awad-admin-image-input');
-        imageInput?.addEventListener('input', () => {
-            const preview = document.getElementById('awad-admin-image-preview');
-            const url = safeUrl(imageInput.value);
-            if (preview) preview.innerHTML = url ? `<img src="${url}" style="max-width:100%;max-height:200px;">` : '';
-        });
-
-        // إضافة جزء
-        document.getElementById('awad-admin-add-part')?.addEventListener('click', () => {
-            const list = document.getElementById('awad-admin-parts-list');
-            const index = list.children.length;
-            const row = document.createElement('div');
-            row.className = 'awad-admin-part-row';
-            row.innerHTML = `
-                <input type="text" name="part_name_${index}" placeholder="${t('admin_part_name_label')}">
-                <input type="text" name="part_filename_${index}" placeholder="${t('admin_part_filename_label')}">
-                <input type="text" name="part_size_${index}" placeholder="${t('admin_part_size_label')}">
-                <input type="url" name="part_url_${index}" placeholder="${t('admin_part_url_label')}">
-            `;
-            list.appendChild(row);
-        });
-
-        // حفظ
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const newItem = {
-                title: formData.get('title') || '',
-                titleEn: formData.get('titleEn') || '',
-                desc: formData.get('description') || '',
-                img: formData.get('image') || '',
-                type: formData.get('type') || 'software',
-                platform: formData.get('platform') || 'Windows',
-                category: formData.get('category') || 'Tools',
-                status: formData.get('status') || 'Free',
-                version: formData.get('version') || '',
-                size: formData.get('size') || '',
-                os: formData.get('requirements') || '',
-                updated: formData.get('updated') || new Date().toISOString().split('T')[0],
-                downloads: Number(formData.get('downloads')) || 0,
-                featured: formData.get('featured') === 'on',
-                popular: formData.get('popular') === 'on',
-                downloadType: formData.get('downloadType') || 'single',
-                downloadUrl: formData.get('downloadUrl') || '',
-                parts: []
-            };
-            // جمع الأجزاء
-            const partRows = form.querySelectorAll('.awad-admin-part-row');
-            partRows.forEach((row, index) => {
-                const name = formData.get(`part_name_${index}`) || `Part ${index+1}`;
-                const filename = formData.get(`part_filename_${index}`) || '';
-                const size = formData.get(`part_size_${index}`) || '';
-                const url = formData.get(`part_url_${index}`) || '';
-                newItem.parts.push({ id: index+1, name, filename, size, downloadUrl: url, servers: [] });
-            });
-            if (newItem.downloadType === 'multipart' && newItem.parts.length > 0) {
-                newItem.linkType = 'parts';
-                newItem.link = newItem.parts.map(p => ({ url: p.downloadUrl, name: p.name, date: p.size }));
-            } else {
-                newItem.linkType = 'versions';
-                newItem.link = newItem.downloadUrl ? [{ url: newItem.downloadUrl, name: 'أحدث إصدار', date: newItem.updated }] : [];
-            }
-            // حفظ في بيانات المواضيع مؤقتًا (للعرض الفوري) ثم محاولة النشر
-            if (item) {
-                // تعديل موضوع موجود
-                // سنقوم بفتح نموذج تعديل المنتدى
-                editDlItem(item.topicUrl || '');
-                // نملأ الحقول ونحفظ
-                // لكننا هنا مبسّطين: سنستدعي saveDlItem مع بياناتنا
-                saveDlItem();
-            } else {
-                // إضافة موضوع جديد
-                saveDlItem();
-            }
-        });
-    }
+        // هنا يمكن إرسال البيانات إلى المنتدى
+        // سنستخدم نفس منطق saveDlItem لكن بشكل مبسط
+        await saveDlItem(newItem, isEdit ? item.topicUrl : null);
+        closeModal('awad-admin-modal-backdrop');
+        loadDlItems(`/f${DL_FORUM_ID}-montada`);
+    });
+}
 
     // ===== التعليقات =====
     function showComments(topicId) {
