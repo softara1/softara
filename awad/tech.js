@@ -1,10 +1,10 @@
 /* ============================================================
-   عوض تك - مكتبة التحميل الرقمية
+   عوض تك - مكتبة التحميل الرقمية المتكاملة مع المنتدى
    JavaScript خارجي - يعمل داخل #awad-download-library
-   يدعم: الإدارة، التعليقات، التحميل متعدد الأجزاء، المفضلة،
-   البحث، الفلاتر، الفرز، الوضع الليلي، اللغة، وغيرها.
-   ملاحظة: وضع Admin التجريبي يستخدم LocalStorage للعرض فقط،
-   وهو ليس بديلاً عن التحقق الأمني في Backend حقيقي.
+   يدعم: الإدارة الحقيقية عبر المنتدى، التعليقات، التحميل متعدد الأجزاء،
+   البحث، الفلاتر، الفرز، المفضلة، الوضع الليلي، اللغة، وغيرها.
+   ملاحظة أمنية: الصلاحيات تُحدد من وجود روابط النشر في صفحات المنتدى
+   وليس من LocalStorage. يجب تعزيز الأمان في Backend المنتدى نفسه.
 ============================================================ */
 (function() {
     'use strict';
@@ -12,23 +12,24 @@
     const root = document.getElementById('awad-download-library');
     if (!root) return;
 
-    // إعدادات أولية
+    // إعدادات المنتدى
+    const DL_FORUM_ID = 30; // رقم القسم المخصص للمكتبة في المنتدى
+    const ITEMS_PER_PAGE = 8; // عدد العناصر في كل صفحة ترقيم داخل الأقسام
+
+    // الإعدادات العامة
     const defaultLang = root.dataset.lang || 'ar';
     const defaultTheme = root.dataset.theme || 'light';
-    const PAGE_SIZE = 6;
+    const PAGE_SIZE = 6; // عدد البطاقات في عرض "المكتبة" الرئيسية
     const STORAGE_KEYS = {
         lang: 'awad_lang',
         theme: 'awad_theme',
         favorites: 'awad_favs',
-        recent: 'awad_recent',
-        adminSession: 'awad_admin_session' // تجريبي فقط
+        recent: 'awad_recent'
     };
 
     let currentLang = localStorage.getItem(STORAGE_KEYS.lang) || defaultLang;
     let currentTheme = localStorage.getItem(STORAGE_KEYS.theme) || defaultTheme;
-    let products = [];
-    // حالة Admin تجريبية - يتم ضبطها من LocalStorage للتوضيح فقط
-    let isAdmin = localStorage.getItem(STORAGE_KEYS.adminSession) === 'true';
+    let isAdmin = false; // سيتم تحديدها من المنتدى
 
     const state = {
         query: '',
@@ -48,10 +49,11 @@
             favoritesOnly: false
         },
         modalPartsSelection: new Set(),
-        comments: {} // تخزين مؤقت للتعليقات في الذاكرة - تجريبي
+        allTopicsData: [], // ستحتوي البيانات المستخرجة من المنتدى
+        sectionPages: { software: 1, app: 1, pcgame: 1, psgame: 1, ebook: 1 }
     };
 
-    // ===== الترجمات =====
+    // ===== الترجمات الكاملة =====
     const translations = {
         ar: {
             app_name: 'عوض تك',
@@ -260,7 +262,7 @@
             language_name: 'العربية',
             theme_dark: 'داكن',
             theme_light: 'فاتح',
-            // مصطلحات جديدة من الصفحة المقدمة
+            // إضافات من الصفحة المقدمة
             upload_center: 'مركز الرفع',
             upload_image: 'رفع صورة',
             upload_loading: 'جارٍ تحميل واجهة الرفع...',
@@ -286,6 +288,8 @@
             delete_cancel: 'إلغاء'
         },
         en: {
+            // سنكتفي بترجمة المفاتيح الأساسية لتقليل الطول، مع إمكانية إضافتها لاحقاً
+            // في النسخة النهائية يجب تضمين جميع الترجمات الإنجليزية كاملة
             app_name: 'Awad Tech',
             app_name_en: 'عوض تك',
             nav_home: 'Home',
@@ -390,7 +394,6 @@
             footer_terms: 'Terms & Conditions',
             footer_social: 'Follow Us',
             footer_copyright: '© 2026 Awad Tech. All rights reserved.',
-            // Admin Modal
             admin_title_add: 'Add New Item',
             admin_title_edit: 'Edit Item',
             admin_general_tab: 'General',
@@ -492,7 +495,6 @@
             language_name: 'English',
             theme_dark: 'Dark',
             theme_light: 'Light',
-            // New terms from provided page
             upload_center: 'Upload Center',
             upload_image: 'Upload Image',
             upload_loading: 'Loading upload interface...',
@@ -519,7 +521,7 @@
         }
     };
 
-    // المنصات والتصنيفات
+    // ===== المنصات والتصنيفات =====
     const platformKeys = ['Windows', 'Android', 'iOS', 'PDF', 'Other'];
     const allCategories = [
         { key: 'Windows', icon: 'fa-brands fa-windows' },
@@ -538,8 +540,8 @@
 
     // ===== دوال مساعدة =====
     function t(key) { return translations[currentLang][key] || key; }
-    function getTitle(p) { return currentLang === 'ar' ? (p.title || p.titleEn) : (p.titleEn || p.title); }
-    function getDesc(p) { return currentLang === 'ar' ? (p.description || p.descriptionEn) : (p.descriptionEn || p.description); }
+    function getTitle(p) { return currentLang === 'ar' ? (p.rawTitle || p.titleEn) : (p.titleEn || p.rawTitle); }
+    function getDesc(p) { return currentLang === 'ar' ? (p.parsedData.desc || p.descriptionEn) : (p.descriptionEn || p.parsedData.desc); }
     function getCatLabel(key) {
         const map = {
             ar: { Windows:'ويندوز', Android:'أندرويد', iOS:'آيفون', Books:'كتب', Tools:'أدوات', Office:'أوفيس', Multimedia:'وسائط', Graphics:'تصميم', Security:'حماية', Internet:'إنترنت', Education:'تعليم', Development:'تطوير' },
@@ -586,14 +588,14 @@
         }
         return item.size;
     }
-    function getBadges(p) {
+    function getBadges(item) {
         const badges = [];
-        if (isWithinDays(p.createdAt, 30)) badges.push({text:t('new'), cls:'awad-badge-success', icon:'fa-solid fa-bolt'});
-        if (isWithinDays(p.updated, 30)) badges.push({text:t('updated'), cls:'awad-badge-primary', icon:'fa-solid fa-clock'});
-        if (p.featured) badges.push({text:t('featured'), cls:'awad-badge-warning', icon:'fa-solid fa-star'});
-        if (p.popular) badges.push({text:t('popular'), cls:'awad-badge-danger', icon:'fa-solid fa-fire'});
-        if (p.downloadType === 'multipart') badges.push({text:t('multipart'), cls:'awad-badge-primary', icon:'fa-solid fa-layer-group'});
-        badges.push({text: p.status, cls: p.status === 'Free' ? 'awad-badge-success' : 'awad-badge-danger', icon: p.status === 'Free' ? 'fa-solid fa-check' : 'fa-solid fa-lock'});
+        if (isWithinDays(item.createdAt, 30)) badges.push({text:t('new'), cls:'awad-badge-success', icon:'fa-solid fa-bolt'});
+        if (isWithinDays(item.updated, 30)) badges.push({text:t('updated'), cls:'awad-badge-primary', icon:'fa-solid fa-clock'});
+        if (item.featured) badges.push({text:t('featured'), cls:'awad-badge-warning', icon:'fa-solid fa-star'});
+        if (item.popular) badges.push({text:t('popular'), cls:'awad-badge-danger', icon:'fa-solid fa-fire'});
+        if (item.downloadType === 'multipart') badges.push({text:t('multipart'), cls:'awad-badge-primary', icon:'fa-solid fa-layer-group'});
+        badges.push({text: item.status, cls: item.status === 'Free' ? 'awad-badge-success' : 'awad-badge-danger', icon: item.status === 'Free' ? 'fa-solid fa-check' : 'fa-solid fa-lock'});
         return badges.slice(0,4);
     }
     function safeUrl(url) {
@@ -638,106 +640,6 @@
             return true;
         }
     }
-
-    // ===== إنشاء البطاقات =====
-    function createCard(product) {
-        const card = document.createElement('article');
-        card.className = 'awad-card';
-        card.dataset.id = product.id;
-
-        const media = document.createElement('div');
-        media.className = 'awad-card-media';
-        const img = document.createElement('img');
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        img.alt = getTitle(product);
-        img.src = safeUrl(product.image) || 'https://picsum.photos/seed/fallback/600/400';
-        img.style.objectFit = product.imageFit || 'cover';
-        img.onerror = () => { img.src = 'https://picsum.photos/seed/fallback/600/400'; };
-        media.appendChild(img);
-
-        const badges = document.createElement('div');
-        badges.className = 'awad-badges';
-        getBadges(product).forEach(b => {
-            const span = document.createElement('span');
-            span.className = `awad-badge ${b.cls}`;
-            const i = document.createElement('i');
-            i.className = b.icon;
-            span.appendChild(i);
-            span.appendChild(document.createTextNode(b.text));
-            badges.appendChild(span);
-        });
-        media.appendChild(badges);
-
-        const checkWrap = document.createElement('label');
-        checkWrap.className = 'awad-checkbox-wrapper';
-        const check = document.createElement('input');
-        check.type = 'checkbox';
-        check.className = 'awad-select-check';
-        check.dataset.id = product.id;
-        check.checked = state.selected.has(product.id);
-        checkWrap.appendChild(check);
-        const checkmark = document.createElement('span');
-        checkmark.className = 'awad-checkmark';
-        checkWrap.appendChild(checkmark);
-        media.appendChild(checkWrap);
-
-        const favBtn = document.createElement('button');
-        favBtn.className = 'awad-fav-btn';
-        favBtn.dataset.action = 'favorite';
-        favBtn.dataset.id = product.id;
-        favBtn.classList.toggle('awad-active', state.favorites.has(product.id));
-        const favIcon = document.createElement('i');
-        favIcon.className = state.favorites.has(product.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-        favBtn.appendChild(favIcon);
-        media.appendChild(favBtn);
-
-        card.appendChild(media);
-
-        const body = document.createElement('div');
-        body.className = 'awad-card-body';
-        const title = document.createElement('h3');
-        title.className = 'awad-card-title';
-        title.textContent = getTitle(product);
-        body.appendChild(title);
-        const desc = document.createElement('p');
-        desc.className = 'awad-card-desc';
-        desc.textContent = getDesc(product);
-        body.appendChild(desc);
-        const meta = document.createElement('div');
-        meta.className = 'awad-card-meta';
-        const platformTag = document.createElement('span');
-        platformTag.className = 'awad-platform-tag';
-        const platformIcon = document.createElement('i');
-        platformIcon.className = getPlatformIcon(product.platform);
-        platformTag.appendChild(platformIcon);
-        platformTag.appendChild(document.createTextNode(product.platform));
-        meta.appendChild(platformTag);
-        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`v${product.version}`}));
-        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`${product.size}`}));
-        meta.appendChild(Object.assign(document.createElement('span'), {textContent:`${formatNum(product.downloads)}`}));
-        body.appendChild(meta);
-
-        const actions = document.createElement('div');
-        actions.className = 'awad-card-actions';
-        const detailsBtn = document.createElement('button');
-        detailsBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
-        detailsBtn.dataset.action = 'details';
-        detailsBtn.dataset.id = product.id;
-        detailsBtn.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + t('details');
-        actions.appendChild(detailsBtn);
-        const dlBtn = document.createElement('button');
-        dlBtn.className = 'awad-btn awad-btn-primary awad-btn-sm';
-        dlBtn.dataset.action = 'download';
-        dlBtn.dataset.id = product.id;
-        dlBtn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download');
-        actions.appendChild(dlBtn);
-        body.appendChild(actions);
-
-        card.appendChild(body);
-        return card;
-    }
-
     function getPlatformIcon(platform) {
         switch(platform) {
             case 'Windows': return 'fa-brands fa-windows';
@@ -748,27 +650,150 @@
         }
     }
 
-    function createMiniCard(product) {
+    // ===== إنشاء بطاقات (تعمل مع بيانات الموضوع) =====
+    function createCard(topicData) {
+        const { rawTitle, parsedData, topicUrl, editBtn, delBtn, topicId } = topicData;
         const card = document.createElement('article');
-        card.className = 'awad-mini-card';
-        card.dataset.action = 'details';
-        card.dataset.id = product.id;
+        card.className = 'awad-card';
+        card.dataset.id = topicId;
+
+        // الصورة
+        const media = document.createElement('div');
+        media.className = 'awad-card-media';
         const img = document.createElement('img');
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.alt = getTitle(product);
-        img.src = safeUrl(product.image) || 'https://picsum.photos/seed/fallback/600/400';
-        img.style.objectFit = product.imageFit || 'cover';
+        img.alt = rawTitle;
+        img.src = safeUrl(parsedData.img) || 'https://picsum.photos/seed/fallback/600/400';
+        img.onerror = () => { img.src = 'https://picsum.photos/seed/fallback/600/400'; };
+        media.appendChild(img);
+
+        // الشارات
+        const badges = document.createElement('div');
+        badges.className = 'awad-badges';
+        getBadges(parsedData).forEach(b => {
+            const span = document.createElement('span');
+            span.className = `awad-badge ${b.cls}`;
+            span.innerHTML = `<i class="${b.icon}"></i> ${b.text}`;
+            badges.appendChild(span);
+        });
+        media.appendChild(badges);
+
+        // مربع التحديد المتعدد
+        const checkWrap = document.createElement('label');
+        checkWrap.className = 'awad-checkbox-wrapper';
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.className = 'awad-select-check';
+        check.dataset.id = topicId;
+        check.checked = state.selected.has(topicId);
+        checkWrap.appendChild(check);
+        const checkmark = document.createElement('span');
+        checkmark.className = 'awad-checkmark';
+        checkWrap.appendChild(checkmark);
+        media.appendChild(checkWrap);
+
+        // زر المفضلة
+        const favBtn = document.createElement('button');
+        favBtn.className = 'awad-fav-btn';
+        favBtn.dataset.action = 'favorite';
+        favBtn.dataset.id = topicId;
+        favBtn.classList.toggle('awad-active', state.favorites.has(topicId));
+        favBtn.innerHTML = `<i class="fa-${state.favorites.has(topicId) ? 'solid' : 'regular'} fa-heart"></i>`;
+        media.appendChild(favBtn);
+
+        card.appendChild(media);
+
+        // جسم البطاقة
+        const body = document.createElement('div');
+        body.className = 'awad-card-body';
+        const title = document.createElement('h3');
+        title.className = 'awad-card-title';
+        title.textContent = rawTitle;
+        body.appendChild(title);
+        const desc = document.createElement('p');
+        desc.className = 'awad-card-desc';
+        desc.textContent = parsedData.desc || 'لا يوجد وصف';
+        body.appendChild(desc);
+        const meta = document.createElement('div');
+        meta.className = 'awad-card-meta';
+        const platformTag = document.createElement('span');
+        platformTag.className = 'awad-platform-tag';
+        platformTag.innerHTML = `<i class="${getPlatformIcon(parsedData.platform)}"></i> ${parsedData.platform || 'غير محدد'}`;
+        meta.appendChild(platformTag);
+        if (parsedData.size) meta.appendChild(Object.assign(document.createElement('span'), {textContent: `📦 ${parsedData.size}`}));
+        if (parsedData.version) meta.appendChild(Object.assign(document.createElement('span'), {textContent: `v${parsedData.version}`}));
+        meta.appendChild(Object.assign(document.createElement('span'), {textContent: `⬇ ${formatNum(parsedData.downloads || 0)}`}));
+        body.appendChild(meta);
+
+        // أزرار الفعل
+        const actions = document.createElement('div');
+        actions.className = 'awad-card-actions';
+        const detailsBtn = document.createElement('button');
+        detailsBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
+        detailsBtn.dataset.action = 'details';
+        detailsBtn.dataset.id = topicId;
+        detailsBtn.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + t('details');
+        actions.appendChild(detailsBtn);
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'awad-btn awad-btn-primary awad-btn-sm';
+        dlBtn.dataset.action = 'download';
+        dlBtn.dataset.id = topicId;
+        dlBtn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download');
+        actions.appendChild(dlBtn);
+        body.appendChild(actions);
+
+        // أزرار الإدارة (تظهر فقط إذا كان المستخدم مشرفًا ولديه روابط)
+        if (isAdmin && (editBtn || delBtn)) {
+            const adminBox = document.createElement('div');
+            adminBox.className = 'awad-admin-box';
+            if (editBtn) {
+                const editLink = document.createElement('button');
+                editLink.className = 'awad-btn awad-btn-ghost awad-btn-sm';
+                editLink.innerHTML = '<i class="fa-solid fa-pen"></i> ' + t('admin_edit');
+                editLink.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editDlItem(editBtn);
+                });
+                adminBox.appendChild(editLink);
+            }
+            if (delBtn) {
+                const delLink = document.createElement('button');
+                delLink.className = 'awad-btn awad-btn-ghost awad-btn-sm';
+                delLink.innerHTML = '<i class="fa-solid fa-trash"></i> ' + t('admin_delete');
+                delLink.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    confirmDelete(delBtn);
+                });
+                adminBox.appendChild(delLink);
+            }
+            body.appendChild(adminBox);
+        }
+
+        card.appendChild(body);
+        return card;
+    }
+
+    function createMiniCard(topicData) {
+        const card = document.createElement('article');
+        card.className = 'awad-mini-card';
+        card.dataset.action = 'details';
+        card.dataset.id = topicData.topicId;
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.alt = topicData.rawTitle;
+        img.src = safeUrl(topicData.parsedData.img) || 'https://picsum.photos/seed/fallback/600/400';
         card.appendChild(img);
         const body = document.createElement('div');
         body.className = 'awad-mini-body';
         const title = document.createElement('strong');
         title.className = 'awad-mini-title';
-        title.textContent = getTitle(product);
+        title.textContent = topicData.rawTitle;
         body.appendChild(title);
         const platform = document.createElement('span');
         platform.className = 'awad-mini-platform';
-        platform.textContent = product.platform;
+        platform.textContent = topicData.parsedData.platform || '';
         body.appendChild(platform);
         card.appendChild(body);
         return card;
@@ -797,11 +822,12 @@
     // ===== عرض الأقسام =====
     function renderCategories() {
         const grid = document.getElementById('awad-categories-grid');
+        if (!grid) return;
         grid.innerHTML = '';
         const frag = document.createDocumentFragment();
         allCategories.forEach(cat => {
             const isPlatform = platformKeys.includes(cat.key);
-            const count = products.filter(p => isPlatform ? p.platform===cat.key : p.category===cat.key).length;
+            const count = state.allTopicsData.filter(t => isPlatform ? t.parsedData.platform === cat.key : t.parsedData.category === cat.key).length;
             const btn = document.createElement('button');
             btn.className = 'awad-cat-card';
             btn.dataset.category = cat.key;
@@ -822,49 +848,53 @@
     }
 
     function renderStats() {
-        document.getElementById('awad-stat-programs').textContent = products.filter(p=>p.type==='Software').length;
-        document.getElementById('awad-stat-apps').textContent = products.filter(p=>p.type==='App').length;
-        document.getElementById('awad-stat-books').textContent = products.filter(p=>p.type==='Book').length;
-        document.getElementById('awad-stat-files').textContent = products.length;
+        document.getElementById('awad-stat-programs').textContent = state.allTopicsData.filter(t => t.parsedData.type === 'software').length;
+        document.getElementById('awad-stat-apps').textContent = state.allTopicsData.filter(t => t.parsedData.type === 'app').length;
+        document.getElementById('awad-stat-books').textContent = state.allTopicsData.filter(t => t.parsedData.type === 'ebook').length;
+        document.getElementById('awad-stat-files').textContent = state.allTopicsData.length;
     }
 
     function renderFeatured() {
         const grid = document.getElementById('awad-featured-grid');
+        if (!grid) return;
         grid.innerHTML = '';
-        const featured = products.filter(p => p.featured);
+        const featured = state.allTopicsData.filter(t => t.parsedData.featured);
         if (!featured.length) return;
         const frag = document.createDocumentFragment();
-        featured.forEach(p => frag.appendChild(createCard(p)));
+        featured.forEach(t => frag.appendChild(createCard(t)));
         grid.appendChild(frag);
     }
 
     function renderPopular() {
         const grid = document.getElementById('awad-popular-grid');
+        if (!grid) return;
         grid.innerHTML = '';
-        const popular = [...products].sort((a,b)=>b.downloads-a.downloads).slice(0,4);
+        const popular = [...state.allTopicsData].sort((a,b) => (b.parsedData.downloads||0) - (a.parsedData.downloads||0)).slice(0,4);
         const frag = document.createDocumentFragment();
-        popular.forEach(p => frag.appendChild(createCard(p)));
+        popular.forEach(t => frag.appendChild(createCard(t)));
         grid.appendChild(frag);
     }
 
     function renderLatest() {
         const grid = document.getElementById('awad-latest-grid');
+        if (!grid) return;
         grid.innerHTML = '';
-        const latest = [...products].sort((a,b)=>new Date(b.updated)-new Date(a.updated)).slice(0,4);
+        const latest = [...state.allTopicsData].sort((a,b) => new Date(b.parsedData.updated) - new Date(a.parsedData.updated)).slice(0,4);
         const frag = document.createDocumentFragment();
-        latest.forEach(p => frag.appendChild(createCard(p)));
+        latest.forEach(t => frag.appendChild(createCard(t)));
         grid.appendChild(frag);
     }
 
     function renderFavorites() {
         const grid = document.getElementById('awad-favorites-grid');
         const empty = document.getElementById('awad-favorites-empty');
+        if (!grid || !empty) return;
         grid.innerHTML = '';
-        const favItems = [...state.favorites].map(id => products.find(p=>p.id===id)).filter(Boolean);
-        empty.hidden = favItems.length !== 0;
-        if (favItems.length) {
+        const favTopics = state.allTopicsData.filter(t => state.favorites.has(t.topicId));
+        empty.hidden = favTopics.length !== 0;
+        if (favTopics.length) {
             const frag = document.createDocumentFragment();
-            favItems.forEach(p => frag.appendChild(createCard(p)));
+            favTopics.forEach(t => frag.appendChild(createCard(t)));
             grid.appendChild(frag);
         }
         document.getElementById('awad-fav-count').textContent = state.favorites.size;
@@ -872,16 +902,20 @@
 
     function renderRecent() {
         const grid = document.getElementById('awad-recent-grid');
+        if (!grid) return;
         grid.innerHTML = '';
-        const items = state.recentlyViewed.map(id => products.find(p=>p.id===id)).filter(Boolean);
-        if (!items.length) return;
+        const recentTopics = state.recentlyViewed
+            .map(id => state.allTopicsData.find(t => t.topicId === id))
+            .filter(Boolean);
+        if (!recentTopics.length) return;
         const frag = document.createDocumentFragment();
-        items.forEach(p => frag.appendChild(createMiniCard(p)));
+        recentTopics.forEach(t => frag.appendChild(createMiniCard(t)));
         grid.appendChild(frag);
     }
 
     function renderFilterPanel() {
         const panel = document.getElementById('awad-filter-panel');
+        if (!panel) return;
         panel.innerHTML = '';
         const groups = [
             { key:'platform', label:t('filter_platform'), options: platformKeys.map(v=>({value:v,label:getCatLabel(v)})) },
@@ -939,6 +973,7 @@
         panel.appendChild(frag);
     }
 
+    // ===== الفلاتر والفرز (تعمل على state.allTopicsData) =====
     function matchesSizeFilter(key, sizeStr) {
         const mb = parseSizeToMB(sizeStr);
         switch(key) {
@@ -950,92 +985,137 @@
             default: return true;
         }
     }
-    function matchesStatusFilter(key, p) {
-        const isNew = isWithinDays(p.createdAt, 30);
-        const isUpdated = isWithinDays(p.updated, 30);
+    function matchesStatusFilter(key, item) {
+        const isNew = isWithinDays(item.createdAt, 30);
+        const isUpdated = isWithinDays(item.updated, 30);
         switch(key) {
             case 'new': return isNew;
             case 'updated': return isUpdated;
-            case 'popular': return !!p.popular;
-            case 'featured': return !!p.featured;
+            case 'popular': return !!item.popular;
+            case 'featured': return !!item.featured;
             default: return true;
         }
     }
 
-    function getFilteredSortedProducts() {
-        let list = [...products];
+    function getFilteredSortedTopics() {
+        let list = [...state.allTopicsData];
         if (state.query) {
             const q = state.query.toLowerCase();
-            list = list.filter(p =>
-                (getTitle(p)?.toLowerCase().includes(q)) ||
-                (getDesc(p)?.toLowerCase().includes(q)) ||
-                (p.keywords || []).some(k => k.toLowerCase().includes(q)) ||
-                p.category?.toLowerCase().includes(q) ||
-                p.platform?.toLowerCase().includes(q) ||
-                p.type?.toLowerCase().includes(q) ||
-                p.version?.toLowerCase().includes(q)
+            list = list.filter(t =>
+                (t.rawTitle?.toLowerCase().includes(q)) ||
+                (t.parsedData.desc?.toLowerCase().includes(q)) ||
+                (t.parsedData.keywords || []).some(k => k.toLowerCase().includes(q)) ||
+                (t.parsedData.platform?.toLowerCase().includes(q)) ||
+                (t.parsedData.type?.toLowerCase().includes(q)) ||
+                (t.parsedData.version?.toLowerCase().includes(q))
             );
         }
-        if (state.filters.favoritesOnly) list = list.filter(p => state.favorites.has(p.id));
-        if (state.filters.platform.length) list = list.filter(p => state.filters.platform.includes(p.platform));
-        if (state.filters.category.length) list = list.filter(p => state.filters.category.includes(p.category));
-        if (state.filters.type.length) list = list.filter(p => state.filters.type.includes(p.type));
-        if (state.filters.price.length) list = list.filter(p => state.filters.price.includes(p.status));
-        if (state.filters.downloadType.length) list = list.filter(p => state.filters.downloadType.includes(p.downloadType));
-        if (state.filters.size.length) list = list.filter(p => state.filters.size.some(s => matchesSizeFilter(s, p.size)));
-        if (state.filters.status.length) list = list.filter(p => state.filters.status.some(s => matchesStatusFilter(s, p)));
+        if (state.filters.favoritesOnly) list = list.filter(t => state.favorites.has(t.topicId));
+        if (state.filters.platform.length) list = list.filter(t => state.filters.platform.includes(t.parsedData.platform));
+        if (state.filters.category.length) list = list.filter(t => state.filters.category.includes(t.parsedData.category));
+        if (state.filters.type.length) list = list.filter(t => state.filters.type.includes(t.parsedData.type));
+        if (state.filters.price.length) list = list.filter(t => state.filters.price.includes(t.parsedData.status));
+        if (state.filters.downloadType.length) list = list.filter(t => state.filters.downloadType.includes(t.parsedData.downloadType));
+        if (state.filters.size.length) list = list.filter(t => state.filters.size.some(s => matchesSizeFilter(s, t.parsedData.size)));
+        if (state.filters.status.length) list = list.filter(t => state.filters.status.some(s => matchesStatusFilter(s, t.parsedData)));
 
         switch(state.sort) {
-            case 'latest': list.sort((a,b)=>new Date(b.updated)-new Date(a.updated)); break;
-            case 'oldest': list.sort((a,b)=>new Date(a.updated)-new Date(b.updated)); break;
-            case 'downloads': list.sort((a,b)=>b.downloads-a.downloads); break;
-            case 'popular': list.sort((a,b)=>(b.popular?1:0)-(a.popular?1:0)); break;
-            case 'name_asc': list.sort((a,b)=>getTitle(a).localeCompare(getTitle(b), currentLang==='ar'?'ar':'en')); break;
-            case 'name_desc': list.sort((a,b)=>getTitle(b).localeCompare(getTitle(a), currentLang==='ar'?'ar':'en')); break;
-            case 'size_asc': list.sort((a,b)=>parseSizeToMB(a.size)-parseSizeToMB(b.size)); break;
-            case 'size_desc': list.sort((a,b)=>parseSizeToMB(b.size)-parseSizeToMB(a.size)); break;
+            case 'latest': list.sort((a,b) => new Date(b.parsedData.updated) - new Date(a.parsedData.updated)); break;
+            case 'oldest': list.sort((a,b) => new Date(a.parsedData.updated) - new Date(b.parsedData.updated)); break;
+            case 'downloads': list.sort((a,b) => (b.parsedData.downloads||0) - (a.parsedData.downloads||0)); break;
+            case 'popular': list.sort((a,b) => (b.parsedData.popular?1:0) - (a.parsedData.popular?1:0)); break;
+            case 'name_asc': list.sort((a,b) => a.rawTitle.localeCompare(b.rawTitle, currentLang==='ar'?'ar':'en')); break;
+            case 'name_desc': list.sort((a,b) => b.rawTitle.localeCompare(a.rawTitle, currentLang==='ar'?'ar':'en')); break;
+            case 'size_asc': list.sort((a,b) => parseSizeToMB(a.parsedData.size) - parseSizeToMB(b.parsedData.size)); break;
+            case 'size_desc': list.sort((a,b) => parseSizeToMB(b.parsedData.size) - parseSizeToMB(a.parsedData.size)); break;
         }
         return list;
     }
 
-    function renderProducts() {
+    function renderLibrary() {
         const grid = document.getElementById('awad-products-grid');
         const empty = document.getElementById('awad-empty-state');
         const loadMoreBtn = document.getElementById('awad-load-more');
         const resultsCount = document.getElementById('awad-results-count');
+        if (!grid || !empty || !loadMoreBtn || !resultsCount) return;
 
-        const filtered = getFilteredSortedProducts();
+        const filtered = getFilteredSortedTopics();
         const visible = filtered.slice(0, state.visibleCount);
         grid.innerHTML = '';
         const frag = document.createDocumentFragment();
-        visible.forEach(p => frag.appendChild(createCard(p)));
+        visible.forEach(topic => frag.appendChild(createCard(topic)));
         grid.appendChild(frag);
         resultsCount.textContent = t('showing_results').replace('{count}', visible.length).replace('{total}', filtered.length);
         empty.hidden = filtered.length !== 0;
         loadMoreBtn.hidden = filtered.length <= visible.length;
     }
 
-    function renderAll() {
-        renderCategories();
-        renderStats();
-        renderFeatured();
-        renderPopular();
-        renderLatest();
-        renderProducts();
-        renderFavorites();
-        renderRecent();
-        updateBottomBar();
-        updateAdminUI();
+    function renderCategorySections() {
+        const sections = ['software', 'app', 'pcgame', 'psgame', 'ebook'];
+        sections.forEach(type => {
+            const section = document.getElementById(`sec-${type}`);
+            const grid = document.getElementById(`grid-${type}`);
+            const pagination = document.getElementById(`pagination-${type}`);
+            if (!section || !grid) return;
+
+            let typeData = state.allTopicsData.filter(item => item.parsedData.type === type);
+            const badge = section.querySelector('.badge');
+            if (badge) badge.textContent = typeData.length;
+            section.style.display = typeData.length > 0 ? 'block' : 'none';
+
+            let totalPages = Math.ceil(typeData.length / ITEMS_PER_PAGE);
+            let currentPage = state.sectionPages[type] || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+            let start = (currentPage - 1) * ITEMS_PER_PAGE;
+            let end = start + ITEMS_PER_PAGE;
+            let pageData = typeData.slice(start, end);
+
+            grid.innerHTML = '';
+            const frag = document.createDocumentFragment();
+            pageData.forEach(topic => frag.appendChild(createCard(topic)));
+            grid.appendChild(frag);
+
+            if (pagination) {
+                if (totalPages > 1) {
+                    pagination.style.display = 'flex';
+                    renderSectionPagination(pagination, type, totalPages, currentPage);
+                } else {
+                    pagination.style.display = 'none';
+                    pagination.innerHTML = '';
+                }
+            }
+        });
     }
 
-    // ===== الفلاتر والفرز =====
+    function renderSectionPagination(container, type, totalPages, current) {
+        let html = '';
+        html += `<button class="awad-page-btn ${current === 1 ? 'disabled' : ''}" onclick="${current === 1 ? '' : `changePage('${type}', ${current - 1})`}"><i class="fa-solid fa-chevron-right"></i></button>`;
+        for(let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= current - 1 && i <= current + 1)) {
+                html += `<button class="awad-page-btn ${i === current ? 'active' : ''}" onclick="changePage('${type}', ${i})">${i}</button>`;
+            } else if (i === current - 2 || i === current + 2) {
+                html += `<span class="awad-page-dots">...</span>`;
+            }
+        }
+        html += `<button class="awad-page-btn ${current === totalPages ? 'disabled' : ''}" onclick="${current === totalPages ? '' : `changePage('${type}', ${current + 1})`}"><i class="fa-solid fa-chevron-left"></i></button>`;
+        container.innerHTML = html;
+    }
+
+    function changePage(type, newPage) {
+        state.sectionPages[type] = newPage;
+        renderCategorySections();
+        document.getElementById(`sec-${type}`).scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    // ===== الفلاتر والفرز (إجراءات) =====
     function resetFilters() {
         state.filters = { platform:[], category:[], type:[], price:[], size:[], downloadType:[], status:[], favoritesOnly:false };
         state.query = '';
         const searchInput = document.getElementById('awad-search-input');
         if (searchInput) searchInput.value = '';
         renderFilterPanel();
-        renderProducts();
+        renderLibrary();
         showToast(t('filters_reset'), 'success');
     }
 
@@ -1050,8 +1130,10 @@
     function updateBottomBar() {
         const bar = document.getElementById('awad-bottom-bar');
         const count = state.selected.size;
-        bar.hidden = count === 0;
-        document.getElementById('awad-selected-count').textContent = count;
+        if (bar) {
+            bar.hidden = count === 0;
+            document.getElementById('awad-selected-count').textContent = count;
+        }
     }
 
     function clearSelection() {
@@ -1062,8 +1144,21 @@
     }
 
     function downloadSelected() {
-        [...state.selected].forEach(id => downloadItem(id));
+        [...state.selected].forEach(id => {
+            const topic = state.allTopicsData.find(t => t.topicId === id);
+            if (topic) downloadTopic(topic);
+        });
         clearSelection();
+    }
+
+    function downloadTopic(topic) {
+        const data = topic.parsedData;
+        if (data.downloadType === 'multipart') {
+            sortedParts(data).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
+        } else {
+            openSafe(data.downloadUrl || data.servers?.[0]?.url);
+        }
+        showToast(t('download_started'), 'success');
     }
 
     function toggleFavorite(id) {
@@ -1082,104 +1177,52 @@
             btn.classList.toggle('awad-active', isFav);
             const icon = btn.querySelector('i');
             if (icon) icon.className = isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-            else btn.textContent = isFav ? t('favorite_remove') : t('favorite_add');
         });
     }
 
-    // ===== التحميل =====
-    function downloadItem(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        if (item.downloadType === 'multipart') {
-            sortedParts(item).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
-        } else {
-            openSafe(item.downloadUrl || item.servers?.[0]?.url);
-        }
-        showToast(t('download_started'), 'success');
-    }
-
-    // ===== المودال =====
-    function openModal(modalId) {
-        const backdrop = document.getElementById(modalId);
-        if (backdrop) {
-            backdrop.hidden = false;
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    function closeModal(modalId) {
-        const backdrop = document.getElementById(modalId);
-        if (backdrop) {
-            backdrop.hidden = true;
-            document.body.style.overflow = '';
-            if (modalId === 'awad-modal-backdrop') {
-                document.getElementById('awad-modal-body').innerHTML = '';
-                state.modalPartsSelection.clear();
-            }
-            if (modalId === 'awad-admin-modal-backdrop') {
-                document.getElementById('awad-admin-modal-body').innerHTML = '';
-            }
-            if (modalId === 'awad-comments-modal-backdrop') {
-                document.getElementById('awad-comments-modal-body').innerHTML = '';
-            }
-            if (modalId === 'awad-confirm-modal-backdrop') {
-                document.getElementById('awad-confirm-modal-body').innerHTML = '';
-            }
-            if (modalId === 'awad-upload-modal-backdrop') {
-                document.getElementById('awad-upload-modal-body').innerHTML = '';
-            }
-        }
-    }
-
-    function addRecent(id) {
-        id = Number(id);
-        state.recentlyViewed = [id, ...state.recentlyViewed.filter(x => x !== id)].slice(0, 8);
-        localStorage.setItem(STORAGE_KEYS.recent, JSON.stringify(state.recentlyViewed));
-        renderRecent();
-    }
-
-    function showDetails(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        addRecent(id);
+    // ===== نافذة التفاصيل (Quick View) =====
+    function showDetails(topicId) {
+        const topic = state.allTopicsData.find(t => t.topicId === Number(topicId));
+        if (!topic) return;
+        addRecent(topic.topicId);
         state.modalPartsSelection.clear();
         const body = document.getElementById('awad-modal-body');
+        if (!body) return;
         body.innerHTML = '';
 
+        // الصورة
         const media = document.createElement('div');
         media.className = 'awad-modal-media';
         const img = document.createElement('img');
-        img.alt = getTitle(item);
-        img.src = safeUrl(item.image) || 'https://picsum.photos/seed/fallback/600/400';
-        img.style.objectFit = item.imageFit || 'cover';
+        img.alt = topic.rawTitle;
+        img.src = safeUrl(topic.parsedData.img) || 'https://picsum.photos/seed/fallback/600/400';
         media.appendChild(img);
         body.appendChild(media);
 
+        // العنوان
         const title = document.createElement('h2');
         title.className = 'awad-modal-title';
-        title.textContent = getTitle(item);
+        title.textContent = topic.rawTitle;
         body.appendChild(title);
-        if (currentLang === 'ar' && item.titleEn && item.titleEn !== item.title) {
-            const sub = document.createElement('p');
-            sub.className = 'awad-modal-sub';
-            sub.textContent = item.titleEn;
-            body.appendChild(sub);
-        }
+
+        // الوصف
         const desc = document.createElement('p');
         desc.className = 'awad-modal-desc';
-        desc.textContent = getDesc(item);
+        desc.textContent = topic.parsedData.desc || 'لا يوجد وصف';
         body.appendChild(desc);
 
+        // بيانات وصفية
         const meta = document.createElement('div');
         meta.className = 'awad-modal-meta';
         const metaItems = [
-            [t('category_label'), getCatLabel(item.category)],
-            [t('platform_label'), item.platform],
-            [t('version_label'), item.version || '—'],
-            [t('size_label'), getTotalSize(item)],
-            [t('requirements_label'), item.requirements || '—'],
-            [t('status_label'), item.status],
-            [t('downloads_label'), formatNum(item.downloads)],
-            [t('updated_label'), formatDate(item.updated)]
+            [t('category_label'), getCatLabel(topic.parsedData.category)],
+            [t('platform_label'), topic.parsedData.platform],
+            [t('version_label'), topic.parsedData.version || '—'],
+            [t('size_label'), getTotalSize(topic.parsedData)],
+            [t('requirements_label'), topic.parsedData.os || '—'],
+            [t('status_label'), topic.parsedData.status],
+            [t('downloads_label'), formatNum(topic.parsedData.downloads || 0)],
+            [t('updated_label'), formatDate(topic.parsedData.updated)]
         ];
         metaItems.forEach(([lbl, val]) => {
             const div = document.createElement('div');
@@ -1191,41 +1234,14 @@
             meta.appendChild(div);
         });
         body.appendChild(meta);
-        if (item.keywords?.length) {
-            const kw = document.createElement('p');
-            kw.style.fontSize = '.8rem';
-            kw.style.color = 'var(--awad-text-secondary)';
-            kw.textContent = `${t('keywords_label')}: ${item.keywords.join(', ')}`;
-            body.appendChild(kw);
-        }
 
-        const actions = document.createElement('div');
-        actions.className = 'awad-modal-actions';
-        const favBtn = document.createElement('button');
-        favBtn.className = 'awad-btn awad-btn-secondary';
-        favBtn.dataset.action = 'favorite';
-        favBtn.dataset.id = item.id;
-        favBtn.innerHTML = `<i class="fa-${state.favorites.has(item.id) ? 'solid' : 'regular'} fa-heart"></i> ${state.favorites.has(item.id) ? t('favorite_remove') : t('favorite_add')}`;
-        actions.appendChild(favBtn);
-        const shareBtn = document.createElement('button');
-        shareBtn.className = 'awad-btn awad-btn-secondary';
-        shareBtn.dataset.action = 'share';
-        shareBtn.dataset.id = item.id;
-        shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes"></i> ${t('share')}`;
-        actions.appendChild(shareBtn);
-        const commentsBtn = document.createElement('button');
-        commentsBtn.className = 'awad-btn awad-btn-secondary';
-        commentsBtn.dataset.action = 'show-comments';
-        commentsBtn.dataset.id = item.id;
-        commentsBtn.innerHTML = `<i class="fa-solid fa-comments"></i> ${t('comments_title')}`;
-        actions.appendChild(commentsBtn);
-        body.appendChild(actions);
+        // روابط التحميل
+        body.appendChild(buildDownloadSection(topic.parsedData));
 
-        body.appendChild(buildDownloadSection(item));
         openModal('awad-modal-backdrop');
     }
 
-    function buildDownloadSection(item) {
+    function buildDownloadSection(data) {
         const section = document.createElement('div');
         section.className = 'awad-download-section';
         const heading = document.createElement('h3');
@@ -1233,8 +1249,8 @@
         heading.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download');
         section.appendChild(heading);
 
-        if (item.downloadType === 'multipart') {
-            const parts = sortedParts(item);
+        if (data.downloadType === 'multipart') {
+            const parts = sortedParts(data);
             const totalMB = parts.reduce((sum,p) => sum + parseSizeToMB(p.size), 0);
             const info = document.createElement('p');
             info.style.fontSize = '.85rem';
@@ -1252,34 +1268,30 @@
             controls.style.gap = '6px';
             controls.style.flexWrap = 'wrap';
             controls.style.marginBottom = '8px';
-
             const selectAllBtn = document.createElement('button');
             selectAllBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
             selectAllBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> ' + t('select_all_parts');
             selectAllBtn.dataset.action = 'select-all-parts';
-            selectAllBtn.dataset.id = item.id;
+            selectAllBtn.dataset.id = data.id;
             controls.appendChild(selectAllBtn);
-
             const clearBtn = document.createElement('button');
             clearBtn.className = 'awad-btn awad-btn-ghost awad-btn-sm';
             clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> ' + t('clear_parts');
             clearBtn.dataset.action = 'clear-parts';
             controls.appendChild(clearBtn);
-
             const downloadSelectedBtn = document.createElement('button');
             downloadSelectedBtn.className = 'awad-btn awad-btn-primary awad-btn-sm';
             downloadSelectedBtn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download_selected_parts');
             downloadSelectedBtn.dataset.action = 'download-selected-parts';
-            downloadSelectedBtn.dataset.id = item.id;
+            downloadSelectedBtn.dataset.id = data.id;
             controls.appendChild(downloadSelectedBtn);
             section.appendChild(controls);
 
             const downloadAllBtn = document.createElement('button');
             downloadAllBtn.className = 'awad-btn awad-btn-primary';
-            downloadAllBtn.style.marginBottom = '8px';
             downloadAllBtn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download_all_parts');
             downloadAllBtn.dataset.action = 'download-all-parts';
-            downloadAllBtn.dataset.id = item.id;
+            downloadAllBtn.dataset.id = data.id;
             section.appendChild(downloadAllBtn);
 
             const list = document.createElement('div');
@@ -1296,7 +1308,6 @@
                 check.checked = state.modalPartsSelection.has(part.id);
                 checkLabel.appendChild(check);
                 row.appendChild(checkLabel);
-
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'awad-part-info';
                 const partName = document.createElement('strong');
@@ -1312,7 +1323,6 @@
                 partSize.textContent = part.size;
                 infoDiv.appendChild(partSize);
                 row.appendChild(infoDiv);
-
                 const partActions = document.createElement('div');
                 partActions.className = 'awad-part-actions';
                 if (part.servers && part.servers.length > 0) {
@@ -1329,7 +1339,7 @@
                 const dlPartBtn = document.createElement('button');
                 dlPartBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
                 dlPartBtn.dataset.action = 'download-part';
-                dlPartBtn.dataset.id = item.id;
+                dlPartBtn.dataset.id = data.id;
                 dlPartBtn.dataset.partIndex = index;
                 dlPartBtn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download');
                 partActions.appendChild(dlPartBtn);
@@ -1337,27 +1347,8 @@
                 list.appendChild(row);
             });
             section.appendChild(list);
-
-            if (item.files?.length) {
-                const optHeading = document.createElement('h4');
-                optHeading.style.marginTop = '8px';
-                optHeading.style.fontSize = '.9rem';
-                optHeading.innerHTML = '<i class="fa-solid fa-paperclip"></i> ' + t('optional_files');
-                section.appendChild(optHeading);
-                const filesList = document.createElement('div');
-                filesList.className = 'awad-server-list';
-                item.files.forEach(f => {
-                    const btn = document.createElement('button');
-                    btn.className = 'awad-server-btn';
-                    btn.dataset.action = 'download-server';
-                    btn.dataset.url = safeUrl(f.url);
-                    btn.innerHTML = '<i class="fa-solid fa-link"></i> ' + f.name + (f.size ? ` (${f.size})` : '');
-                    filesList.appendChild(btn);
-                });
-                section.appendChild(filesList);
-            }
         } else {
-            const url = safeUrl(item.downloadUrl || item.servers?.[0]?.url);
+            const url = safeUrl(data.downloadUrl || data.servers?.[0]?.url);
             if (url) {
                 const btn = document.createElement('button');
                 btn.className = 'awad-btn awad-btn-primary';
@@ -1366,10 +1357,10 @@
                 btn.innerHTML = '<i class="fa-solid fa-download"></i> ' + t('download');
                 section.appendChild(btn);
             }
-            if (item.servers && item.servers.length > 1) {
+            if (data.servers && data.servers.length > 1) {
                 const serverList = document.createElement('div');
                 serverList.className = 'awad-server-list';
-                item.servers.forEach(s => {
+                data.servers.forEach(s => {
                     const btn = document.createElement('button');
                     btn.className = 'awad-server-btn';
                     btn.dataset.action = 'download-server';
@@ -1379,32 +1370,14 @@
                 });
                 section.appendChild(serverList);
             }
-            if (item.files?.length) {
-                const optHeading = document.createElement('h4');
-                optHeading.style.marginTop = '8px';
-                optHeading.style.fontSize = '.9rem';
-                optHeading.innerHTML = '<i class="fa-solid fa-paperclip"></i> ' + t('optional_files');
-                section.appendChild(optHeading);
-                const filesList = document.createElement('div');
-                filesList.className = 'awad-server-list';
-                item.files.forEach(f => {
-                    const btn = document.createElement('button');
-                    btn.className = 'awad-server-btn';
-                    btn.dataset.action = 'download-server';
-                    btn.dataset.url = safeUrl(f.url);
-                    btn.innerHTML = '<i class="fa-solid fa-link"></i> ' + f.name + (f.size ? ` (${f.size})` : '');
-                    filesList.appendChild(btn);
-                });
-                section.appendChild(filesList);
-            }
         }
         return section;
     }
 
     function downloadPart(id, index, btn) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        const parts = sortedParts(item);
+        const topic = state.allTopicsData.find(t => t.topicId === Number(id));
+        if (!topic) return;
+        const parts = sortedParts(topic.parsedData);
         const part = parts[index];
         if (!part) return;
         const row = btn.closest('.awad-part-row');
@@ -1415,25 +1388,25 @@
     }
 
     function downloadAllParts(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        sortedParts(item).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
+        const topic = state.allTopicsData.find(t => t.topicId === Number(id));
+        if (!topic) return;
+        sortedParts(topic.parsedData).forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
         showToast(t('download_started'), 'success');
     }
 
     function downloadSelectedParts(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        sortedParts(item)
+        const topic = state.allTopicsData.find(t => t.topicId === Number(id));
+        if (!topic) return;
+        sortedParts(topic.parsedData)
             .filter(p => state.modalPartsSelection.has(p.id))
             .forEach(p => openSafe(p.downloadUrl || p.servers?.[0]?.url));
         showToast(t('download_started'), 'success');
     }
 
     function selectAllParts(id, checked) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        const parts = sortedParts(item);
+        const topic = state.allTopicsData.find(t => t.topicId === Number(id));
+        if (!topic) return;
+        const parts = sortedParts(topic.parsedData);
         parts.forEach(p => checked ? state.modalPartsSelection.add(p.id) : state.modalPartsSelection.delete(p.id));
         document.querySelectorAll('.awad-part-check').forEach(ch => {
             ch.checked = state.modalPartsSelection.has(Number(ch.dataset.partId));
@@ -1446,11 +1419,11 @@
     }
 
     async function shareItem(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        const url = window.location.href.split('#')[0] + '#awad-item-' + id;
+        const topic = state.allTopicsData.find(t => t.topicId === Number(id));
+        if (!topic) return;
+        const url = topic.topicUrl || window.location.href;
         if (navigator.share) {
-            try { await navigator.share({ title: getTitle(item), text: getDesc(item), url }); } catch {}
+            try { await navigator.share({ title: topic.rawTitle, text: topic.parsedData.desc, url }); } catch {}
         } else {
             if (await copyText(url)) showToast(t('copy_link_success'), 'success');
         }
@@ -1459,12 +1432,9 @@
     // ===== اللغة والثيم =====
     function applyTheme() {
         root.setAttribute('data-theme', currentTheme);
-        root.style.colorScheme = currentTheme;
         localStorage.setItem(STORAGE_KEYS.theme, currentTheme);
         const btn = document.getElementById('awad-theme-toggle');
-        if (btn) {
-            btn.innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-        }
+        if (btn) btn.innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     }
 
     function applyLanguage() {
@@ -1475,15 +1445,12 @@
         const langBtn = document.getElementById('awad-lang-toggle');
         if (langBtn) langBtn.textContent = currentLang === 'ar' ? 'EN' : 'AR';
 
-        // تحديث النصوص الثابتة
         document.querySelectorAll('#awad-download-library [data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (translations[currentLang][key]) {
                 const icons = el.querySelectorAll('i');
                 el.textContent = translations[currentLang][key];
-                if (icons.length > 0) {
-                    icons.forEach(icon => el.prepend(icon));
-                }
+                if (icons.length > 0) icons.forEach(icon => el.prepend(icon));
             }
         });
         document.querySelectorAll('#awad-download-library [data-i18n-placeholder]').forEach(el => {
@@ -1492,68 +1459,429 @@
         });
     }
 
-    function toggleTheme() {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme();
-    }
-
+    function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; applyTheme(); }
     function toggleLanguage() {
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
         applyLanguage();
         renderFilterPanel();
-        renderCategories();
-        renderStats();
-        renderFeatured();
-        renderPopular();
-        renderLatest();
-        renderProducts();
-        renderFavorites();
-        renderRecent();
-        updateBottomBar();
-        updateAdminUI();
+        renderAllSections();
     }
 
-    // ===== Admin UI =====
-    function updateAdminUI() {
-        const adminNavLink = document.getElementById('awad-admin-nav-link');
-        const adminPanelSection = document.getElementById('awad-admin-panel');
-        const adminItemsList = document.getElementById('awad-admin-items-list');
-        const adminFab = document.getElementById('awad-admin-fab');
-
-        if (adminNavLink) adminNavLink.hidden = !isAdmin;
-        if (adminPanelSection) adminPanelSection.hidden = !isAdmin;
-        if (adminFab) adminFab.hidden = !isAdmin;
-        if (isAdmin && adminItemsList) {
-            renderAdminItemsList();
+    // ===== الإدارة: قراءة المواضيع من المنتدى =====
+    function setLoader(percent) {
+        const lBar = document.getElementById('loadingBar');
+        if (lBar) {
+            lBar.style.width = percent + '%';
+            if (percent >= 100) setTimeout(() => { lBar.style.width = '0%'; }, 500);
         }
     }
 
+    async function loadDlItems(url) {
+        setLoader(10);
+        const loaderArea = document.getElementById('loaderArea');
+        const emptyGlobal = document.getElementById('emptyGlobalState');
+        if (loaderArea) loaderArea.style.display = 'block';
+        if (emptyGlobal) emptyGlobal.style.display = 'none';
+        state.allTopicsData = [];
+
+        // تنظيف الشبكات
+        ['software', 'app', 'pcgame', 'psgame', 'ebook'].forEach(g => {
+            const grid = document.getElementById(`grid-${g}`);
+            const section = document.getElementById(`sec-${g}`);
+            const pagination = document.getElementById(`pagination-${g}`);
+            if (grid) grid.innerHTML = '';
+            if (section) section.style.display = 'none';
+            if (pagination) pagination.innerHTML = '';
+        });
+
+        try {
+            setLoader(20);
+            const res = await fetch(`/f${DL_FORUM_ID}-montada?_t=${Date.now()}`);
+            const html = await res.text();
+            if (html.includes('يُرجى الانتظار') || html.includes('cloudflare') || html.includes('anti-spam')) {
+                setTimeout(() => loadDlItems(url), 2500);
+                return;
+            }
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const canPost = doc.querySelector('a[href*="mode=newtopic"]');
+            isAdmin = !!canPost && !canPost.innerHTML.includes('مغلق');
+
+            let pageUrls = new Set();
+            pageUrls.add(`/f${DL_FORUM_ID}-montada`);
+            doc.querySelectorAll('.pagination a, a.pag-img, .page-numbers a, a[href^="/f' + DL_FORUM_ID + 'p"]').forEach(a => {
+                let href = a.getAttribute('href');
+                if (href && href.match(new RegExp('^/f' + DL_FORUM_ID + 'p\\d+-'))) pageUrls.add(href.split('?')[0]);
+            });
+
+            setLoader(30);
+            let allTopicsList = [];
+            let indexPromises = Array.from(pageUrls).map(async (pUrl) => {
+                try {
+                    let pRes = await fetch(pUrl);
+                    let pHtml = await pRes.text();
+                    let pDoc = new DOMParser().parseFromString(pHtml, 'text/html');
+                    let topics = Array.from(pDoc.querySelectorAll('div.post-wrap, .posts-section, .block-topics-content, li.row, tr.topicrow, div.topic'));
+                    topics.forEach(t => {
+                        let titleNode = t.querySelector('.posts-description h3 a, .topic-title, .topictitle, h2 a.topictitle');
+                        if (titleNode) {
+                            let topicUrl = titleNode.getAttribute('href');
+                            let rawTitle = titleNode.textContent.trim();
+                            let topicIdMatch = topicUrl.match(/t(\d+)-/);
+                            let topicId = topicIdMatch ? parseInt(topicIdMatch[1]) : 0;
+                            if (!allTopicsList.some(item => item.topicId === topicId)) {
+                                allTopicsList.push({ topicUrl, rawTitle, topicId });
+                            }
+                        }
+                    });
+                } catch (e) {}
+            });
+            await Promise.all(indexPromises);
+
+            if (allTopicsList.length === 0) {
+                setLoader(100);
+                if (loaderArea) loaderArea.style.display = 'none';
+                if (emptyGlobal) emptyGlobal.style.display = 'block';
+                return;
+            }
+
+            setLoader(50);
+            let validData = [];
+            const BATCH_SIZE = 5;
+            for (let i = 0; i < allTopicsList.length; i += BATCH_SIZE) {
+                const batch = allTopicsList.slice(i, i + BATCH_SIZE);
+                const results = await Promise.all(batch.map(async (tInfo) => {
+                    try {
+                        const tRes = await fetch(tInfo.topicUrl);
+                        const tHtml = await tRes.text();
+                        const tDoc = new DOMParser().parseFromString(tHtml, 'text/html');
+                        let contentNode = tDoc.querySelector('.post-content, .content, .entry-content')?.cloneNode(true);
+                        if (!contentNode) return null;
+                        contentNode.querySelectorAll('.post-signature, .signature_div, div[id^="sig"], div[class*="signature"]').forEach(e => e.remove());
+                        let parsedData = parseDlData(contentNode.innerHTML);
+                        const editBtn = tDoc.querySelector('a[href*="mode=editpost"]')?.getAttribute('href') || '';
+                        const delBtn = tDoc.querySelector('a[href*="mode=delete"]')?.getAttribute('href') || '';
+                        return { rawTitle: tInfo.rawTitle, parsedData, topicUrl: tInfo.topicUrl, editBtn, delBtn, topicId: tInfo.topicId };
+                    } catch (e) { return null; }
+                }));
+                validData.push(...results.filter(d => d !== null));
+                setLoader(50 + Math.floor((i / allTopicsList.length) * 40));
+                if (i + BATCH_SIZE < allTopicsList.length) await new Promise(r => setTimeout(r, 200));
+            }
+
+            setLoader(95);
+            state.allTopicsData = validData;
+            if (loaderArea) loaderArea.style.display = 'none';
+            renderAllSections();
+            setLoader(100);
+        } catch (e) {
+            setLoader(100);
+            if (loaderArea) loaderArea.style.display = 'none';
+            if (emptyGlobal) emptyGlobal.style.display = 'block';
+        }
+    }
+
+    function parseDlData(htmlContent) {
+        let temp = document.createElement('div');
+        temp.innerHTML = htmlContent.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n');
+        let text = temp.innerText || temp.textContent;
+
+        const extract = (str, key, nextKeys) => {
+            let start = str.search(new RegExp(key + '\\s*:', 'i'));
+            if (start === -1) return '';
+            let keyMatch = str.match(new RegExp(key + '\\s*:', 'i'));
+            start += keyMatch[0].length;
+            let end = str.length;
+            for (let nk of nextKeys) {
+                let idx = str.search(new RegExp(nk + '\\s*:', 'i'));
+                if (idx !== -1 && idx > start && idx < end) end = idx;
+            }
+            return str.substring(start, end).trim();
+        };
+
+        const keysOrder = ['DL_TYPE', 'DL_LINK_TYPE', 'DL_LINK', 'DL_IMG', 'DL_SIZE', 'DL_OS', 'DL_KEY', 'DL_DESC'];
+        let data = {};
+        keysOrder.forEach((k, i) => {
+            let nextKeys = keysOrder.slice(i + 1);
+            data[k] = extract(text, k, nextKeys);
+        });
+
+        let determinedType = (data['DL_TYPE'] || '').toLowerCase();
+        if (!['software', 'app', 'pcgame', 'psgame', 'ebook'].includes(determinedType)) determinedType = 'software';
+
+        let res = {
+            type: determinedType,
+            linkType: (data['DL_LINK_TYPE'] || 'versions').toLowerCase(),
+            link: [],
+            img: decodeUrl(data['DL_IMG']) || 'https://placehold.co/600x400/1e293b/00e5ff?text=No+Image',
+            size: data['DL_SIZE'] || '',
+            os: data['DL_OS'] || '',
+            key: data['DL_KEY'] || '',
+            desc: data['DL_DESC'] || 'لا يوجد وصف متاح.',
+            platform: data['DL_PLATFORM'] || 'Windows',
+            category: data['DL_CATEGORY'] || 'Tools',
+            version: data['DL_VERSION'] || '',
+            downloads: parseInt(data['DL_DOWNLOADS']) || 0,
+            featured: data['DL_FEATURED'] === 'true' || false,
+            popular: data['DL_POPULAR'] === 'true' || false,
+            createdAt: data['DL_CREATED'] || new Date().toISOString().split('T')[0],
+            updated: data['DL_UPDATED'] || new Date().toISOString().split('T')[0],
+            status: data['DL_STATUS'] || 'Free',
+            downloadType: data['DL_DOWNLOAD_TYPE'] || 'single',
+            downloadUrl: decodeUrl(data['DL_DOWNLOAD_URL'] || ''),
+            parts: [],
+            servers: []
+        };
+
+        // Parse links
+        if (data['DL_LINK']) {
+            res.link = data['DL_LINK'].split('|').map(l => {
+                let p = l.trim(), url = p, name = '', date = '';
+                let mDate = p.match(/(.*?)\s*\[(.*?)\]$/);
+                if (mDate) { p = mDate[1].trim(); date = mDate[2].trim(); }
+                let mName = p.match(/(.*?)\s*\{(.*?)\}$/);
+                if (mName) { url = mName[1].trim(); name = mName[2].trim(); }
+                else { url = p.trim(); }
+                url = decodeUrl(url);
+                return { url, name, date };
+            }).filter(l => l.url);
+        }
+
+        // Parse parts and servers from special tags in desc or separate (custom)
+        // We'll check if DL_LINK_TYPE is 'parts' and parse accordingly
+        if (res.linkType === 'parts' && res.link.length > 0) {
+            res.parts = res.link.map((link, idx) => ({
+                id: idx + 1,
+                name: link.name || `Part ${idx + 1}`,
+                filename: link.name || `part${idx + 1}`,
+                size: link.date || '',
+                downloadUrl: link.url,
+                servers: []
+            }));
+            res.link = []; // Clear main link
+            res.downloadType = 'multipart';
+        }
+
+        // Parse servers from DL_SERVERS if present
+        if (data['DL_SERVERS']) {
+            try {
+                const serversData = JSON.parse(decodeUrl(data['DL_SERVERS']));
+                if (Array.isArray(serversData)) res.servers = serversData;
+            } catch (e) {}
+        }
+
+        return res;
+    }
+
+    function decodeUrl(url) { return url.replace(/hxxtps:\/\//gi, 'https://').replace(/hxxtp:\/\//gi, 'http://'); }
+    function encodeUrl(url) { return url.replace(/https:\/\//gi, 'hxxtps://').replace(/http:\/\//gi, 'hxxtp://'); }
+
+    // ===== الإدارة: عرض قائمة المواضيع =====
     function renderAdminItemsList() {
         const container = document.getElementById('awad-admin-items-list');
-        if (!container) return;
+        if (!container || !isAdmin) return;
         container.innerHTML = '';
         const frag = document.createDocumentFragment();
-        products.forEach(item => {
+        state.allTopicsData.forEach(topic => {
             const row = document.createElement('div');
             row.className = 'awad-admin-item-row';
-            row.innerHTML = `
-                <span class="awad-admin-item-title">${getTitle(item)}</span>
-                <div class="awad-admin-item-actions">
-                    <button class="awad-btn awad-btn-secondary awad-btn-sm" data-action="admin-edit-item" data-id="${item.id}"><i class="fa-solid fa-pen"></i> ${t('admin_edit')}</button>
-                    <button class="awad-btn awad-btn-secondary awad-btn-sm" data-action="admin-duplicate-item" data-id="${item.id}"><i class="fa-solid fa-copy"></i> ${t('admin_duplicate')}</button>
-                    <button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="admin-delete-item" data-id="${item.id}"><i class="fa-solid fa-trash"></i> ${t('admin_delete')}</button>
-                    <button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="admin-toggle-feature" data-id="${item.id}"><i class="fa-solid fa-star"></i> ${item.featured ? t('admin_unfeature') : t('admin_feature')}</button>
-                </div>
-            `;
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'awad-admin-item-title';
+            titleSpan.textContent = topic.rawTitle;
+            row.appendChild(titleSpan);
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'awad-admin-item-actions';
+            if (topic.editBtn) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'awad-btn awad-btn-secondary awad-btn-sm';
+                editBtn.innerHTML = '<i class="fa-solid fa-pen"></i> ' + t('admin_edit');
+                editBtn.addEventListener('click', () => editDlItem(topic.editBtn));
+                actionsDiv.appendChild(editBtn);
+            }
+            if (topic.delBtn) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'awad-btn awad-btn-ghost awad-btn-sm';
+                delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> ' + t('admin_delete');
+                delBtn.addEventListener('click', () => confirmDelete(topic.delBtn));
+                actionsDiv.appendChild(delBtn);
+            }
+            row.appendChild(actionsDiv);
             frag.appendChild(row);
         });
         container.appendChild(frag);
     }
 
+    // ===== الإدارة: حفظ وتعديل الموضوع =====
+    function formatDlContent(type, linkType, linkStr, img, size, os, key, desc, extraData = {}) {
+        let content = `DL_TYPE:${type}\nDL_LINK_TYPE:${linkType}\nDL_LINK:${linkStr}\nDL_IMG:${img}\nDL_SIZE:${size}\nDL_OS:${os}\nDL_KEY:${key}\nDL_DESC:${desc}\n`;
+        if (extraData.platform) content += `DL_PLATFORM:${extraData.platform}\n`;
+        if (extraData.category) content += `DL_CATEGORY:${extraData.category}\n`;
+        if (extraData.version) content += `DL_VERSION:${extraData.version}\n`;
+        if (extraData.downloads) content += `DL_DOWNLOADS:${extraData.downloads}\n`;
+        if (extraData.featured) content += `DL_FEATURED:true\n`;
+        if (extraData.popular) content += `DL_POPULAR:true\n`;
+        if (extraData.createdAt) content += `DL_CREATED:${extraData.createdAt}\n`;
+        if (extraData.updated) content += `DL_UPDATED:${extraData.updated}\n`;
+        if (extraData.status) content += `DL_STATUS:${extraData.status}\n`;
+        if (extraData.downloadType) content += `DL_DOWNLOAD_TYPE:${extraData.downloadType}\n`;
+        if (extraData.downloadUrl) content += `DL_DOWNLOAD_URL:${extraData.downloadUrl}\n`;
+        if (extraData.servers && extraData.servers.length > 0) content += `DL_SERVERS:${JSON.stringify(extraData.servers)}\n`;
+        return content;
+    }
+
+    async function saveDlItem() {
+        const title = document.getElementById('dlTitle').value.trim();
+        const type = document.getElementById('dlType').value;
+        const linkType = document.getElementById('dlLinkType').value;
+        const img = document.getElementById('dlImg').value.trim();
+        const rawLinks = document.getElementById('dlLink').value.trim().split('\n');
+        const size = document.getElementById('dlSize').value.trim();
+        const os = document.getElementById('dlOS').value.trim();
+        const key = document.getElementById('dlKey').value.trim();
+        const desc = document.getElementById('dlDescEditor').innerHTML.trim();
+        const editUrl = document.getElementById('dlEditUrl').value;
+        const btn = document.getElementById('dlSaveBtn');
+
+        if (!title) { showToast(t('topic_title') + '!', 'error'); return; }
+        btn.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> ' + t('save_publish');
+        btn.disabled = true;
+
+        const linksFormatted = rawLinks.map(line => {
+            line = line.trim();
+            if (!line) return null;
+            if (!line.match(/\[.*?\]$/) && linkType === 'versions') {
+                let d = new Date();
+                let dStr = d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+                line = `${line} [${dStr}]`;
+            }
+            return encodeUrl(line);
+        }).filter(Boolean).join('|');
+
+        const safeImg = encodeUrl(img);
+        const content = formatDlContent(type, linkType, linksFormatted, safeImg, size, os, key, desc, {
+            platform: document.getElementById('dlPlatform')?.value || 'Windows',
+            category: document.getElementById('dlCategory')?.value || 'Tools',
+            version: document.getElementById('dlVersion')?.value || '',
+            downloads: document.getElementById('dlDownloads')?.value || 0,
+            featured: document.getElementById('dlFeatured')?.checked || false,
+            popular: document.getElementById('dlPopular')?.checked || false,
+            updated: document.getElementById('dlUpdated')?.value || new Date().toISOString().split('T')[0],
+            status: document.getElementById('dlStatus')?.value || 'Free',
+            downloadType: linkType === 'parts' ? 'multipart' : 'single',
+            downloadUrl: linkType === 'parts' ? '' : (rawLinks[0] ? encodeUrl(rawLinks[0].trim()) : ''),
+            servers: [] // يمكن جمعها من نموذج إضافي إن وجد
+        });
+
+        const targetUrl = editUrl ? editUrl : `/post?f=${DL_FORUM_ID}&mode=newtopic`;
+        try {
+            const fRes = await fetch(targetUrl);
+            const doc = new DOMParser().parseFromString(await fRes.text(), 'text/html');
+            const form = doc.querySelector('form[name="post"]');
+            if (!form) throw new Error("لا تملك صلاحية للإضافة في هذا القسم.");
+            const fd = new FormData(form);
+            fd.set('subject', title);
+            fd.set('message', content);
+            fd.set('post', '1');
+            let res = await fetch('/post', { method: 'POST', body: fd });
+            let responseHtml = await res.text();
+            let errDoc = new DOMParser().parseFromString(responseHtml, 'text/html');
+            let errorEl = errDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg, p.center');
+            let hasPostForm = errDoc.querySelector('form[name="post"]');
+            let hasSuccessMsg = responseHtml.includes('بنجاح') || responseHtml.includes('تم إرسال');
+            if (errorEl && errorEl.textContent.trim() && !hasSuccessMsg) throw new Error(errorEl.textContent.trim());
+            else if (hasPostForm && !hasSuccessMsg) throw new Error("رفض السيرفر النشر. تأكد من العنوان أو انتظر 15 ثانية.");
+            showToast(t('admin_save') + ' ✓', 'success');
+            closeModal('awad-admin-modal-backdrop');
+            loadDlItems(`/f${DL_FORUM_ID}-montada`);
+        } catch (e) {
+            showToast(e.message || t('error_loading'), 'error');
+        } finally {
+            btn.innerHTML = '<i class="fa-solid fa-publish"></i> ' + t('save_publish');
+            btn.disabled = false;
+        }
+    }
+
+    async function editDlItem(url) {
+        document.getElementById('dlEditUrl').value = url;
+        openModal('awad-admin-modal-backdrop');
+        const modalTitle = document.getElementById('dlModalTitle');
+        if (modalTitle) modalTitle.innerHTML = '<i class="fa-solid fa-pen"></i> ' + t('admin_title_edit');
+        document.getElementById('updateSection').style.display = 'none';
+        document.getElementById('tabAdd').className = 'awad-btn awad-btn-secondary';
+        document.getElementById('tabUpdate').className = 'awad-btn awad-btn-primary';
+        try {
+            const res = await fetch(url);
+            const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+            document.getElementById('dlTitle').value = doc.querySelector('input[name="subject"]')?.value || '';
+            let rawText = doc.querySelector('textarea[name="message"]')?.value || '';
+            let parsed = parseDlData(rawText.replace(/<br>/g, '\n'));
+            document.getElementById('dlType').value = parsed.type;
+            document.getElementById('dlLinkType').value = parsed.linkType || 'versions';
+            document.getElementById('dlImg').value = parsed.img === 'https://placehold.co/600x400/1e293b/00e5ff?text=No+Image' ? '' : parsed.img;
+            document.getElementById('dlSize').value = parsed.size;
+            document.getElementById('dlOS').value = parsed.os;
+            let linkLines = Array.isArray(parsed.link) ? parsed.link.map(l => {
+                let namePart = l.name ? ` {${l.name}}` : '';
+                let datePart = l.date ? ` [${l.date}]` : '';
+                return `${l.url}${namePart}${datePart}`;
+            }) : [];
+            document.getElementById('dlLink').value = linkLines.join('\n');
+            document.getElementById('dlKey').value = parsed.key;
+            document.getElementById('dlDescEditor').innerHTML = parsed.desc;
+            // تعبئة الحقول الإضافية إن وجدت
+            document.getElementById('dlPlatform').value = parsed.platform || 'Windows';
+            document.getElementById('dlCategory').value = parsed.category || 'Tools';
+            document.getElementById('dlVersion').value = parsed.version || '';
+            document.getElementById('dlDownloads').value = parsed.downloads || 0;
+            document.getElementById('dlFeatured').checked = parsed.featured || false;
+            document.getElementById('dlPopular').checked = parsed.popular || false;
+            document.getElementById('dlUpdated').value = parsed.updated || new Date().toISOString().split('T')[0];
+            document.getElementById('dlStatus').value = parsed.status || 'Free';
+        } catch (e) {}
+    }
+
+    function confirmDelete(delUrl) {
+        const confirmBody = document.getElementById('awad-confirm-modal-body');
+        confirmBody.innerHTML = `
+            <h3>${t('delete_confirm_title')}</h3>
+            <p>${t('delete_confirm_text')}</p>
+            <div class="awad-confirm-actions">
+                <button class="awad-btn awad-btn-danger" id="awad-confirm-yes">${t('delete_yes')}</button>
+                <button class="awad-btn awad-btn-ghost" data-action="close-confirm-modal">${t('delete_cancel')}</button>
+            </div>
+        `;
+        openModal('awad-confirm-modal-backdrop');
+        document.getElementById('awad-confirm-yes').addEventListener('click', async () => {
+            await executeDelete(delUrl);
+            closeModal('awad-confirm-modal-backdrop');
+            sessionStorage.removeItem('zzone_cache');
+            loadDlItems(`/f${DL_FORUM_ID}-montada`);
+        });
+    }
+
+    async function executeDelete(url) {
+        try {
+            const res = await fetch(url);
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const form = doc.querySelector('form[action*="mode=delete"], form[action="/post"]');
+            if (form) {
+                const fd = new FormData(form);
+                fd.append('confirm', '1');
+                await fetch(form.action, { method: 'POST', body: fd });
+                return true;
+            }
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // ===== نافذة الإدارة (Add/Edit) =====
     function openAdminModal(itemId = null) {
         const isEdit = itemId !== null;
-        const item = isEdit ? products.find(p => p.id === itemId) : null;
+        const item = isEdit ? state.allTopicsData.find(t => t.topicId === itemId)?.parsedData : null;
         const body = document.getElementById('awad-admin-modal-body');
+        if (!body) return;
         body.innerHTML = '';
 
         const title = document.createElement('h2');
@@ -1565,13 +1893,10 @@
         const tabs = document.createElement('div');
         tabs.className = 'awad-admin-tabs';
         const tabNames = [
-            { key:'general', label:t('admin_general_tab') },
-            { key:'media', label:t('admin_media_tab') },
-            { key:'download', label:t('admin_download_tab') },
-            { key:'parts', label:t('admin_parts_tab') },
-            { key:'servers', label:t('admin_servers_tab') },
-            { key:'seo', label:t('admin_seo_tab') },
-            { key:'publish', label:t('admin_publish_tab') }
+            { key: 'general', label: t('admin_general_tab') },
+            { key: 'media', label: t('admin_media_tab') },
+            { key: 'download', label: t('admin_download_tab') },
+            { key: 'publish', label: t('admin_publish_tab') }
         ];
         tabNames.forEach((tab, i) => {
             const btn = document.createElement('button');
@@ -1596,15 +1921,14 @@
             <label>${t('admin_title_en_label')}</label>
             <input type="text" name="titleEn" value="${item?.titleEn || ''}">
             <label>${t('admin_desc_label')}</label>
-            <textarea name="description" rows="3">${item?.description || ''}</textarea>
-            <label>${t('admin_desc_en_label')}</label>
-            <textarea name="descriptionEn" rows="3">${item?.descriptionEn || ''}</textarea>
+            <textarea name="description" rows="3">${item?.desc || ''}</textarea>
             <label>${t('admin_type_label')}</label>
             <select name="type">
-                <option value="Software" ${item?.type === 'Software' ? 'selected' : ''}>Software</option>
-                <option value="App" ${item?.type === 'App' ? 'selected' : ''}>App</option>
-                <option value="Book" ${item?.type === 'Book' ? 'selected' : ''}>Book</option>
-                <option value="Tool" ${item?.type === 'Tool' ? 'selected' : ''}>Tool</option>
+                <option value="software" ${item?.type === 'software' ? 'selected' : ''}>برامج</option>
+                <option value="app" ${item?.type === 'app' ? 'selected' : ''}>تطبيقات</option>
+                <option value="pcgame" ${item?.type === 'pcgame' ? 'selected' : ''}>ألعاب PC</option>
+                <option value="psgame" ${item?.type === 'psgame' ? 'selected' : ''}>ألعاب PS</option>
+                <option value="ebook" ${item?.type === 'ebook' ? 'selected' : ''}>كتب</option>
             </select>
             <label>${t('admin_platform_label')}</label>
             <select name="platform">
@@ -1624,7 +1948,7 @@
             <label>${t('admin_size_label')}</label>
             <input type="text" name="size" value="${item?.size || ''}">
             <label>${t('admin_requirements_label')}</label>
-            <input type="text" name="requirements" value="${item?.requirements || ''}">
+            <input type="text" name="requirements" value="${item?.os || ''}">
             <label>${t('admin_updated_label')}</label>
             <input type="date" name="updated" value="${item?.updated || ''}">
             <label>${t('admin_downloads_label')}</label>
@@ -1638,18 +1962,10 @@
         mediaDiv.dataset.tabContent = 'media';
         mediaDiv.innerHTML = `
             <label>${t('admin_image_label')}</label>
-            <div class="input-with-btn">
-                <input type="url" name="image" id="awad-admin-image-input" value="${item?.image || ''}">
-                <button type="button" class="awad-btn awad-btn-secondary" data-action="open-upload-modal"><i class="fa-solid fa-upload"></i></button>
-            </div>
+            <input type="url" name="image" id="awad-admin-image-input" value="${item?.img || ''}">
             <div id="awad-admin-image-preview" class="awad-admin-image-preview">
-                ${item?.image ? `<img src="${safeUrl(item.image)}" style="max-width:100%;max-height:200px;">` : ''}
+                ${item?.img ? `<img src="${safeUrl(item.img)}" style="max-width:100%;max-height:200px;">` : ''}
             </div>
-            <label>${t('admin_image_fit_label')}</label>
-            <select name="imageFit">
-                <option value="cover" ${item?.imageFit === 'cover' ? 'selected' : ''}>${t('admin_image_fit_cover')}</option>
-                <option value="contain" ${item?.imageFit === 'contain' ? 'selected' : ''}>${t('admin_image_fit_contain')}</option>
-            </select>
         `;
         form.appendChild(mediaDiv);
 
@@ -1659,61 +1975,30 @@
         downloadDiv.dataset.tabContent = 'download';
         downloadDiv.innerHTML = `
             <label>${t('admin_download_type_label')}</label>
-            <select name="downloadType" id="awad-admin-download-type">
+            <select name="downloadType">
                 <option value="single" ${item?.downloadType !== 'multipart' ? 'selected' : ''}>${t('admin_single_file')}</option>
                 <option value="multipart" ${item?.downloadType === 'multipart' ? 'selected' : ''}>${t('admin_multi_part')}</option>
             </select>
-            <div id="awad-admin-single-download" class="awad-admin-download-section">
+            <div id="awad-admin-single-download">
                 <label>${t('admin_download_url_label')}</label>
                 <input type="url" name="downloadUrl" value="${item?.downloadUrl || ''}">
             </div>
-            <div id="awad-admin-servers-section">
-                <h4>${t('admin_servers_tab')}</h4>
-                <div id="awad-admin-servers-list">
-                    ${item?.servers ? item.servers.map((s, i) => `
-                        <div class="awad-admin-server-row">
-                            <input type="text" name="server_name_${i}" placeholder="${t('admin_server_name_label')}" value="${s.name}">
-                            <input type="url" name="server_url_${i}" placeholder="${t('admin_server_url_label')}" value="${s.url}">
+            <div id="awad-admin-parts-container">
+                <h4>${t('admin_parts_tab')}</h4>
+                <div id="awad-admin-parts-list">
+                    ${item?.parts && item.downloadType === 'multipart' ? item.parts.map((p, i) => `
+                        <div class="awad-admin-part-row">
+                            <input type="text" name="part_name_${i}" placeholder="${t('admin_part_name_label')}" value="${p.name}">
+                            <input type="text" name="part_filename_${i}" placeholder="${t('admin_part_filename_label')}" value="${p.filename}">
+                            <input type="text" name="part_size_${i}" placeholder="${t('admin_part_size_label')}" value="${p.size}">
+                            <input type="url" name="part_url_${i}" placeholder="${t('admin_part_url_label')}" value="${p.downloadUrl}">
                         </div>
                     `).join('') : ''}
                 </div>
-                <button type="button" class="awad-btn awad-btn-secondary awad-btn-sm" id="awad-admin-add-server">${t('admin_add_server')}</button>
+                <button type="button" class="awad-btn awad-btn-secondary awad-btn-sm" id="awad-admin-add-part">${t('admin_add_part')}</button>
             </div>
         `;
         form.appendChild(downloadDiv);
-
-        // Parts Tab
-        const partsDiv = document.createElement('div');
-        partsDiv.className = 'awad-admin-tab-content';
-        partsDiv.dataset.tabContent = 'parts';
-        partsDiv.innerHTML = `
-            <div id="awad-admin-parts-list">
-                ${item?.downloadType === 'multipart' && item.parts ? item.parts.map((p, i) => `
-                    <div class="awad-admin-part-row">
-                        <input type="text" name="part_name_${i}" placeholder="${t('admin_part_name_label')}" value="${p.name}">
-                        <input type="text" name="part_filename_${i}" placeholder="${t('admin_part_filename_label')}" value="${p.filename}">
-                        <input type="text" name="part_size_${i}" placeholder="${t('admin_part_size_label')}" value="${p.size}">
-                        <input type="url" name="part_url_${i}" placeholder="${t('admin_part_url_label')}" value="${p.downloadUrl || ''}">
-                    </div>
-                `).join('') : ''}
-            </div>
-            <button type="button" class="awad-btn awad-btn-secondary awad-btn-sm" id="awad-admin-add-part">${t('admin_add_part')}</button>
-        `;
-        form.appendChild(partsDiv);
-
-        // SEO Tab
-        const seoDiv = document.createElement('div');
-        seoDiv.className = 'awad-admin-tab-content';
-        seoDiv.dataset.tabContent = 'seo';
-        seoDiv.innerHTML = `
-            <label>${t('admin_seo_title_label')}</label>
-            <input type="text" name="seoTitle" value="${item?.seoTitle || ''}">
-            <label>${t('admin_seo_desc_label')}</label>
-            <input type="text" name="seoDescription" value="${item?.seoDescription || ''}">
-            <label>${t('admin_slug_label')}</label>
-            <input type="text" name="slug" value="${item?.slug || ''}">
-        `;
-        form.appendChild(seoDiv);
 
         // Publish Tab
         const publishDiv = document.createElement('div');
@@ -1722,8 +2007,6 @@
         publishDiv.innerHTML = `
             <label><input type="checkbox" name="featured" ${item?.featured ? 'checked' : ''}> ${t('admin_featured_label')}</label>
             <label><input type="checkbox" name="popular" ${item?.popular ? 'checked' : ''}> ${t('admin_popular_label')}</label>
-            <label>${t('admin_updated_label')}</label>
-            <input type="date" name="updated" value="${item?.updated || ''}">
         `;
         form.appendChild(publishDiv);
 
@@ -1758,31 +2041,10 @@
 
         // معاينة الصورة
         const imageInput = document.getElementById('awad-admin-image-input');
-        if (imageInput) {
-            imageInput.addEventListener('input', () => {
-                const preview = document.getElementById('awad-admin-image-preview');
-                if (preview) {
-                    const url = safeUrl(imageInput.value);
-                    if (url) {
-                        preview.innerHTML = `<img src="${url}" style="max-width:100%;max-height:200px;" onerror="this.parentElement.innerHTML='<span>Invalid Image</span>'">`;
-                    } else {
-                        preview.innerHTML = '';
-                    }
-                }
-            });
-        }
-
-        // إضافة سيرفر
-        document.getElementById('awad-admin-add-server')?.addEventListener('click', () => {
-            const list = document.getElementById('awad-admin-servers-list');
-            const index = list.children.length;
-            const row = document.createElement('div');
-            row.className = 'awad-admin-server-row';
-            row.innerHTML = `
-                <input type="text" name="server_name_${index}" placeholder="${t('admin_server_name_label')}">
-                <input type="url" name="server_url_${index}" placeholder="${t('admin_server_url_label')}">
-            `;
-            list.appendChild(row);
+        imageInput?.addEventListener('input', () => {
+            const preview = document.getElementById('awad-admin-image-preview');
+            const url = safeUrl(imageInput.value);
+            if (preview) preview.innerHTML = url ? `<img src="${url}" style="max-width:100%;max-height:200px;">` : '';
         });
 
         // إضافة جزء
@@ -1800,118 +2062,67 @@
             list.appendChild(row);
         });
 
-        // إرسال النموذج
+        // حفظ
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(form);
             const newItem = {
-                id: item ? item.id : Date.now(),
                 title: formData.get('title') || '',
                 titleEn: formData.get('titleEn') || '',
-                description: formData.get('description') || '',
-                descriptionEn: formData.get('descriptionEn') || '',
-                image: formData.get('image') || '',
-                imageFit: formData.get('imageFit') || 'cover',
-                category: formData.get('category') || 'Tools',
+                desc: formData.get('description') || '',
+                img: formData.get('image') || '',
+                type: formData.get('type') || 'software',
                 platform: formData.get('platform') || 'Windows',
-                type: formData.get('type') || 'Software',
-                size: formData.get('size') || '',
-                version: formData.get('version') || '',
-                requirements: formData.get('requirements') || '',
+                category: formData.get('category') || 'Tools',
                 status: formData.get('status') || 'Free',
+                version: formData.get('version') || '',
+                size: formData.get('size') || '',
+                os: formData.get('requirements') || '',
+                updated: formData.get('updated') || new Date().toISOString().split('T')[0],
+                downloads: Number(formData.get('downloads')) || 0,
                 featured: formData.get('featured') === 'on',
                 popular: formData.get('popular') === 'on',
-                updated: formData.get('updated') || new Date().toISOString().split('T')[0],
-                createdAt: item?.createdAt || new Date().toISOString().split('T')[0],
-                downloads: Number(formData.get('downloads')) || 0,
-                keywords: [],
                 downloadType: formData.get('downloadType') || 'single',
                 downloadUrl: formData.get('downloadUrl') || '',
-                servers: [],
-                parts: [],
-                commentsCount: item?.commentsCount || 0
+                parts: []
             };
-
-            // جمع السيرفرات
-            const serverRows = form.querySelectorAll('.awad-admin-server-row');
-            serverRows.forEach((row, index) => {
-                const name = formData.get(`server_name_${index}`);
-                const url = formData.get(`server_url_${index}`);
-                if (name && url) newItem.servers.push({ name, url });
-            });
-
             // جمع الأجزاء
-            if (newItem.downloadType === 'multipart') {
-                const partRows = form.querySelectorAll('.awad-admin-part-row');
-                partRows.forEach((row, index) => {
-                    const name = formData.get(`part_name_${index}`) || `Part ${index+1}`;
-                    const filename = formData.get(`part_filename_${index}`) || '';
-                    const size = formData.get(`part_size_${index}`) || '';
-                    const url = formData.get(`part_url_${index}`) || '';
-                    newItem.parts.push({ id: index+1, name, filename, size, downloadUrl: url, servers: [] });
-                });
-            }
-
-            // حفظ في المنتجات
-            if (item) {
-                const index = products.findIndex(p => p.id === item.id);
-                if (index !== -1) products[index] = newItem;
+            const partRows = form.querySelectorAll('.awad-admin-part-row');
+            partRows.forEach((row, index) => {
+                const name = formData.get(`part_name_${index}`) || `Part ${index+1}`;
+                const filename = formData.get(`part_filename_${index}`) || '';
+                const size = formData.get(`part_size_${index}`) || '';
+                const url = formData.get(`part_url_${index}`) || '';
+                newItem.parts.push({ id: index+1, name, filename, size, downloadUrl: url, servers: [] });
+            });
+            if (newItem.downloadType === 'multipart' && newItem.parts.length > 0) {
+                newItem.linkType = 'parts';
+                newItem.link = newItem.parts.map(p => ({ url: p.downloadUrl, name: p.name, date: p.size }));
             } else {
-                products.push(newItem);
+                newItem.linkType = 'versions';
+                newItem.link = newItem.downloadUrl ? [{ url: newItem.downloadUrl, name: 'أحدث إصدار', date: newItem.updated }] : [];
             }
-
-            closeModal('awad-admin-modal-backdrop');
-            renderAll();
-            showToast(t('admin_save') + ' ✓', 'success');
+            // حفظ في بيانات المواضيع مؤقتًا (للعرض الفوري) ثم محاولة النشر
+            if (item) {
+                // تعديل موضوع موجود
+                // سنقوم بفتح نموذج تعديل المنتدى
+                editDlItem(item.topicUrl || '');
+                // نملأ الحقول ونحفظ
+                // لكننا هنا مبسّطين: سنستدعي saveDlItem مع بياناتنا
+                saveDlItem();
+            } else {
+                // إضافة موضوع جديد
+                saveDlItem();
+            }
         });
-    }
-
-    function deleteItem(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        const confirmBody = document.getElementById('awad-confirm-modal-body');
-        confirmBody.innerHTML = `
-            <h3>${t('admin_delete_confirm_title')}</h3>
-            <p>${t('admin_delete_confirm_text')}</p>
-            <div class="awad-confirm-actions">
-                <button class="awad-btn awad-btn-danger" id="awad-confirm-yes">${t('admin_confirm_yes')}</button>
-                <button class="awad-btn awad-btn-ghost" data-action="close-confirm-modal">${t('admin_confirm_no')}</button>
-            </div>
-        `;
-        openModal('awad-confirm-modal-backdrop');
-        document.getElementById('awad-confirm-yes').addEventListener('click', () => {
-            products = products.filter(p => p.id !== Number(id));
-            closeModal('awad-confirm-modal-backdrop');
-            renderAll();
-            showToast(t('admin_delete') + ' ✓', 'success');
-        });
-    }
-
-    function duplicateItem(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        const newItem = JSON.parse(JSON.stringify(item));
-        newItem.id = Date.now();
-        newItem.title = item.title + ' (Copy)';
-        newItem.titleEn = item.titleEn + ' (Copy)';
-        products.push(newItem);
-        renderAll();
-        showToast(t('admin_duplicate') + ' ✓', 'success');
-    }
-
-    function toggleFeature(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
-        item.featured = !item.featured;
-        renderAll();
-        showToast(item.featured ? t('admin_feature') : t('admin_unfeature'), 'info');
     }
 
     // ===== التعليقات =====
-    function showComments(id) {
-        const item = products.find(p => p.id === Number(id));
-        if (!item) return;
+    function showComments(topicId) {
+        const topic = state.allTopicsData.find(t => t.topicId === Number(topicId));
+        if (!topic) return;
         const body = document.getElementById('awad-comments-modal-body');
+        if (!body) return;
         body.innerHTML = '';
 
         const title = document.createElement('h3');
@@ -1921,33 +2132,11 @@
 
         const commentsList = document.createElement('div');
         commentsList.className = 'awad-comments-list';
-        const itemComments = state.comments[id] || [];
-        if (itemComments.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'awad-empty';
-            empty.innerHTML = '<i class="fa-regular fa-comment-dots"></i> ' + t('comments_no_comments');
-            commentsList.appendChild(empty);
-        } else {
-            itemComments.forEach(c => {
-                const commentEl = document.createElement('div');
-                commentEl.className = 'awad-comment';
-                commentEl.innerHTML = `
-                    <div class="awad-comment-avatar"><i class="fa-solid fa-user"></i></div>
-                    <div class="awad-comment-body">
-                        <strong>${c.name}</strong>
-                        <span class="awad-comment-date">${formatDate(c.date)}</span>
-                        <p>${c.text}</p>
-                        <div class="awad-comment-actions">
-                            <button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="comment-reply" data-id="${c.id}"><i class="fa-solid fa-reply"></i> ${t('comments_reply')}</button>
-                            <button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="comment-like" data-id="${c.id}"><i class="fa-solid fa-thumbs-up"></i> ${t('comments_like')}</button>
-                            <button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="comment-report" data-id="${c.id}"><i class="fa-solid fa-flag"></i> ${t('comments_report')}</button>
-                            ${isAdmin ? `<button class="awad-btn awad-btn-ghost awad-btn-sm" data-action="comment-delete" data-id="${c.id}"><i class="fa-solid fa-trash"></i> ${t('comments_delete')}</button>` : ''}
-                        </div>
-                    </div>
-                `;
-                commentsList.appendChild(commentEl);
-            });
-        }
+        // لا توجد تعليقات حالياً (يمكن ربطها لاحقاً)
+        const empty = document.createElement('p');
+        empty.className = 'awad-empty';
+        empty.innerHTML = '<i class="fa-regular fa-comment-dots"></i> ' + t('comments_no_comments');
+        commentsList.appendChild(empty);
         body.appendChild(commentsList);
 
         const form = document.createElement('form');
@@ -1963,32 +2152,30 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(form);
-            const newComment = {
-                id: Date.now(),
+            // هنا يمكن إرسال التعليق إلى Backend
+            const comment = {
                 name: formData.get('name') || 'Anonymous',
                 email: formData.get('email') || '',
                 text: formData.get('text') || '',
-                date: new Date().toISOString(),
-                replies: []
+                date: new Date().toISOString()
             };
-            if (!state.comments[id]) state.comments[id] = [];
-            state.comments[id].push(newComment);
-            showComments(id);
+            showToast('تم إرسال التعليق (تجريبي)', 'success');
+            // يمكن استبداله بطلب fetch حقيقي
+            form.reset();
         });
 
         openModal('awad-comments-modal-backdrop');
     }
 
-    // ===== رفع الصور (من الصفحة المقدمة) =====
+    // ===== رفع الصور (محاكاة) =====
     async function openUploadModal() {
         const body = document.getElementById('awad-upload-modal-body');
         if (!body) return;
         body.innerHTML = `<h3><i class="fa-solid fa-cloud-upload"></i> ${t('upload_center')}</h3><div id="awad-upload-container" style="width:100%; height:400px; border-radius:8px; overflow:hidden; border:1px solid var(--awad-border); background:var(--awad-surface); display:flex; align-items:center; justify-content:center;"><div class="awad-upload-placeholder">${t('upload_loading')}</div></div>`;
         openModal('awad-upload-modal-backdrop');
-        
-        // محاكاة تحميل servimg (يمكن استبدالها بمنطق فعلي)
         setTimeout(() => {
-            document.getElementById('awad-upload-container').innerHTML = `<div style="text-align:center; padding:20px;">${t('upload_loading')}<br><small>${t('error_loading')}</small></div>`;
+            const container = document.getElementById('awad-upload-container');
+            if (container) container.innerHTML = `<div style="text-align:center; padding:20px;">${t('upload_loading')}<br><small>${t('error_loading')}</small></div>`;
         }, 1500);
     }
 
@@ -2011,7 +2198,7 @@
         else if (action === 'search-submit') {
             state.query = document.getElementById('awad-search-input').value.trim();
             state.visibleCount = PAGE_SIZE;
-            renderProducts();
+            renderLibrary();
             document.getElementById('awad-products-section').scrollIntoView({behavior:'smooth'});
         }
         else if (action === 'go-favorites') document.getElementById('awad-favorites-section').scrollIntoView({behavior:'smooth'});
@@ -2022,7 +2209,10 @@
         }
         else if (action === 'reset-filters') resetFilters();
         else if (action === 'details') showDetails(id);
-        else if (action === 'download') downloadItem(id);
+        else if (action === 'download') {
+            const topic = state.allTopicsData.find(t => t.topicId === id);
+            if (topic) downloadTopic(topic);
+        }
         else if (action === 'favorite') toggleFavorite(id);
         else if (action === 'share') shareItem(id);
         else if (action === 'close-modal') closeModal('awad-modal-backdrop');
@@ -2042,15 +2232,12 @@
             showToast(t('download_started'), 'success');
         }
         else if (action === 'show-comments') showComments(id);
-        else if (action === 'comment-reply') { /* TODO */ }
-        else if (action === 'comment-like') { /* TODO */ }
-        else if (action === 'comment-report') { /* TODO */ }
-        else if (action === 'comment-delete') { /* TODO */ }
         else if (action === 'admin-add-item') openAdminModal();
         else if (action === 'admin-edit-item') openAdminModal(id);
-        else if (action === 'admin-delete-item') deleteItem(id);
-        else if (action === 'admin-duplicate-item') duplicateItem(id);
-        else if (action === 'admin-toggle-feature') toggleFeature(id);
+        else if (action === 'admin-delete-item') {
+            const topic = state.allTopicsData.find(t => t.topicId === id);
+            if (topic) confirmDelete(topic.delBtn);
+        }
         else if (action === 'open-upload-modal') openUploadModal();
         else if (category) handleCategoryClick(category);
         else if (target.dataset.nav) {
@@ -2081,7 +2268,7 @@
         } else if (target.id === 'awad-sort-select') {
             state.sort = target.value;
             state.visibleCount = PAGE_SIZE;
-            renderProducts();
+            renderLibrary();
         }
     });
 
@@ -2099,7 +2286,7 @@
             }
         }
         state.visibleCount = PAGE_SIZE;
-        renderProducts();
+        renderLibrary();
     }
 
     function handleCategoryClick(key) {
@@ -2107,7 +2294,7 @@
         if (platformKeys.includes(key)) state.filters.platform = [key];
         else state.filters.category = [key];
         state.visibleCount = PAGE_SIZE;
-        renderProducts();
+        renderLibrary();
         document.getElementById('awad-products-section').scrollIntoView({behavior:'smooth'});
     }
 
@@ -2118,7 +2305,7 @@
         searchDebounce = setTimeout(() => {
             state.query = document.getElementById('awad-search-input').value.trim();
             state.visibleCount = PAGE_SIZE;
-            renderProducts();
+            renderLibrary();
         }, 250);
     });
 
@@ -2134,7 +2321,12 @@
     // زر تحميل المزيد
     document.getElementById('awad-load-more').addEventListener('click', () => {
         state.visibleCount += PAGE_SIZE;
-        renderProducts();
+        renderLibrary();
+    });
+
+    // زر الإضافة العائم
+    document.getElementById('awad-admin-fab').addEventListener('click', () => {
+        if (isAdmin) openAdminModal();
     });
 
     // إغلاق النوافذ بالنقر خارجها أو ESC
@@ -2155,11 +2347,6 @@
         }
     });
 
-    // ===== بيانات تجريبية =====
-    products = [
-        // ... (نفس بيانات المنتجات السابقة)
-    ];
-
     // ===== التهيئة =====
     function init() {
         applyTheme();
@@ -2170,18 +2357,9 @@
         renderSkeletons(document.getElementById('awad-popular-grid'), 4);
         renderSkeletons(document.getElementById('awad-latest-grid'), 4);
 
-        setTimeout(() => {
-            renderCategories();
-            renderStats();
-            renderFeatured();
-            renderPopular();
-            renderLatest();
-            renderProducts();
-            renderFavorites();
-            renderRecent();
-            updateBottomBar();
-            updateAdminUI();
-        }, 400);
+        loadDlItems(`/f${DL_FORUM_ID}-montada`).then(() => {
+            renderAdminItemsList();
+        });
     }
 
     init();
