@@ -1,7 +1,7 @@
 /* ============================================================
    عوض تك - مكتبة التحميل الرقمية
    جميع التنسيقات معزولة تحت #awad-download-library
-   حتى لا تؤثر على تنسيقات المنتدى
+   لمنع التعارض مع تنسيقات المنتدى
 ============================================================ */
 
 #awad-download-library {
@@ -152,6 +152,7 @@
     display: grid;
     place-items: center;
     color: #fff;
+    font-size: 1.2rem;
 }
 .awad-logo-text {
     display: flex;
@@ -179,6 +180,9 @@
     text-decoration: none;
     transition: all var(--awad-transition);
     font-size: .85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .awad-nav a:hover {
     background: var(--awad-surface-2);
@@ -273,6 +277,10 @@
     max-width: 500px;
     margin: 0 auto;
 }
+.awad-search-icon {
+    color: var(--awad-text-secondary);
+    flex-shrink: 0;
+}
 .awad-search-box input {
     flex: 1;
     border: none;
@@ -294,6 +302,9 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .awad-stats {
     display: flex;
@@ -329,6 +340,12 @@
     font-weight: 800;
     margin-bottom: 14px;
     color: var(--awad-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.awad-section-title i {
+    color: var(--awad-primary);
 }
 
 /* التصنيفات */
@@ -358,6 +375,7 @@
 }
 .awad-cat-icon {
     font-size: 1.6rem;
+    color: var(--awad-primary);
 }
 .awad-cat-name {
     font-weight: 600;
@@ -426,6 +444,9 @@
     font-size: .65rem;
     font-weight: 700;
     border: 1px solid var(--awad-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 .awad-badge-primary { background: var(--awad-primary); color: #fff; border-color: var(--awad-primary); }
 .awad-badge-warning { background: var(--awad-warning); color: #000; border-color: var(--awad-warning); }
@@ -467,7 +488,9 @@
     position: relative;
 }
 .awad-checkbox-wrapper input:checked + .awad-checkmark::after {
-    content: '✓';
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     color: #fff;
     position: absolute;
     inset: 0;
@@ -652,6 +675,11 @@
     border-radius: var(--awad-radius-md);
     color: var(--awad-text-secondary);
 }
+.awad-empty-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: var(--awad-primary);
+}
 .awad-empty h3 {
     color: var(--awad-text);
     margin-bottom: 4px;
@@ -714,6 +742,12 @@
     position: relative;
     box-shadow: var(--awad-shadow-lg);
     animation: awad-modalIn .25s ease;
+}
+.awad-modal-lg {
+    max-width: 900px;
+}
+.awad-modal-sm {
+    max-width: 420px;
 }
 @keyframes awad-modalIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -948,10 +982,16 @@
     transform: translateY(10px);
     transition: all .3s ease;
     pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 .awad-toast.awad-show {
     opacity: 1;
     transform: translateY(0);
+}
+.awad-toast i {
+    color: var(--awad-primary);
 }
 
 /* زر الصعود */
