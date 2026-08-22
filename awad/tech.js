@@ -13,7 +13,7 @@
     if (!root) return;
 
     // ===== إعدادات المنتدى =====
-    const DL_FORUM_ID = 20; // رقم القسم المخصص للمكتبة في المنتدى
+    const DL_FORUM_ID = 30; // رقم القسم المخصص للمكتبة في المنتدى
 
     // ===== إعدادات عامة =====
     const defaultLang = root.dataset.lang || 'ar';
@@ -161,7 +161,6 @@
             footer_terms: 'الشروط والأحكام',
             footer_social: 'تابعنا',
             footer_copyright: '© 2026 عوض تك. جميع الحقوق محفوظة.',
-            // Admin Modal
             admin_title_add: 'إضافة عنصر جديد',
             admin_title_edit: 'تعديل العنصر',
             admin_general_tab: 'معلومات أساسية',
@@ -263,7 +262,6 @@
             language_name: 'العربية',
             theme_dark: 'داكن',
             theme_light: 'فاتح',
-            // إضافات من الصفحة المقدمة
             upload_center: 'مركز الرفع',
             upload_image: 'رفع صورة',
             upload_loading: 'جارٍ تحميل واجهة الرفع...',
@@ -737,7 +735,6 @@
         actions.appendChild(dlBtn);
         body.appendChild(actions);
 
-        // أزرار الإدارة
         if (isAdmin && (editBtn || delBtn)) {
             const adminBox = document.createElement('div');
             adminBox.className = 'awad-admin-box';
@@ -1449,8 +1446,8 @@
 
     async function loadDlItems(url) {
         setLoader(10);
-        const loaderArea = document.getElementById('loaderArea');
-        const emptyGlobal = document.getElementById('emptyGlobalState');
+        const loaderArea = document.getElementById('awad-loader-area');
+        const emptyGlobal = document.getElementById('awad-global-empty-state');
         if (loaderArea) loaderArea.style.display = 'block';
         if (emptyGlobal) emptyGlobal.style.display = 'none';
         state.allTopicsData = [];
@@ -1691,7 +1688,7 @@
         container.appendChild(frag);
     }
 
-    // ===== الإدارة: نافذة إضافة/تعديل (نسخة مصححة) =====
+    // ===== الإدارة: نافذة إضافة/تعديل =====
     function openAdminModal(itemId = null) {
         const isEdit = itemId !== null;
         const item = isEdit ? state.allTopicsData.find(t => t.topicId === itemId)?.parsedData : null;
@@ -1900,7 +1897,6 @@
                 newItem.parts.push({ id: index+1, name, filename, size, downloadUrl: url, servers: [] });
             });
 
-            // بناء محتوى الموضوع المناسب للمنتدى
             let linkStr = '';
             if (newItem.downloadType === 'multipart' && newItem.parts.length > 0) {
                 linkStr = newItem.parts.map(p => `${encodeUrl(p.downloadUrl)} {${p.name}} [${p.size}]`).join('|');
@@ -1969,15 +1965,11 @@
             const subject = doc.querySelector('input[name="subject"]')?.value || '';
             const message = doc.querySelector('textarea[name="message"]')?.value || '';
             const parsed = parseDlData(message.replace(/<br>/g, '\n'));
-            // نستخدم openAdminModal مع بيانات parsed، لكن نحتاج topicId
-            // نبحث عن topicId من الرابط
             const idMatch = url.match(/t(\d+)-/);
             const topicId = idMatch ? parseInt(idMatch[1]) : Date.now();
-            // إنشاء كائن مؤقت لفتح النافذة مع البيانات
             const tempTopic = { topicId, parsedData: parsed, editBtn: url };
             state.currentEditingTopic = tempTopic;
             openAdminModal(topicId);
-            // تعبئة الحقول بعد فتح النافذة
             setTimeout(() => {
                 const form = document.getElementById('awad-admin-form');
                 if (form) {
