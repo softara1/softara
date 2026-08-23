@@ -13,7 +13,7 @@
     if (!root) return;
 
     // ===== إعدادات المنتدى =====
-    const DL_FORUM_ID = 30; // رقم القسم المخصص للمكتبة في المنتدى
+    const DL_FORUM_ID = 20; // رقم القسم المخصص للمكتبة في المنتدى
 
     // ===== إعدادات عامة =====
     const defaultLang = root.dataset.lang || 'ar';
@@ -795,16 +795,7 @@
         const frag = document.createDocumentFragment();
         for (let i=0; i<count; i++) {
             const card = document.createElement('div');
-            card.className = 'awad-card awad-skeleton-card';
-            const media = document.createElement('div');
-            media.className = 'awad-skeleton-block awad-skeleton-media';
-            card.appendChild(media);
-            const body = document.createElement('div');
-            body.className = 'awad-skeleton-body';
-            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line'}));
-            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line short'}));
-            body.appendChild(Object.assign(document.createElement('div'), {className:'awad-skeleton-block awad-skeleton-line medium'}));
-            card.appendChild(body);
+            card.className = 'awad-skeleton-card';
             frag.appendChild(card);
         }
         grid.appendChild(frag);
@@ -2143,7 +2134,7 @@
             state.query = document.getElementById('awad-search-input')?.value.trim() || '';
             state.visibleCount = PAGE_SIZE;
             renderLibrary();
-            document.getElementById('awad-products-section')?.scrollIntoView({behavior:'smooth'});
+            document.getElementById('awad-library-section')?.scrollIntoView({behavior:'smooth'});
         }
         else if (action === 'go-favorites') document.getElementById('awad-favorites-section')?.scrollIntoView({behavior:'smooth'});
         else if (action === 'toggle-filters') {
@@ -2192,14 +2183,14 @@
             else state.filters.category = [category];
             state.visibleCount = PAGE_SIZE;
             renderLibrary();
-            document.getElementById('awad-products-section')?.scrollIntoView({behavior:'smooth'});
+            document.getElementById('awad-library-section')?.scrollIntoView({behavior:'smooth'});
         }
         else if (target.dataset.nav) {
             const map = {
                 hero: 'awad-hero',
                 categories: 'awad-categories-section',
                 featured: 'awad-featured-section',
-                products: 'awad-products-section',
+                library: 'awad-library-section',
                 popular: 'awad-popular-section',
                 favorites: 'awad-favorites-section',
                 admin: 'awad-admin-panel'
