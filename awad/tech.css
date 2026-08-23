@@ -690,11 +690,10 @@
 
 /* هيكل تحميل */
 .awad-skeleton-card {
-    pointer-events: none;
-}
-.awad-skeleton-block {
-    background: var(--awad-surface-2);
-    border-radius: 6px;
+    background: var(--awad-surface);
+    border: 1px solid var(--awad-border);
+    border-radius: var(--awad-radius-lg);
+    height: 320px;
     animation: awad-pulse 1.2s infinite ease-in-out;
 }
 @keyframes awad-pulse {
@@ -702,21 +701,6 @@
     50% { opacity: .4; }
     100% { opacity: .7; }
 }
-.awad-skeleton-media {
-    aspect-ratio: 16/10;
-}
-.awad-skeleton-body {
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.awad-skeleton-line {
-    height: 12px;
-    border-radius: 4px;
-}
-.awad-skeleton-line.short { width: 50%; }
-.awad-skeleton-line.medium { width: 70%; }
 
 /* النافذة المنبثقة */
 .awad-modal-backdrop {
