@@ -3541,3 +3541,40 @@ async function buildFooterStats() {
 $(document).ready(function() { 
     startApp(); 
 });
+
+// ===== إغلاق النوافذ عند الضغط خارجها =====
+document.addEventListener('click', function(e) {
+    // لو الضغط على overlay نفسه (وليس محتوى النافذة)
+    if (e.target.classList && e.target.classList.contains('modal-overlay') 
+        && e.target.classList.contains('active')) {
+        // أغلق النافذة
+        e.target.classList.remove('active');
+        // معالجة خاصة لـ quickViewModal
+        if (e.target.id === 'quickViewModal') {
+            e.target.style.display = 'none';
+            e.target.style.opacity = '0';
+            e.target.style.visibility = 'hidden';
+        }
+    }
+});
+
+// منع انتقال النقر من المحتوى إلى الـ overlay
+document.querySelectorAll('.modal-overlay .modal-box, .modal-overlay .modal-content').forEach(box => {
+    box.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+
+// ✦ إغلاق بالنقر على زر Escape أيضاً
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+            modal.classList.remove('active');
+            if (modal.id === 'quickViewModal') {
+                modal.style.display = 'none';
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
+            }
+        });
+    }
+});
