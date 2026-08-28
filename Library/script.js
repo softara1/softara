@@ -3578,3 +3578,68 @@ document.addEventListener('keydown', function(e) {
         });
     }
 });
+
+
+
+
+// ===== دعم اللمس لبطاقات 3D Flip =====
+(function initFlipCardTouchSupport() {
+    // تأكد من تشغيل الكود بعد تحميل البطاقات
+    function attachFlipListeners() {
+        document.querySelectorAll('.flip-card').forEach(card => {
+            if (card.dataset.flipBound) return;
+            card.dataset.flipBound = '1';
+            
+            card.addEventListener('click', function(e) {
+                // ✦ فقط على أجهزة اللمس (بلا hover)
+                if (!window.matchMedia('(hover: none)').matches) return;
+                
+                // ✦ لا تقلب إذا الضغط على عنصر تفاعلي
+                const interactive = e.target.closest('a, button, input, textarea, select, details, summary, .flip-fav-btn, .copy-btn, .part-btn, .ver-item, .adm-btn, .btn-main, .btn-sec');
+                if (interactive) return;
+                
+                // ✦ لا تقلب في وضع list-view
+                if (card.closest('.items-grid.list-view')) return;
+                
+                // ✦ قلب البطاقة
+                card.classList.toggle('flipped');
+                e.preventDefault();
+            });
+        });
+    }
+    
+    // ربط مستمع عند تحميل الصفحة
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachFlipListeners);
+    } else {
+        attachFlipListeners();
+    }
+    
+    // ✦ إعادة الربط عند إضافة بطاقات جديدة (بعد التحديث/البحث)
+    const cardObserver = new MutationObserver(function(mutations) {
+        let shouldAttach = false;
+        mutations.forEach(m => {
+            m.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && (node.classList?.contains('flip-card') || node.querySelector?.('.flip-card'))) {
+                    shouldAttach = true;
+                }
+            });
+        });
+        if (shouldAttach) setTimeout(attachFlipListeners, 50);
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const grids = document.querySelectorAll('.items-grid, #grid-software, #grid-app, #grid-pcgame, #grid-psgame, #grid-ebook');
+        grids.forEach(g => cardObserver.observe(g, { childList: true, subtree: true }));
+    });
+})();
+
+// ✦ إعادة ضبط البطاقات المقلوبة عند البحث أو الفلترة
+const originalExecuteSearchAndFilter = window.executeSearchAndFilter;
+if (originalExecuteSearchAndFilter) {
+    window.executeSearchAndFilter = function() {
+        // أعد البطاقات المقلوبة لوضعها الطبيعي قبل إعادة العرض
+        document.querySelectorAll('.flip-card.flipped').forEach(c => c.classList.remove('flipped'));
+        return originalExecuteSearchAndFilter.apply(this, arguments);
+    };
+}
