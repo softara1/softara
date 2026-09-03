@@ -1,5 +1,5 @@
-var servImgAccount = window.servImgAccount || 'Softara2020@gmail.com';
-var servImgId = window.servImgId || 'Ajman@2025';
+var servImgAccount = window.servImgAccount || 'salveb@mamabood.com';
+var servImgId = window.servImgId || 'f16a39f08e356f7d8da4511105f405d8';
 var servImgF = window.servImgF || '13386037';
 var servImgTB = window.servImgTB || '1637088248';
 var servImgSL = window.servImgSL || '';
