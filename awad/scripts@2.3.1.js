@@ -27,8 +27,6 @@ function f(V,B){V=V-0x146;var u=F();var J=u[V];return J;}function F(){var B5=['r
       function closeLater(){clearTimeout(timer);timer=setTimeout(function(){bt.classList.remove('open');},300);}
       bt.addEventListener('mouseenter',open);
       bt.addEventListener('mouseleave',closeLater);
-      var sp=bt.querySelector('span');
-      if(sp){sp.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();bt.classList.add('open');},true);}
     }
     /* outside-click close (touch UX) */
     d.addEventListener('click',function(e){if(!bt.contains(e.target)){bt.classList.remove('open');}});
