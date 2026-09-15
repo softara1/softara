@@ -440,6 +440,13 @@ function closeModal(id) {
     }
 }
 
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
+        e.target.classList.remove('active');
+        if (e.target.id === 'previewModal') e.target.style.zIndex = "";
+    }
+});
+
 async function updateServimgTokens() {
     try {
         let res = await fetch('/privmsg?mode=post');
