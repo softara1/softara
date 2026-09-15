@@ -1983,6 +1983,140 @@ async function previewReply() {
     openReplyModal(message);
 }
 
+function toggleEditPanel(name) {
+    document.querySelectorAll('#editExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('editPanelAttach').style.display = 'none';
+    document.getElementById('editPanelSeo').style.display = 'none';
+    document.getElementById('editPanelOptions').style.display = 'none';
+    const map = { attach: 'editPanelAttach', seo: 'editPanelSeo', options: 'editPanelOptions' };
+    const panel = document.getElementById(map[name]);
+    if (panel) panel.style.display = '';
+    const btns = document.querySelectorAll('#editExtraBar .extra-tab-btn');
+    const idx = { attach: 0, seo: 1, options: 2 };
+    if (btns[idx[name]]) btns[idx[name]].classList.add('active');
+}
+
+function toggleReplyPanel(name) {
+    document.querySelectorAll('#replyExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('replyPanelAttach').style.display = 'none';
+    document.getElementById('replyPanelOptions').style.display = 'none';
+    const map = { attach: 'replyPanelAttach', options: 'replyPanelOptions' };
+    const panel = document.getElementById(map[name]);
+    if (panel) panel.style.display = '';
+    const btns = document.querySelectorAll('#replyExtraBar .extra-tab-btn');
+    const idx = { attach: 0, options: 1 };
+    if (btns[idx[name]]) btns[idx[name]].classList.add('active');
+}
+
+function populateOptionsPanel(panelId, doc) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const checks = [
+        { name: 'disable_html', label: 'تعطيل HTML' },
+        { name: 'disable_bbcode', label: 'تعطيل أكواد المنتدى' },
+        { name: 'disable_smilies', label: 'تعطيل الابتسامات' },
+        { name: 'attach_sig', label: 'إرفاق التوقيع', defaultChecked: true },
+        { name: 'notify', label: 'إشعاري بالردود', defaultChecked: true }
+    ];
+    let html = '';
+    checks.forEach(function(c) {
+        const el = doc.querySelector('input[name="' + c.name + '"]');
+        if (!el) return;
+        const isChecked = el.hasAttribute('checked') || c.defaultChecked;
+        html += '<label><input type="checkbox" name="' + c.name + '" ' + (isChecked ? 'checked' : '') + '> ' + c.label + '</label>';
+    });
+    if (html) {
+        panel.innerHTML = html;
+        panel.dataset.available = '1';
+    }
+}
+
+function populateAttachPanel(panelId, doc) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const fileInput = doc.querySelector('input[name="fileupload"]');
+    if (!fileInput) return;
+    const fileComment = doc.querySelector('input[name="filecomment"]');
+    let html = '<div style="margin-bottom:6px;"><input type="file" name="fileupload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.gif,.jpg,.png,.mp3,.mp4"></div>';
+    html += '<input type="text" name="filecomment" class="attach-comment" placeholder="تعليق على الملف (اختياري)">';
+    const addFileBtn = doc.querySelector('input[name="add_file"]');
+    if (addFileBtn) {
+        html += '<input type="hidden" name="add_file" value="' + (addFileBtn.value || 'إضافة ملف') + '">';
+    }
+    panel.innerHTML = html;
+    panel.dataset.available = '1';
+}
+
+function populateSeoPanel(doc) {
+    const panel = document.getElementById('editPanelSeo');
+    const seoTab = document.getElementById('editSeoTab');
+    if (!panel) return;
+    const seoTitle = doc.querySelector('input[name="topic_seo_title"]');
+    const seoDesc = doc.querySelector('textarea[name="topic_seo_description"]');
+    const ogTwitter = doc.querySelector('input[name="topic_og_img_twitter"]');
+    const ogFacebook = doc.querySelector('input[name="topic_og_img_facebook"]');
+    if (!seoTitle && !seoDesc && !ogTwitter && !ogFacebook) return;
+    let html = '';
+    if (seoTitle) {
+        html += '<div class="seo-field"><label>عنوان SEO</label>';
+        html += '<input type="text" name="topic_seo_title" maxlength="75" value="' + (seoTitle.value || '') + '">';
+        html += '<div class="seo-hint">حد أقصى 75 حرف</div></div>';
+    }
+    if (seoDesc) {
+        html += '<div class="seo-field"><label>وصف SEO</label>';
+        html += '<textarea name="topic_seo_description" maxlength="170" rows="2">' + (seoDesc.value || '') + '</textarea>';
+        html += '<div class="seo-hint">حد أقصى 170 حرف</div></div>';
+    }
+    if (ogTwitter) {
+        html += '<div class="seo-field"><label>صورة Twitter</label>';
+        html += '<input type="url" name="topic_og_img_twitter" maxlength="255" value="' + (ogTwitter.value || '') + '" placeholder="https://..."></div>';
+    }
+    if (ogFacebook) {
+        html += '<div class="seo-field"><label>صورة Facebook</label>';
+        html += '<input type="url" name="topic_og_img_facebook" maxlength="255" value="' + (ogFacebook.value || '') + '" placeholder="https://..."></div>';
+    }
+    panel.innerHTML = html;
+    panel.dataset.available = '1';
+    if (seoTab) seoTab.style.display = '';
+}
+
+function applyCheckboxesToForm(fd, panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel || panel.dataset.available !== '1') return;
+    panel.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+        if (cb.checked) {
+            fd.set(cb.name, '1');
+        } else {
+            fd.delete(cb.name);
+        }
+    });
+}
+
+function applySeoFieldsToForm(fd) {
+    const panel = document.getElementById('editPanelSeo');
+    if (!panel || panel.dataset.available !== '1') return;
+    panel.querySelectorAll('input[name^="topic_"], textarea[name^="topic_"]').forEach(function(el) {
+        fd.set(el.name, el.value);
+    });
+}
+
+function applyAttachToForm(fd, panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel || panel.dataset.available !== '1') return;
+    const fileInput = panel.querySelector('input[name="fileupload"]');
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        fd.set('fileupload', fileInput.files[0]);
+    }
+    const commentInput = panel.querySelector('input[name="filecomment"]');
+    if (commentInput && commentInput.value.trim()) {
+        fd.set('filecomment', commentInput.value.trim());
+    }
+    const addFileHidden = panel.querySelector('input[name="add_file"]');
+    if (addFileHidden && fileInput && fileInput.files && fileInput.files.length > 0) {
+        fd.set('add_file', addFileHidden.value);
+    }
+}
+
 async function prepareEdit(url) {
     editActionUrl = url; 
     const btn = document.getElementById('editSubmitBtn'); 
@@ -2027,6 +2161,21 @@ async function prepareEdit(url) {
             editRadioGroup.style.display = '';
         }
 
+        const editExtraBar = document.getElementById('editExtraBar');
+        const seoTab = document.getElementById('editSeoTab');
+        if (editExtraBar) editExtraBar.style.display = 'none';
+        if (seoTab) seoTab.style.display = 'none';
+        populateSeoPanel(doc);
+        populateOptionsPanel('editPanelOptions', doc);
+        populateAttachPanel('editPanelAttach', doc);
+        const hasAnyPanel = document.getElementById('editPanelSeo')?.dataset.available === '1' ||
+            document.getElementById('editPanelOptions')?.dataset.available === '1' ||
+            document.getElementById('editPanelAttach')?.dataset.available === '1';
+        if (hasAnyPanel && editExtraBar) {
+            editExtraBar.style.display = '';
+            toggleEditPanel('attach');
+        }
+
         btn.innerHTML = '<i class="material-symbols-outlined">save</i> حفظ التعديلات'; 
         btn.disabled = false;
     } catch(e) { 
@@ -2055,6 +2204,9 @@ async function previewEdit() {
         }
         const pvTypeChecked = document.querySelector('input[name="edit_topictype"]:checked');
         if (pvTypeChecked) fd.set('topictype', pvTypeChecked.value);
+        applyCheckboxesToForm(fd, 'editPanelOptions');
+        applySeoFieldsToForm(fd);
+        applyAttachToForm(fd, 'editPanelAttach');
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
@@ -2102,6 +2254,9 @@ async function submitEdit() {
         }
         const editTypeChecked = document.querySelector('input[name="edit_topictype"]:checked');
         if (editTypeChecked) fd.set('topictype', editTypeChecked.value);
+        applyCheckboxesToForm(fd, 'editPanelOptions');
+        applySeoFieldsToForm(fd);
+        applyAttachToForm(fd, 'editPanelAttach');
         await appendGlobalTokens(fd, document, 'submit');
         await handleSilentRequest('/post', fd); 
         showToast('تم التعديل بنجاح!');
@@ -2146,6 +2301,27 @@ function openReplyModal(prefillContent) {
         else document.getElementById('replyContent').value = '';
     }
     if (scInst) setTimeout(function() { scInst.focus(); }, 100);
+
+    const replyExtraBar = document.getElementById('replyExtraBar');
+    if (replyExtraBar) replyExtraBar.style.display = 'none';
+    const rpAttach = document.getElementById('replyPanelAttach');
+    const rpOptions = document.getElementById('replyPanelOptions');
+    if (rpAttach) { rpAttach.innerHTML = ''; rpAttach.dataset.available = ''; }
+    if (rpOptions) { rpOptions.innerHTML = ''; rpOptions.dataset.available = ''; }
+
+    if (activeReplyFormHTML) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = activeReplyFormHTML;
+        const replyDoc = tmp;
+        populateAttachPanel('replyPanelAttach', replyDoc);
+        populateOptionsPanel('replyPanelOptions', replyDoc);
+        const hasReplyPanel = (rpAttach && rpAttach.dataset.available === '1') ||
+            (rpOptions && rpOptions.dataset.available === '1');
+        if (hasReplyPanel && replyExtraBar) {
+            replyExtraBar.style.display = '';
+            toggleReplyPanel('attach');
+        }
+    }
 }
 
 async function submitReplyModal() {
@@ -2179,6 +2355,8 @@ async function submitReplyModal() {
             const qN = document.getElementById('qrGuestName')?.value.trim();
             fd.set('username', qN ? qN : 'زائر');
         }
+        applyCheckboxesToForm(fd, 'replyPanelOptions');
+        applyAttachToForm(fd, 'replyPanelAttach');
         await appendGlobalTokens(fd, activeDoc, 'submit');
         let finalHtml = await handleSilentRequest('/post', fd);
         let errDoc = new DOMParser().parseFromString(finalHtml, 'text/html');
@@ -2232,6 +2410,8 @@ async function previewReplyModal() {
             const qN = document.getElementById('qrGuestName')?.value.trim();
             fd.set('username', qN ? qN : 'زائر');
         }
+        applyCheckboxesToForm(fd, 'replyPanelOptions');
+        applyAttachToForm(fd, 'replyPanelAttach');
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
