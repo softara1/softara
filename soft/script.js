@@ -263,7 +263,7 @@ $(document).ready(function ($) {
         ":)": "https://2img.net/i/fa/i/smiles/icon_smile.gif" 
     };
     var fullToolbar = 'bold,italic,underline,strike|left,center,right,justify|bulletlist,orderedlist,horizontalrule|quote,code,faspoiler,table|servimg,image,link,embed,youtube,emoticon|headers,size,color,font,removeformat|more|subscript,superscript|fascroll,faupdown,farand|mention,twemojifa,date,time,pastetext,source';
-    var simpleToolbar = 'bold,italic,underline,strike,mention,faspoiler,emoticon,source';
+    var simpleToolbar = 'bold,italic,underline,strike,mention,faspoiler,emoticon|servimg,image|size,font|left,center,right,justify|source';
 
     const iframeCSS = `
         html, body { 
@@ -343,6 +343,7 @@ let currentForumName = '';
 let isCurrentLocked = false;
 let currentTopicUrl = null;
 let editActionUrl = '';
+let previewSourceModal = '';
 let activeReplyFormHTML = '';
 window.currentUserIsGuest = true;
 
@@ -421,7 +422,7 @@ function getCleanUsername(node, returnHtml = false) {
 }
 
 function openModal(id) {
-    const allowedForGuests = ['authModal', 'goodbyeModal', 'postModal', 'previewModal', 'adminModal'];
+    const allowedForGuests = ['authModal', 'goodbyeModal', 'postModal', 'previewModal', 'adminModal', 'replyModal'];
     if (!allowedForGuests.includes(id) && window.currentUserIsGuest) { 
         showToast('يرجى تسجيل الدخول أولاً للإجراء المطلوب!', true); 
         return; 
@@ -579,13 +580,7 @@ function safeEncode(str) {
 function scrollToReply() {
     const qrBox = document.getElementById('quickReplyBox');
     if (qrBox && qrBox.style.display !== 'none') {
-        qrBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        let scInst = $('#qrContent').sceditor('instance'); 
-        if (scInst) {
-            scInst.focus(); 
-        } else {
-            document.getElementById('qrContent').focus();
-        }
+        openReplyModal();
     } else {
         showToast('عذراً، هذا الموضوع مغلق أو لا تملك صلاحية الرد.', true);
     }
@@ -1977,47 +1972,8 @@ async function previewReply() {
     let scInst = $('#qrContent').sceditor('instance'); 
     if (scInst) scInst.updateOriginal();
     const message = document.getElementById('qrContent').value.trim();
-    const btn = document.getElementById('qrPreviewBtn');
     if (!message) return showToast('لا يمكنك معاينة رد فارغ!', true);
-    btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري المعاينة...'; 
-    btn.disabled = true;
-    try {
-        let fd;
-        if (activeReplyFormHTML) { 
-            const temp = document.createElement('div'); 
-            temp.innerHTML = activeReplyFormHTML; 
-            const form = temp.querySelector('form[name="post"]'); 
-            if (form) fd = new FormData(form); 
-        }
-        if (!fd) { 
-            let tid = 0; 
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
-            const fRes = await fetch('/post?t=' + tid + '&mode=reply'); 
-            fd = new FormData(new DOMParser().parseFromString(await fRes.text(), 'text/html').querySelector('form[name="post"]')); 
-        }
-        fd.set('message', message); 
-        fd.set('preview', '1');
-        if (window.currentUserIsGuest) { 
-            const qName = document.getElementById('qrGuestName')?.value.trim(); 
-            fd.set('username', qName ? qName : 'زائر'); 
-        }
-        const res = await fetch('/post', { method: 'POST', body: fd });
-        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-        const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
-        if (previewBlock) { 
-            previewBlock.querySelectorAll('.attachbox').forEach(e => e.remove()); 
-            document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML; 
-            openModal('previewModal'); 
-            setTimeout(applyLuffyAddons, 100); 
-        } else {
-            showToast('تعذر استخراج المعاينة من السيرفر.', true);
-        }
-    } catch(e) { 
-        showToast('حدث خطأ أثناء الاتصال للمعاينة!', true); 
-    } finally { 
-        btn.innerHTML = '<i class="material-symbols-outlined">visibility</i> معاينة الرد'; 
-        btn.disabled = false; 
-    }
+    openReplyModal(message);
 }
 
 async function prepareEdit(url) {
@@ -2098,13 +2054,14 @@ async function previewEdit() {
         if (previewBlock) { 
             previewBlock.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML; 
+            previewSourceModal = 'editModal';
             closeModal('editModal');
             openModal('previewModal'); 
             const backBtn = document.querySelector('#previewModal .btn-action');
             if(backBtn) {
                 backBtn.onclick = function() {
                     closeModal('previewModal');
-                    openModal('editModal');
+                    if (previewSourceModal) { openModal(previewSourceModal); previewSourceModal = ''; }
                 };
             }
             setTimeout(applyLuffyAddons, 100); 
@@ -2165,6 +2122,128 @@ function quotePost(author, htmlContent) {
     else document.getElementById('qrContent').value += quoteStr;
     document.getElementById('quickReplyBox').scrollIntoView({ behavior: 'smooth' }); 
     showToast('تم إدراج الاقتباس بنجاح!');
+}
+
+function openReplyModal(prefillContent) {
+    openModal('replyModal');
+    let scInst = $('#replyContent').sceditor('instance');
+    if (!scInst) {
+        try { window.initSCEditor('#replyContent', false); } catch(e) {}
+        scInst = $('#replyContent').sceditor('instance');
+    }
+    if (prefillContent !== undefined) {
+        if (scInst) scInst.val(prefillContent);
+        else document.getElementById('replyContent').value = prefillContent;
+    } else {
+        if (scInst) scInst.val('');
+        else document.getElementById('replyContent').value = '';
+    }
+    if (scInst) setTimeout(function() { scInst.focus(); }, 100);
+}
+
+async function submitReplyModal() {
+    let scInst = $('#replyContent').sceditor('instance');
+    if (scInst) scInst.updateOriginal();
+    const message = document.getElementById('replyContent').value.trim();
+    const btn = document.getElementById('replySubmitBtn');
+    if (!message) return showToast('لا يمكنك إرسال رد فارغ!', true);
+    btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري النشر...';
+    btn.disabled = true;
+    try {
+        let fd, activeDoc;
+        if (activeReplyFormHTML) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = activeReplyFormHTML;
+            const frm = tmp.querySelector('form[name="post"]');
+            if (frm) { fd = new FormData(frm); activeDoc = document; }
+        }
+        if (!fd) {
+            let tid = 0;
+            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]);
+            const docText = await (await fetch('/post?t=' + tid + '&mode=reply')).text();
+            activeDoc = new DOMParser().parseFromString(docText, 'text/html');
+            const frm = activeDoc.querySelector('form[name="post"]');
+            if (!frm) throw new Error("لا تملك صلاحية الرد على هذا الموضوع.");
+            fd = new FormData(frm);
+        }
+        fd.set('message', message);
+        fd.set('post', '1');
+        if (window.currentUserIsGuest) {
+            const qN = document.getElementById('qrGuestName')?.value.trim();
+            fd.set('username', qN ? qN : 'زائر');
+        }
+        await appendGlobalTokens(fd, activeDoc, 'submit');
+        let finalHtml = await handleSilentRequest('/post', fd);
+        let errDoc = new DOMParser().parseFromString(finalHtml, 'text/html');
+        let errorEl = errDoc.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box, .msg');
+        let hasPostForm = errDoc.querySelector('form[name="post"]');
+        let hasSuccessMsg = finalHtml.includes('بنجاح') || finalHtml.includes('تم إرسال') || finalHtml.includes('تفعيل');
+        if (errorEl && errorEl.textContent.trim()) throw new Error(errorEl.textContent.trim());
+        else if (hasPostForm && !hasSuccessMsg) throw new Error("حدث خطأ أثناء إرسال الرد.");
+        showToast('تم إرسال الرد بنجاح!');
+        if (scInst) scInst.val(''); else document.getElementById('replyContent').value = '';
+        let qrInst = $('#qrContent').sceditor('instance');
+        if (qrInst) qrInst.val(''); else document.getElementById('qrContent').value = '';
+        for (let key in AppCache) delete AppCache[key];
+        setTimeout(function() { closeModal('replyModal'); openTopic(currentTopicUrl); }, 1000);
+    } catch(e) {
+        showToast(e.message || 'فشل إرسال الرد!', true);
+    } finally {
+        btn.innerHTML = '<i class="material-symbols-outlined">send</i> إرسال الرد';
+        btn.disabled = false;
+    }
+}
+
+async function previewReplyModal() {
+    let scInst = $('#replyContent').sceditor('instance');
+    if (scInst) scInst.updateOriginal();
+    const message = document.getElementById('replyContent').value.trim();
+    const btn = document.getElementById('replyPreviewBtn');
+    if (!message) return showToast('لا يمكنك معاينة رد فارغ!', true);
+    btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري المعاينة...';
+    btn.disabled = true;
+    try {
+        let fd;
+        if (activeReplyFormHTML) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = activeReplyFormHTML;
+            const frm = tmp.querySelector('form[name="post"]');
+            if (frm) fd = new FormData(frm);
+        }
+        if (!fd) {
+            let tid = 0;
+            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]);
+            const docText = await (await fetch('/post?t=' + tid + '&mode=reply')).text();
+            const doc = new DOMParser().parseFromString(docText, 'text/html');
+            const frm = doc.querySelector('form[name="post"]');
+            if (frm) fd = new FormData(frm);
+        }
+        if (!fd) throw new Error("تعذر الوصول لنموذج الرد.");
+        fd.set('message', message);
+        fd.set('preview', '1');
+        if (window.currentUserIsGuest) {
+            const qN = document.getElementById('qrGuestName')?.value.trim();
+            fd.set('username', qN ? qN : 'زائر');
+        }
+        const res = await fetch('/post', { method: 'POST', body: fd });
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+        const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
+        if (previewBlock) {
+            previewBlock.querySelectorAll('.attachbox').forEach(function(e) { e.remove(); });
+            document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML;
+            previewSourceModal = 'replyModal';
+            closeModal('replyModal');
+            openModal('previewModal');
+            setTimeout(applyLuffyAddons, 100);
+        } else {
+            showToast('تعذر استخراج المعاينة من السيرفر.', true);
+        }
+    } catch(e) {
+        showToast('حدث خطأ أثناء الاتصال للمعاينة!', true);
+    } finally {
+        btn.innerHTML = '<i class="material-symbols-outlined">visibility</i> معاينة الرد';
+        btn.disabled = false;
+    }
 }
 
 async function silentAdminAction(url, actionName, isTopicDelete = false) {
