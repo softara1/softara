@@ -335,6 +335,7 @@ $(document).ready(function ($) {
     
     window.initSCEditor('#topicContent', false);
     window.initSCEditor('#editContent', false);
+    window.initSCEditor('#replyContent', false);
     window.initSCEditor('#qrContent', true);
 });
 
@@ -1793,6 +1794,28 @@ async function preparePostModal() {
         let scInst = $('#topicContent').sceditor('instance');
         if (scInst) scInst.val(''); 
         else document.getElementById('topicContent').value = '';
+
+        const postExtraBar = document.getElementById('postExtraBar');
+        const postSeoTab = document.getElementById('postSeoTab');
+        if (postExtraBar) postExtraBar.style.display = 'none';
+        if (postSeoTab) postSeoTab.style.display = 'none';
+        const ppAttach = document.getElementById('postPanelAttach');
+        const ppSeo = document.getElementById('postPanelSeo');
+        const ppOptions = document.getElementById('postPanelOptions');
+        if (ppAttach) { ppAttach.innerHTML = ''; ppAttach.dataset.available = ''; }
+        if (ppSeo) { ppSeo.innerHTML = ''; ppSeo.dataset.available = ''; }
+        if (ppOptions) { ppOptions.innerHTML = ''; ppOptions.dataset.available = ''; }
+        populateSeoPanel(doc, 'postPanelSeo', 'postSeoTab');
+        populateOptionsPanel('postPanelOptions', doc);
+        populateAttachPanel('postPanelAttach', doc);
+        const hasAnyPostPanel = (ppSeo && ppSeo.dataset.available === '1') ||
+            (ppOptions && ppOptions.dataset.available === '1') ||
+            (ppAttach && ppAttach.dataset.available === '1');
+        if (hasAnyPostPanel && postExtraBar) {
+            postExtraBar.style.display = '';
+            togglePostPanel('attach');
+        }
+
         openModal('postModal');
     } catch (e) { 
         showToast('حدث خطأ أثناء فتح المحرر!', true); 
@@ -1834,6 +1857,10 @@ async function submitTopic() {
             const gName = document.getElementById('guestName')?.value.trim(); 
             fd.set('username', gName ? gName : 'زائر'); 
         }
+
+        applyCheckboxesToForm(fd, 'postPanelOptions');
+        applySeoFieldsToForm(fd, 'postPanelSeo');
+        applyAttachToForm(fd, 'postPanelAttach');
         
         await appendGlobalTokens(fd, doc, 'submit');
         let finalHtml = await handleSilentRequest('/post', fd); 
@@ -1850,6 +1877,14 @@ async function submitTopic() {
         document.getElementById('topicTitle').value = ''; 
         if (scInst) scInst.val(''); 
         else document.getElementById('topicContent').value = '';
+
+        const ppAttach = document.getElementById('postPanelAttach');
+        if (ppAttach) {
+            const pFileInput = ppAttach.querySelector('input[name="fileupload"]');
+            if (pFileInput) pFileInput.value = '';
+            const pCommentInput = ppAttach.querySelector('input[name="filecomment"]');
+            if (pCommentInput) pCommentInput.value = '';
+        }
         
         for (let key in AppCache) delete AppCache[key]; 
         
@@ -1908,6 +1943,19 @@ async function submitReply() {
             const qName = document.getElementById('qrGuestName')?.value.trim(); 
             fd.set('username', qName ? qName : 'زائر'); 
         }
+
+        const qrAttachPanel = document.getElementById('qrAttachPanel');
+        if (qrAttachPanel) {
+            const qrFileInput = qrAttachPanel.querySelector('input[name="qr_fileupload"]');
+            if (qrFileInput && qrFileInput.files && qrFileInput.files.length > 0) {
+                fd.set('fileupload', qrFileInput.files[0]);
+                const qrCommentInput = qrAttachPanel.querySelector('input[name="qr_filecomment"]');
+                if (qrCommentInput && qrCommentInput.value.trim()) {
+                    fd.set('filecomment', qrCommentInput.value.trim());
+                }
+                fd.set('add_file', 'إضافة ملف');
+            }
+        }
         
         await appendGlobalTokens(fd, activeDoc, 'submit');
         let finalHtml = await handleSilentRequest('/post', fd); 
@@ -1923,6 +1971,14 @@ async function submitReply() {
         showToast('تم إرسال الرد بنجاح!');
         if (scInst) scInst.val(''); 
         else document.getElementById('qrContent').value = '';
+        
+        const qrAttachPanel = document.getElementById('qrAttachPanel');
+        if (qrAttachPanel) {
+            const qrFileInput = qrAttachPanel.querySelector('input[name="qr_fileupload"]');
+            if (qrFileInput) qrFileInput.value = '';
+            const qrCommentInput = qrAttachPanel.querySelector('input[name="qr_filecomment"]');
+            if (qrCommentInput) qrCommentInput.value = '';
+        }
         
         for (let key in AppCache) delete AppCache[key];
         setTimeout(() => openTopic(currentTopicUrl), 1000);
@@ -1952,17 +2008,31 @@ async function previewTopic() {
         fd.set('subject', subject); 
         fd.set('message', message); 
         fd.set('preview', '1');
+        const tType = document.querySelector('input[name="topictype"]:checked')?.value || '0'; 
+        fd.set('topictype', tType);
         if (window.currentUserIsGuest) { 
             const gName = document.getElementById('guestName')?.value.trim(); 
             fd.set('username', gName ? gName : 'زائر'); 
         }
+        applyCheckboxesToForm(fd, 'postPanelOptions');
+        applySeoFieldsToForm(fd, 'postPanelSeo');
+        applyAttachToForm(fd, 'postPanelAttach');
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
         if (previewBlock) { 
             previewBlock.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML; 
+            previewSourceModal = 'postModal';
+            closeModal('postModal');
             openModal('previewModal'); 
+            const backBtn = document.querySelector('#previewModal .btn-action');
+            if(backBtn) {
+                backBtn.onclick = function() {
+                    closeModal('previewModal');
+                    if (previewSourceModal) { openModal(previewSourceModal); previewSourceModal = ''; }
+                };
+            }
             setTimeout(applyLuffyAddons, 100); 
         } else {
             showToast('تعذر استخراج المعاينة من السيرفر.', true);
@@ -2008,6 +2078,20 @@ function toggleReplyPanel(name) {
     if (btns[idx[name]]) btns[idx[name]].classList.add('active');
 }
 
+function togglePostPanel(name) {
+    document.querySelectorAll('#postExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('postPanelAttach').style.display = 'none';
+    const seoPanel = document.getElementById('postPanelSeo');
+    if (seoPanel) seoPanel.style.display = 'none';
+    document.getElementById('postPanelOptions').style.display = 'none';
+    const map = { attach: 'postPanelAttach', seo: 'postPanelSeo', options: 'postPanelOptions' };
+    const panel = document.getElementById(map[name]);
+    if (panel) panel.style.display = '';
+    const btns = document.querySelectorAll('#postExtraBar .extra-tab-btn');
+    const idx = { attach: 0, seo: 1, options: 2 };
+    if (btns[idx[name]]) btns[idx[name]].classList.add('active');
+}
+
 function populateOptionsPanel(panelId, doc) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -2047,9 +2131,11 @@ function populateAttachPanel(panelId, doc) {
     panel.dataset.available = '1';
 }
 
-function populateSeoPanel(doc) {
-    const panel = document.getElementById('editPanelSeo');
-    const seoTab = document.getElementById('editSeoTab');
+function populateSeoPanel(doc, panelId, tabId) {
+    const pId = panelId || 'editPanelSeo';
+    const tId = tabId || 'editSeoTab';
+    const panel = document.getElementById(pId);
+    const seoTab = document.getElementById(tId);
     if (!panel) return;
     const seoTitle = doc.querySelector('input[name="topic_seo_title"]');
     const seoDesc = doc.querySelector('textarea[name="topic_seo_description"]');
@@ -2092,8 +2178,9 @@ function applyCheckboxesToForm(fd, panelId) {
     });
 }
 
-function applySeoFieldsToForm(fd) {
-    const panel = document.getElementById('editPanelSeo');
+function applySeoFieldsToForm(fd, panelId) {
+    const pId = panelId || 'editPanelSeo';
+    const panel = document.getElementById(pId);
     if (!panel || panel.dataset.available !== '1') return;
     panel.querySelectorAll('input[name^="topic_"], textarea[name^="topic_"]').forEach(function(el) {
         fd.set(el.name, el.value);
@@ -2262,6 +2349,13 @@ async function submitEdit() {
         showToast('تم التعديل بنجاح!');
         if (scInst) scInst.val(''); 
         else document.getElementById('editContent').value = '';
+        const epAttach = document.getElementById('editPanelAttach');
+        if (epAttach) {
+            const eFileInput = epAttach.querySelector('input[name="fileupload"]');
+            if (eFileInput) eFileInput.value = '';
+            const eCommentInput = epAttach.querySelector('input[name="filecomment"]');
+            if (eCommentInput) eCommentInput.value = '';
+        }
         for (let key in AppCache) delete AppCache[key];
         setTimeout(() => { 
             closeModal('editModal'); 
@@ -2286,7 +2380,7 @@ function quotePost(author, htmlContent) {
     showToast('تم إدراج الاقتباس بنجاح!');
 }
 
-function openReplyModal(prefillContent) {
+async function openReplyModal(prefillContent) {
     openModal('replyModal');
     let scInst = $('#replyContent').sceditor('instance');
     if (!scInst) {
@@ -2309,18 +2403,39 @@ function openReplyModal(prefillContent) {
     if (rpAttach) { rpAttach.innerHTML = ''; rpAttach.dataset.available = ''; }
     if (rpOptions) { rpOptions.innerHTML = ''; rpOptions.dataset.available = ''; }
 
-    if (activeReplyFormHTML) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = activeReplyFormHTML;
-        const replyDoc = tmp;
-        populateAttachPanel('replyPanelAttach', replyDoc);
-        populateOptionsPanel('replyPanelOptions', replyDoc);
-        const hasReplyPanel = (rpAttach && rpAttach.dataset.available === '1') ||
-            (rpOptions && rpOptions.dataset.available === '1');
-        if (hasReplyPanel && replyExtraBar) {
-            replyExtraBar.style.display = '';
-            toggleReplyPanel('attach');
+    let replyDoc = null;
+    try {
+        if (activeReplyFormHTML) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = activeReplyFormHTML;
+            replyDoc = tmp;
+            populateAttachPanel('replyPanelAttach', replyDoc);
+            populateOptionsPanel('replyPanelOptions', replyDoc);
         }
+        const hasFromQuick = (rpAttach && rpAttach.dataset.available === '1') ||
+            (rpOptions && rpOptions.dataset.available === '1');
+        if (!hasFromQuick && currentTopicUrl) {
+            let tid = 0;
+            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]);
+            if (tid > 0) {
+                const fText = await (await fetch('/post?t=' + tid + '&mode=reply')).text();
+                const fullDoc = new DOMParser().parseFromString(fText, 'text/html');
+                populateAttachPanel('replyPanelAttach', fullDoc);
+                populateOptionsPanel('replyPanelOptions', fullDoc);
+                const frm = fullDoc.querySelector('form[name="post"]');
+                if (frm) {
+                    const tmpWrap = document.createElement('div');
+                    tmpWrap.appendChild(frm.cloneNode(true));
+                    activeReplyFormHTML = tmpWrap.innerHTML;
+                }
+            }
+        }
+    } catch(e) {}
+    const hasReplyPanel = (rpAttach && rpAttach.dataset.available === '1') ||
+        (rpOptions && rpOptions.dataset.available === '1');
+    if (hasReplyPanel && replyExtraBar) {
+        replyExtraBar.style.display = '';
+        toggleReplyPanel('attach');
     }
 }
 
@@ -2369,6 +2484,22 @@ async function submitReplyModal() {
         if (scInst) scInst.val(''); else document.getElementById('replyContent').value = '';
         let qrInst = $('#qrContent').sceditor('instance');
         if (qrInst) qrInst.val(''); else document.getElementById('qrContent').value = '';
+
+        const rpAttach = document.getElementById('replyPanelAttach');
+        if (rpAttach) {
+            const rFileInput = rpAttach.querySelector('input[name="fileupload"]');
+            if (rFileInput) rFileInput.value = '';
+            const rCommentInput = rpAttach.querySelector('input[name="filecomment"]');
+            if (rCommentInput) rCommentInput.value = '';
+        }
+        const qrAttachPanel2 = document.getElementById('qrAttachPanel');
+        if (qrAttachPanel2) {
+            const qrFileInput2 = qrAttachPanel2.querySelector('input[name="qr_fileupload"]');
+            if (qrFileInput2) qrFileInput2.value = '';
+            const qrCommentInput2 = qrAttachPanel2.querySelector('input[name="qr_filecomment"]');
+            if (qrCommentInput2) qrCommentInput2.value = '';
+        }
+
         for (let key in AppCache) delete AppCache[key];
         setTimeout(function() { closeModal('replyModal'); openTopic(currentTopicUrl); }, 1000);
     } catch(e) {
@@ -2421,6 +2552,13 @@ async function previewReplyModal() {
             previewSourceModal = 'replyModal';
             closeModal('replyModal');
             openModal('previewModal');
+            const backBtn = document.querySelector('#previewModal .btn-action');
+            if(backBtn) {
+                backBtn.onclick = function() {
+                    closeModal('previewModal');
+                    if (previewSourceModal) { openModal(previewSourceModal); previewSourceModal = ''; }
+                };
+            }
             setTimeout(applyLuffyAddons, 100);
         } else {
             showToast('تعذر استخراج المعاينة من السيرفر.', true);
