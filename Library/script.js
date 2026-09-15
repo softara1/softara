@@ -1,96 +1,15 @@
-var servImgAccount = window.servImgAccount || 'jetzem@mohemil.com';
-var servImgId = window.servImgId || '05444dce4054fc447035d18e5c92547c';
+var servImgAccount = window.servImgAccount || 'salveb@mamabood.com';
+var servImgId = window.servImgId || 'f16a39f08e356f7d8da4511105f405d8';
 var servImgF = window.servImgF || '13386037';
-var servImgTB = window.servImgTB || '1606987585';
-var servImgSL = window.servImgSL || '1';
+var servImgTB = window.servImgTB || '1637088248';
+var servImgSL = window.servImgSL || '';
 var servImgMode = window.servImgMode || 'fae';
-var iframeSrc = '/smilies?mode=smilies_frame&t=1785717690';
+var iframeSrc = '/smilies?mode=smilies_frame&t=1785531294';
 var SCE_TopicID = '';
 var illiwebDomain = 'https://illipro.net/';
 var servimgDomain = 'servimg.com';
 var INTRANET = 0;
 var quick_reply = '';
-
-function extractServimgTokens(html) {
-    let accMatch = html.match(/servImgAccount\s*=\s*['"]([^'"]+)['"]/);
-    let idMatch = html.match(/servImgId\s*=\s*['"]([^'"]+)['"]/);
-    let tbMatch = html.match(/servImgTB\s*=\s*['"]([^'"]+)['"]/);
-    let fMatch = html.match(/servImgF\s*=\s*['"]([^'"]+)['"]/);
-    let slMatch = html.match(/servImgSL\s*=\s*['"]([^'"]+)['"]/);
-    let modeMatch = html.match(/servImgMode\s*=\s*['"]([^'"]+)['"]/);
-
-    if (accMatch && accMatch[1]) window.servImgAccount = accMatch[1];
-    if (idMatch && idMatch[1]) window.servImgId = idMatch[1];
-    if (tbMatch && tbMatch[1]) window.servImgTB = tbMatch[1];
-    if (fMatch && fMatch[1]) window.servImgF = fMatch[1];
-    if (slMatch && slMatch[1]) window.servImgSL = slMatch[1];
-    if (modeMatch && modeMatch[1]) window.servImgMode = modeMatch[1];
-
-    if (window.servImgAccount && window.servImgId) {
-        window.iframeSrc = 'https://servimg.com/multiupload.php?mode=' + (window.servImgMode || 'fae') + 
-                           '&account=' + encodeURIComponent(window.servImgAccount) + 
-                           '&id=' + window.servImgId + 
-                           '&f=' + (window.servImgF || '13386037') + 
-                           '&tb=' + window.servImgTB + 
-                           '&sl=' + (window.servImgSL || '1');
-    }
-}
-
-function getUserRankProgress(userPosts) {
-    const posts = parseInt(userPosts) || 0;
-    
-    
-    const ranks = [
-        { name: "مستكشف رقمي", icon: "explore", threshold: 0 },
-        { name: "هاوي تقني", icon: "radar", threshold: 50 },
-        { name: "مساهم فعّال", icon: "moving", threshold: 200 },
-        { name: "محترف شامل", icon: "task_alt", threshold: 500 },
-        { name: "خبير استثنائي", icon: "verified", threshold: 1000 },
-        { name: "سفير التقنية", icon: "military_tech", threshold: 3000 },
-        { name: "أسطورة Softara", icon: "diamond", threshold: 5000 }
-    ];
-
-    let currentRank = ranks[0];
-    let nextRank = null;
-
-  
-    for (let i = 0; i < ranks.length; i++) {
-        if (posts >= ranks[i].threshold) {
-            currentRank = ranks[i];
-            nextRank = ranks[i + 1] || null; 
-        } else {
-            break;
-        }
-    }
-
-    let progressPercent = 100;
-    let tooltipText = "لقد وصلت إلى أعلى رتبة! أسطورة Softara";
-    let nextRankText = "الحد الأقصى";
-
- 
-    if (nextRank) {
-        let postsNeededForNext = nextRank.threshold - currentRank.threshold;
-        let postsDoneInCurrent = posts - currentRank.threshold;
-        progressPercent = (postsDoneInCurrent / postsNeededForNext) * 100;
-        
-        let postsLeft = nextRank.threshold - posts;
-        tooltipText = `باقي ${postsLeft} مساهمة للوصول إلى رتبة (${nextRank.name})`;
-        nextRankText = `<i class="material-symbols-outlined" style="font-size:12px; vertical-align:middle;">${nextRank.icon}</i> ${nextRank.name}`;
-    }
-
- 
-    return `
-        <div class="user-progress-wrap" title="${tooltipText}">
-            <div class="up-header">
-                <span>الهدف: ${nextRankText}</span>
-                <span class="up-percent">${Math.floor(progressPercent)}%</span>
-            </div>
-            <div class="up-bar-bg">
-                <div class="up-bar-fill" style="width: ${progressPercent}%;"></div>
-            </div>
-        </div>
-    `;
-}
 
 (function initThemes() {
     try {
@@ -108,7 +27,9 @@ function toggleDarkMode() {
     root.setAttribute('data-theme', newTheme);
     try {
         localStorage.setItem('zzone_theme', newTheme);
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Could not save theme to localStorage", e);
+    }
     const btn = document.getElementById('darkModeBtn');
     if (btn) {
         btn.innerHTML = isLight ? '<i class="material-symbols-outlined">dark_mode</i>' : '<i class="material-symbols-outlined">light_mode</i>';
@@ -166,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 $(document).ready(function ($) {
     'use strict';
+    
     var _originalJQLoad = $.fn.load;
     $.fn.load = function(url, params, callback) {
         if (typeof url === "function") {
@@ -330,7 +252,9 @@ $(document).ready(function ($) {
                     instance.css(iframeCSS); 
                 }); 
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error("SCEditor Init Error:", e);
+        }
     };
     
     window.initSCEditor('#topicContent', false);
@@ -350,7 +274,9 @@ function switchView(viewId) {
     const views = ['categoriesView', 'listView', 'topicView', 'discoverView', 'settingsView'];
     const currentActive = document.querySelector('.active-view');
     const nextActive = document.getElementById(viewId);
-    if (currentActive && currentActive.id === viewId) return;
+    if (currentActive && currentActive.id === viewId) {
+        return;
+    }
     if (viewId === 'settingsView') {
         document.body.classList.add('settings-active');
     } else {
@@ -358,8 +284,12 @@ function switchView(viewId) {
     }
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
     const navLinks = document.querySelectorAll('.nav-links a');
-    if (viewId === 'categoriesView' && navLinks[0]) navLinks[0].classList.add('active');
-    if (viewId === 'discoverView' && navLinks[1]) navLinks[1].classList.add('active');
+    if (viewId === 'categoriesView' && navLinks[0]) {
+        navLinks[0].classList.add('active');
+    }
+    if (viewId === 'discoverView' && navLinks[1]) {
+        navLinks[1].classList.add('active');
+    }
     if (currentActive) {
         currentActive.style.animation = 'proFadeSlideOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
         setTimeout(() => {
@@ -374,22 +304,15 @@ function switchView(viewId) {
     } else {
         views.forEach(v => { 
             const el = document.getElementById(v); 
-            if (el) el.classList.remove('active-view'); 
+            if (el) {
+                el.classList.remove('active-view'); 
+            }
         });
         if (nextActive) {
             nextActive.classList.add('active-view');
             nextActive.style.animation = 'proFadeSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
         }
     }
-}
-
-function escapeHtml(str) {
-    return String(str == null ? '' : str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
 }
 
 function showToast(text, isError=false) {
@@ -405,7 +328,9 @@ function showToast(text, isError=false) {
 }
 
 function getCleanUsername(node, returnHtml = false) {
-    if (!node) return returnHtml ? 'زائر' : 'زائر';
+    if (!node) {
+        return returnHtml ? 'زائر' : 'زائر';
+    }
     let clone = node.cloneNode(true);
     let iconHtml = '';
     let iconEl = clone.querySelector('.group-icon');
@@ -413,7 +338,9 @@ function getCleanUsername(node, returnHtml = false) {
         let iconText = iconEl.textContent.trim();
         iconHtml = ` <i class="material-symbols-outlined group-icon-custom" style="font-size:16px !important; vertical-align:middle !important; line-height:1 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; margin:0 4px !important;">${iconText}</i>`;
     }
+
     clone.querySelectorAll('i, svg, img').forEach(el => el.remove());
+
     let text = clone.innerText || clone.textContent || '';
     let pureText = text.replace(/بواسطة|by|من طرف|في/g, '').replace(/\s+/g, ' ').trim() || 'زائر';
     let escapedText = pureText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -427,15 +354,19 @@ function openModal(id) {
         return; 
     }
     document.getElementById(id).classList.add('active');
+    
     if (id === 'previewModal') {
-        document.getElementById(id).style.zIndex = "3000"; 
+        const modal = document.getElementById(id);
+        modal.style.zIndex = "3000"; 
     }
 }
 
 function closeModal(id) { 
     document.getElementById(id).classList.remove('active'); 
+    
     if (id === 'previewModal') {
-        document.getElementById(id).style.zIndex = "";
+        const modal = document.getElementById(id);
+        modal.style.zIndex = "";
     }
 }
 
@@ -443,24 +374,50 @@ async function updateServimgTokens() {
     try {
         let res = await fetch('/privmsg?mode=post');
         let html = await res.text();
-        extractServimgTokens(html);
-    } catch(e) {}
+        let accMatch = html.match(/servImgAccount\s*=\s*['"]([^'"]+)['"]/);
+        let idMatch = html.match(/servImgId\s*=\s*['"]([^'"]+)['"]/);
+        let fMatch = html.match(/servImgF\s*=\s*['"]([^'"]+)['"]/);
+        let tbMatch = html.match(/servImgTB\s*=\s*['"]([^'"]+)['"]/);
+        let slMatch = html.match(/servImgSL\s*=\s*['"]([^'"]+)['"]/);
+        let modeMatch = html.match(/servImgMode\s*=\s*['"]([^'"]+)['"]/);
+        let iframeMatch = html.match(/iframeSrc\s*=\s*['"]([^'"]+)['"]/);
+
+        if (accMatch && accMatch[1]) window.servImgAccount = accMatch[1];
+        if (idMatch && idMatch[1]) window.servImgId = idMatch[1];
+        if (fMatch && fMatch[1]) window.servImgF = fMatch[1];
+        if (tbMatch && tbMatch[1]) window.servImgTB = tbMatch[1];
+        if (slMatch && slMatch[1]) window.servImgSL = slMatch[1];
+        if (modeMatch && modeMatch[1]) window.servImgMode = modeMatch[1];
+
+        window.iframeSrc = 'https://servimg.com/multiupload.php?mode=' + (window.servImgMode || 'fae') + 
+                           '&account=' + encodeURIComponent(window.servImgAccount || '') + 
+                           '&id=' + (window.servImgId || '') + 
+                           '&f=' + (window.servImgF || '') + 
+                           '&tb=' + (window.servImgTB || '') + 
+                           '&sl=' + (window.servImgSL || '1');
+    } catch(e) {
+        console.warn("Could not update servimg tokens", e);
+    }
 }
 
 const AppCache = {};
 const CACHE_LIMIT = 20;
 
 async function fetchWithCache(url) {
-    if (AppCache[url]) return AppCache[url];
+    if (AppCache[url]) {
+        return AppCache[url];
+    }
     try {
         const res = await fetch(url);
         const html = await res.text();
         if (Object.keys(AppCache).length >= CACHE_LIMIT) {
-            delete AppCache[Object.keys(AppCache)[0]];
+            const firstKey = Object.keys(AppCache)[0];
+            delete AppCache[firstKey];
         }
         AppCache[url] = html; 
         return html;
     } catch (error) { 
+        console.error("Fetch Error:", error);
         return ""; 
     }
 }
@@ -479,7 +436,9 @@ function extractNumbers(str) {
             } 
         }
     }
-    if (current !== '') nums.push(current);
+    if (current !== '') {
+        nums.push(current);
+    }
     return nums;
 }
 
@@ -501,36 +460,48 @@ async function initUserSession() {
         if (html.indexOf('"session_logged_in"] = 1') !== -1 || html.indexOf('"session_logged_in"]=1') !== -1) {
             isLogged = true;
             let uParts = html.split('_userdata["username"] = "'); 
-            if (uParts.length < 2) uParts = html.split("_userdata['username'] = '");
-            if (uParts.length >= 2) username = uParts[1].split('"')[0].split("'")[0];
-            
+            if (uParts.length < 2) {
+                uParts = html.split("_userdata['username'] = '");
+            }
+            if (uParts.length >= 2) {
+                username = uParts[1].split('"')[0].split("'")[0];
+            }
             let aParts = html.split('_userdata["avatar_link"] = "'); 
-            if (aParts.length >= 2) avatar = aParts[1].split('"')[0];
-            
+            if (aParts.length >= 2) {
+                avatar = aParts[1].split('"')[0];
+            }
             let oParts = html.split('_userdata["page_logout"] = "'); 
-            if (oParts.length >= 2) logoutUrl = oParts[1].split('"')[0];
-            
+            if (oParts.length >= 2) {
+                logoutUrl = oParts[1].split('"')[0];
+            }
             let poParts = html.split('_userdata["user_posts"] = '); 
-            if (poParts.length >= 2) posts = parseInt(poParts[1]);
-            
+            if (poParts.length >= 2) {
+                posts = parseInt(poParts[1]);
+            }
             let ptParts = html.split('_userdata["user_points"] = '); 
-            if (ptParts.length >= 2) points = parseInt(ptParts[1]);
+            if (ptParts.length >= 2) {
+                points = parseInt(ptParts[1]);
+            }
         }
-    } catch(e) {}
-    
+    } catch(e) {
+        console.error("Session Init Error", e);
+    }
     window.currentUserIsGuest = !isLogged;
     const guestNameGroup = document.getElementById('guestNameGroup');
     const qrGuestName = document.getElementById('qrGuestName');
-    if (guestNameGroup) guestNameGroup.style.display = isLogged ? 'none' : 'block';
-    if (qrGuestName) qrGuestName.style.display = isLogged ? 'none' : 'block';
-    
+    if (guestNameGroup) {
+        guestNameGroup.style.display = isLogged ? 'none' : 'block';
+    }
+    if (qrGuestName) {
+        qrGuestName.style.display = isLogged ? 'none' : 'block';
+    }
     if (isLogged) {
         panel.innerHTML = `
             <div class="user-panel-pill" style="padding: 5px 15px 5px 5px; height: auto;">
                 <div class="user-info-link" style="cursor: default;">
-                    <img src="${escapeHtml(avatar)}" class="user-avatar-img" title="صورة الحساب" style="cursor: default;">
+                    <img src="${avatar}" class="user-avatar-img" title="صورة الحساب" style="cursor: default;">
                     <div style="display:flex; flex-direction:column; line-height: 1.2;">
-                        <span style="font-weight:800; font-size:14px; color:var(--text-strong);">${escapeHtml(username)}</span>
+                        <span style="font-weight:800; font-size:14px; color:var(--text-strong);">${username}</span>
                         <div style="display:flex; gap:8px; font-size:12px; color:var(--text-muted); font-weight:600; margin-top:2px;">
                             <span title="المساهمات"><i class="material-symbols-outlined" style="font-size:12px; color:var(--primary); vertical-align:middle;">chat</i> ${posts}</span>
                             <span title="النقاط"><i class="material-symbols-outlined" style="font-size:12px; color:#fbbf24; vertical-align:middle;">stars</i> ${points}</span>
@@ -570,7 +541,9 @@ window.toggleFlipSection = function(element, isSubforum) {
 const BASE_APP_PATH = window.location.pathname;
 
 function safeEncode(str) {
-    if (!str) return ''; 
+    if (!str) {
+        return ''; 
+    }
     let enc = encodeURIComponent(str);
     enc = enc.split("'").join("%27").split("(").join("%28").split(")").join("%29"); 
     return enc;
@@ -593,7 +566,9 @@ function scrollToReply() {
 
 async function loadAnnouncements() {
     const container = document.getElementById('announcementsSection'); 
-    if (!container) return;
+    if (!container) {
+        return;
+    }
     const targetForums = [2]; 
     try {
         let allTopics = [];
@@ -667,7 +642,9 @@ async function loadAnnouncements() {
 }
 
 async function loadPremiumCategories(skipPush = false) {
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH);
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH);
+    }
     switchView('categoriesView'); 
     document.getElementById('mainActionBtn').style.display = 'none';
     const container = document.getElementById('categoriesContainer');
@@ -696,16 +673,22 @@ async function loadPremiumCategories(skipPush = false) {
         let finalHTML = ''; 
         categories.forEach((cat, index) => {
             const catTitleNode = cat.querySelector('.category-title h2, .category-title span, h2.maintitle, .category-title span h2, h2, h3, .maintitle, .header');
-            if (!catTitleNode) return;
+            if (!catTitleNode) {
+                return;
+            }
             const catTitle = catTitleNode.textContent.trim(); 
             let forumsHTML = '';
             cat.querySelectorAll('.forum-section, li.row, tr.forumrow, tr.row1, tr.row2, .board, dl.icon').forEach((forumEl, fIdx) => {
                 const aTag = forumEl.querySelector('a.forumtitle, .forum-description h3 a, h2 a, a.forumlink, h3 a'); 
-                if (!aTag) return;
+                if (!aTag) {
+                    return;
+                }
                 const name = aTag.textContent.trim();
                 const url = aTag.getAttribute('href') || '';
                 let id = 0; 
-                if (url.indexOf('/f') !== -1) id = parseInt(url.split('/f')[1].split('-')[0]);
+                if (url.indexOf('/f') !== -1) {
+                    id = parseInt(url.split('/f')[1].split('-')[0]);
+                }
                 let isLocked = forumEl.classList.contains('forum_locked') || String(forumEl.className).includes('locked') || forumEl.querySelector('img[src*="locked"]');
                 let lockBadge = isLocked ? '<span style="background:var(--danger); color:#fff; padding:2px 8px; border-radius:6px; font-size:12px; margin-left:8px; display:inline-flex; align-items:center; gap:3px;"><i class="material-symbols-outlined" style="font-size:14px;">lock</i> مغلق</span>' : '';
                 let nodeIcon = isLocked ? 'lock' : 'forum';
@@ -730,8 +713,9 @@ async function loadPremiumCategories(skipPush = false) {
                 }
                 let lpAvatar = 'https://2img.net/i/fa/modernbb/pp-blank-thumb.png';
                 let avatarImg = forumEl.querySelector('img.avatar, .avatar img, .lastpost-avatar img, .avatar-default img');
-                if (avatarImg) lpAvatar = avatarImg.getAttribute('src') || avatarImg.getAttribute('data-src') || lpAvatar;
-                
+                if (avatarImg) {
+                    lpAvatar = avatarImg.getAttribute('src') || avatarImg.getAttribute('data-src') || lpAvatar;
+                }
                 let lpTitle = 'لا توجد مواضيع';
                 let lpTopicUrl = 'javascript:void(0)';
                 let lpUser = '';
@@ -748,8 +732,9 @@ async function loadPremiumCategories(skipPush = false) {
                             lpTitle = topicLink.getAttribute('title') || topicLink.textContent.trim();
                         }
                     }
-                    if (lpTitle.length > 30) lpTitle = lpTitle.substring(0, 30) + '...';
-                    
+                    if (lpTitle.length > 30) {
+                        lpTitle = lpTitle.substring(0, 30) + '...';
+                    }
                     if (!isCategoryEmpty) {
                         const authorNode = lpEl.querySelector('.forum-lastpost-author a[href^="/u"], .forum-lastpost-author strong');
                         if (authorNode) {
@@ -839,6 +824,7 @@ async function loadPremiumCategories(skipPush = false) {
                 <h3 style="font-size:18px;">خطأ في الإتصال بالخادم</h3>
             </div>
         `;
+        console.error("Load Categories Error:", e);
     }
 }
 
@@ -848,22 +834,34 @@ function extractPagination(doc, containerIds, callback) {
         c.innerHTML = '';
     });
     const pagNodes = doc.querySelectorAll('.pagination'); 
-    if (pagNodes.length === 0) return;
+    if (pagNodes.length === 0) {
+        return;
+    }
     const elements = pagNodes[0].querySelectorAll('a, strong, b');
     const addedPages = new Set();
     const buttonsToAppend = [];
     elements.forEach(el => {
-        if (el.closest('.mobile-hidden-imp')) return;
+        if (el.closest('.mobile-hidden-imp')) {
+            return;
+        }
         let text = el.textContent.trim().split(String.fromCharCode(10)).join(' ').split(String.fromCharCode(13)).join(' ').split(' ').join('');
         const isActive = (el.tagName === 'STRONG' || el.tagName === 'B') && !el.getAttribute('href');
         let isPrev = text.includes('السابق') || text === '<' || el.className.includes('prev');
         let isNext = text.includes('التالي') || text === '>' || el.className.includes('next');
         let btnContent = el.textContent.trim();
-        if (isPrev) btnContent = '<i class="material-symbols-outlined">chevron_right</i>';
-        if (isNext) btnContent = '<i class="material-symbols-outlined">chevron_left</i>';
-        if (!btnContent && !isPrev && !isNext) return;
+        if (isPrev) {
+            btnContent = '<i class="material-symbols-outlined">chevron_right</i>';
+        }
+        if (isNext) {
+            btnContent = '<i class="material-symbols-outlined">chevron_left</i>';
+        }
+        if (!btnContent && !isPrev && !isNext) {
+            return;
+        }
         const identifier = isPrev ? 'prev' : (isNext ? 'next' : text);
-        if (!identifier || addedPages.has(identifier)) return;
+        if (!identifier || addedPages.has(identifier)) {
+            return;
+        }
         addedPages.add(identifier);
         const btn = document.createElement('a'); 
         btn.className = 'page-btn'; 
@@ -897,8 +895,9 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
     if (cleanUrl.endsWith('?') || cleanUrl.endsWith('&')) {
         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
     }
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
-    
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
+    }
     currentForumId = id; 
     currentForumName = name;
     switchView('listView'); 
@@ -914,14 +913,15 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
     document.getElementById('forumPaginationBottom').innerHTML = '';
     banner.style.display = 'none'; 
     lvPermBox.style.display = 'none';
-    
     try {
         const html = await fetchWithCache(`${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`);
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const newBtn = doc.querySelector('a[href*="mode=newtopic"]');
         if (!newBtn) {
             actionBtn.style.display = 'none'; 
-            if (actionBtnBottom) actionBtnBottom.style.display = 'none';
+            if (actionBtnBottom) {
+                actionBtnBottom.style.display = 'none';
+            }
         } else if (newBtn.querySelector('img[src*="locked"]') || newBtn.textContent.includes('مغلق') || doc.querySelector('.forum_locked')) {
             isCurrentLocked = true; 
             banner.style.display = 'flex';
@@ -950,7 +950,9 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
         }
         if (id === 'latest') { 
             actionBtn.style.display = 'none'; 
-            if (actionBtnBottom) actionBtnBottom.style.display = 'none'; 
+            if (actionBtnBottom) {
+                actionBtnBottom.style.display = 'none'; 
+            }
         }
         const permsBlock = Array.from(doc.querySelectorAll('.block-content')).find(b => b.textContent.includes('تستطيع'));
         if (permsBlock && id !== 'latest') {
@@ -1022,7 +1024,9 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
             let author = 'زائر';
             let authorColor = 'var(--text-muted)';
             let authorNode = t.querySelector('.topic-author a, .posts-description p a[href^="/u"], .post-author-name a, .name strong a');
-            if (!authorNode) authorNode = t.querySelector('.topic-author, .post-author-name, .name strong, .posts-description p');
+            if (!authorNode) {
+                authorNode = t.querySelector('.topic-author, .post-author-name, .name strong, .posts-description p');
+            }
             if (authorNode) {
                 author = getCleanUsername(authorNode, true); 
                 let colNode = authorNode.querySelector('[style*="color"], font[color]') || authorNode;
@@ -1037,14 +1041,18 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
                 if (fallbackNode) { 
                     author = getCleanUsername(fallbackNode, true); 
                     let colNode = fallbackNode.querySelector('[style*="color"], font[color]') || fallbackNode; 
-                    if (colNode.style && colNode.style.color) authorColor = colNode.style.color; 
+                    if (colNode.style && colNode.style.color) {
+                        authorColor = colNode.style.color; 
+                    }
                 }
             }
             const repliesNode = t.querySelector('.posts-statistics-replies, td.posts, .block-topics-views'); 
             let replies = 0;
             if (repliesNode) { 
                 let rNums = extractNumbers(repliesNode.textContent); 
-                if (rNums.length > 0) replies = parseInt(rNums[0]); 
+                if (rNums.length > 0) {
+                    replies = parseInt(rNums[0]); 
+                }
             }
             let lockIcon = t.innerHTML.includes('مغلق') || t.querySelector('img[src*="lock"]') ? '<i class="material-symbols-outlined" style="color:var(--danger)">lock</i> ' : '';
             
@@ -1073,12 +1081,16 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
         });
         extractPagination(doc, ['forumPaginationTop', 'forumPaginationBottom'], (url) => loadForumData(id, name, url));
         enforceGroupIcons();
-    } catch(e) {}
+    } catch(e) {
+        console.error("Load Forum Data Error:", e);
+    }
 }
 
 async function loadLatestTopics(skipPush = false) {
     const targetUrl = '/search?search_id=newposts';
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + targetUrl);
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH + '?target=' + targetUrl);
+    }
     switchView('listView'); 
     document.getElementById('secTitle').innerHTML = '<i class="material-symbols-outlined">whatshot</i> أحدث المواضيع'; 
     document.getElementById('mainActionBtn').style.display = 'none'; 
@@ -1101,7 +1113,9 @@ async function loadLatestTopics(skipPush = false) {
                 } 
             }
         });
+        
         container.innerHTML = '';
+        
         if (uniqueTopics.length === 0) { 
             container.innerHTML = `
                 <div class="empty-state" style="display:flex; justify-content:center; align-items:center; flex-direction:column; gap:10px; padding: 25px;">
@@ -1138,21 +1152,29 @@ async function loadLatestTopics(skipPush = false) {
             let author = 'زائر';
             let authorColor = 'var(--text-muted)';
             let authorNode = t.querySelector('.topic-author a, .posts-description p a[href^="/u"], .post-author-name a, .name strong a, .author a, .block-topics-author a');
-            if (!authorNode) authorNode = t.querySelector('.topic-author, .post-author-name, .name strong, .posts-description p, .author');
+            if (!authorNode) {
+                authorNode = t.querySelector('.topic-author, .post-author-name, .name strong, .posts-description p, .author');
+            }
             if (authorNode) { 
                 author = getCleanUsername(authorNode, true); 
                 let colNode = authorNode.querySelector('[style*="color"], font[color]') || authorNode; 
-                if (colNode.style && colNode.style.color) authorColor = colNode.style.color; 
+                if (colNode.style && colNode.style.color) {
+                    authorColor = colNode.style.color; 
+                }
             }
             if (!author || author.includes('عضو') || author.includes('زائر')) { 
                 let fbNode = t.querySelector('.forum-lastpost-author, .last-post-author, .block-topics-lastpost-author'); 
-                if (fbNode) author = getCleanUsername(fbNode, true); 
+                if (fbNode) {
+                    author = getCleanUsername(fbNode, true); 
+                }
             }
             const repliesNode = t.querySelector('.posts-statistics-replies, td.posts, .block-topics-views, dd.posts, .block-topics-posts'); 
             let replies = 0;
             if (repliesNode) { 
                 let rNums = extractNumbers(repliesNode.textContent); 
-                if (rNums.length > 0) replies = parseInt(rNums[0]); 
+                if (rNums.length > 0) {
+                    replies = parseInt(rNums[0]); 
+                }
             }
             container.insertAdjacentHTML('beforeend', `
                 <div class="topic-item">
@@ -1179,18 +1201,24 @@ async function loadLatestTopics(skipPush = false) {
         });
         extractPagination(doc, ['forumPaginationTop', 'forumPaginationBottom'], (url) => loadForumData('latest', 'أحدث المواضيع', url));
         enforceGroupIcons();
-    } catch(e) {}
+    } catch(e) {
+        console.error("Load Latest Topics Error:", e);
+    }
 }
 
 async function loadDiscoverActivity(skipPush = false) {
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=/discover');
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH + '?target=/discover');
+    }
     switchView('discoverView'); 
     const container = document.getElementById('discoverContainer'); 
     container.innerHTML = '<div class="loader" style="margin:80px auto; display:block;"></div>';
     try {
         const doc = new DOMParser().parseFromString(await fetchWithCache('/discover?_t=' + Date.now()), 'text/html');
         const items = doc.querySelectorAll('.feed-item');
+        
         container.innerHTML = '';
+        
         if (items.length === 0) {
             container.innerHTML = window.currentUserIsGuest ? `
                 <div class="empty-state" style="padding:25px;">
@@ -1237,7 +1265,9 @@ async function loadDiscoverActivity(skipPush = false) {
             `);
         });
         enforceGroupIcons();
-    } catch(e) {}
+    } catch(e) {
+        console.error("Load Discover Error:", e);
+    }
 }
 
 async function openTopic(url, skipPush = false){
@@ -1245,8 +1275,9 @@ async function openTopic(url, skipPush = false){
     if (cleanUrl.endsWith('?') || cleanUrl.endsWith('&')) {
         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
     }
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
-    
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
+    }
     currentTopicUrl = cleanUrl; 
     switchView('topicView');
     document.getElementById('tvTitle').textContent = 'جاري التحميل...'; 
@@ -1263,7 +1294,6 @@ async function openTopic(url, skipPush = false){
     }
     try {
         const html = await fetchWithCache(`${cleanUrl}${cleanUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`);
-        extractServimgTokens(html); 
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const fLinks = Array.from(doc.querySelectorAll('a.nav, .breadcrumb a, .pathname-box a, p.nav a'));
         for (let i = fLinks.length - 1; i >= 0; i--) {
@@ -1333,20 +1363,27 @@ async function openTopic(url, skipPush = false){
                     cleanLines.push(`<div class="perms-item"><i class="material-symbols-outlined" style="color:${iconColor};">${iconName}</i> ${cleanText}</div>`);
                 }
             });
-            if (cleanLines.length > 0) permsHTML = cleanLines.join(''); 
-            else permsHTML = '<p style="color: var(--text-muted);">لا توجد صلاحيات لعرضها.</p>';
+            if (cleanLines.length > 0) {
+                permsHTML = cleanLines.join(''); 
+            } else {
+                permsHTML = '<p style="color: var(--text-muted);">لا توجد صلاحيات لعرضها.</p>';
+            }
         }
         document.getElementById('tvPermissions').innerHTML = permsHTML;
         const adminTools = doc.querySelector('.topic-admin');
         const tvAdmin = document.getElementById('tvAdminTools');
         const tvAdminBottom = document.getElementById('tvAdminToolsBottom');
         tvAdmin.innerHTML = ''; 
-        if (tvAdminBottom) tvAdminBottom.innerHTML = '';
+        if (tvAdminBottom) {
+            tvAdminBottom.innerHTML = '';
+        }
         if (adminTools) {
             let adminButtonsHTML = '';
             adminTools.querySelectorAll('a').forEach(a => {
                 const href = a.getAttribute('href'); 
-                if (!href || href.includes('split') || href.includes('merge') || href.includes('trash')) return;
+                if (!href || href.includes('split') || href.includes('merge') || href.includes('trash')) {
+                    return;
+                }
                 let icon = 'settings';
                 let customTitle = 'إجراء';
                 let isTopicDel = false;
@@ -1372,12 +1409,16 @@ async function openTopic(url, skipPush = false){
                 }
             });
             tvAdmin.innerHTML = adminButtonsHTML; 
-            if (tvAdminBottom) tvAdminBottom.innerHTML = adminButtonsHTML;
+            if (tvAdminBottom) {
+                tvAdminBottom.innerHTML = adminButtonsHTML;
+            }
         }
         const container = document.getElementById('tvPostsContainer'); 
         container.innerHTML = '';
         let rawPosts = Array.from(doc.querySelectorAll('div.post-wrap')); 
-        if (rawPosts.length === 0) rawPosts = Array.from(doc.querySelectorAll('div.post'));
+        if (rawPosts.length === 0) {
+            rawPosts = Array.from(doc.querySelectorAll('div.post'));
+        }
         let processedPosts = new Set();
         let uniquePosts = [];
         rawPosts.forEach(p => { 
@@ -1396,19 +1437,25 @@ async function openTopic(url, skipPush = false){
             let authorColor = 'var(--text-strong)';
             if (authorNode) { 
                 let colNode = authorNode.querySelector('[style*="color"], font[color]') || authorNode; 
-                if (colNode.style && colNode.style.color) authorColor = colNode.style.color; 
-                else if (colNode.getAttribute('color')) authorColor = colNode.getAttribute('color');
+                if (colNode.style && colNode.style.color) {
+                    authorColor = colNode.style.color; 
+                } else if (colNode.getAttribute('color')) {
+                    authorColor = colNode.getAttribute('color');
+                }
             }
             let rankNode = post.querySelector('.post-author-title, .tz-rank');
             let rankHTML = rankNode ? rankNode.innerHTML : 'عضو';
             let sigHTML = '';
             let sigNode = post.querySelector('.post-signature, .signature_div, .sig-content, div[id^="sig"], div[class*="signature"]');
-            if (sigNode) sigHTML = sigNode.innerHTML;
-            
+            if (sigNode) {
+                sigHTML = sigNode.innerHTML;
+            }
             let contentClone = post.querySelector('.post-content, .content, .entry-content')?.cloneNode(true);
             if (contentClone) { 
                 let innerSig = contentClone.querySelector('.post-signature, .signature_div, div[id^="sig"], div[class*="signature"]'); 
-                if (innerSig) innerSig.remove(); 
+                if (innerSig) {
+                    innerSig.remove(); 
+                }
                 contentClone.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             }
             let contentHTML = contentClone ? contentClone.innerHTML : '';
@@ -1421,8 +1468,11 @@ async function openTopic(url, skipPush = false){
                     const label = dt.textContent.trim();
                     const dd = dt.nextElementSibling; 
                     if (dd && dd.tagName.toLowerCase() === 'dd') { 
-                        if (label.includes('المساهمات') || label.includes('مشاركات')) messages = dd.textContent.trim(); 
-                        else if (label.includes('نقاط')) points = dd.textContent.trim(); 
+                        if (label.includes('المساهمات') || label.includes('مشاركات')) {
+                            messages = dd.textContent.trim(); 
+                        } else if (label.includes('نقاط')) {
+                            points = dd.textContent.trim(); 
+                        }
                     } 
                 }); 
             } else { 
@@ -1430,12 +1480,16 @@ async function openTopic(url, skipPush = false){
                 if (txt.indexOf('المساهمات') !== -1 || txt.indexOf('مشاركات') !== -1) { 
                     let parts = txt.indexOf('المساهمات') !== -1 ? txt.split('المساهمات') : txt.split('مشاركات'); 
                     let nums = extractNumbers(parts[1]); 
-                    if (nums.length > 0) messages = nums[0]; 
+                    if (nums.length > 0) {
+                        messages = nums[0]; 
+                    }
                 } 
                 if (txt.indexOf('نقاط') !== -1 || txt.indexOf('النقاط') !== -1) { 
                     let parts = txt.indexOf('نقاط') !== -1 ? txt.split('نقاط') : txt.split('النقاط'); 
                     let nums = extractNumbers(parts[1]); 
-                    if (nums.length > 0) points = nums[0]; 
+                    if (nums.length > 0) {
+                        points = nums[0]; 
+                    }
                 } 
             }
             const btnEdit = post.querySelector('a[href*="mode=editpost"]')?.getAttribute('href');
@@ -1472,11 +1526,10 @@ async function openTopic(url, skipPush = false){
                         <div class="pc-rank" style="color:${authorColor}; border-color:${authorColor}; display:flex; justify-content:center; align-items:center;">
                             ${rankHTML}
                         </div>
-                      <div class="pc-stats">
+                        <div class="pc-stats">
                             <div><i class="material-symbols-outlined" style="color: var(--primary);">chat</i> مساهمات: <b style="color:var(--text-strong);">${messages}</b></div>
                             <div><i class="material-symbols-outlined" style="color: #fbbf24;">stars</i> نقاط: <b style="color:var(--text-strong);">${points}</b></div>
                         </div>
-                        ${getUserRankProgress(messages)}
                     </div>
                     <div class="pc-content">
                         <div class="pc-meta">
@@ -1492,7 +1545,9 @@ async function openTopic(url, skipPush = false){
         setTimeout(applyLuffyAddons, 100);
         extractPagination(doc, ['topicPaginationTop', 'topicPaginationBottom'], (pUrl) => openTopic(pUrl));
         enforceGroupIcons();
-    } catch(e) {}
+    } catch(e) {
+        console.error("Open Topic Error:", e);
+    }
 }
 
 function applyLuffyAddons() {
@@ -1527,17 +1582,29 @@ function applyLuffyAddons() {
         $(this).find('a').each(function() {
             var $lnk = $(this);
             var h = $lnk.attr('href') || '';
-            if (h === '' || h.indexOf('javascript:')===0 || h.indexOf('#')===0 || $lnk.hasClass('Luffy-dl-btn')) return;
+            if (h === '' || h.indexOf('javascript:')===0 || h.indexOf('#')===0 || $lnk.hasClass('Luffy-dl-btn')) {
+                return;
+            }
             var isCloud = false;
             var clouds = ['mediafire.com', 'mega.nz', 'drive.google', 'dropbox.com', 'github.com']; 
-            clouds.forEach(c => { if (h.toLowerCase().indexOf(c) !== -1) isCloud = true; });
+            clouds.forEach(c => { 
+                if (h.toLowerCase().indexOf(c) !== -1) {
+                    isCloud = true; 
+                }
+            });
             var extRegex = false;
             var extStr = h.split('?')[0].toLowerCase();
             var exts = ['.zip', '.rar', '.7z', '.apk', '.exe', '.bin', '.mp4', '.mp3', '.pdf', '.iso']; 
-            exts.forEach(e => { if (extStr.endsWith(e)) extRegex = true; });
+            exts.forEach(e => { 
+                if (extStr.endsWith(e)) {
+                    extRegex = true; 
+                }
+            });
             if (isCloud || extRegex) {
                 var fileTxt = $lnk.text().trim(); 
-                if (fileTxt.indexOf('http')===0 || fileTxt.length > 45 || fileTxt==='') fileTxt = "ملف للتحميل المباشر";
+                if (fileTxt.indexOf('http')===0 || fileTxt.length > 45 || fileTxt==='') {
+                    fileTxt = "ملف للتحميل المباشر";
+                }
                 var tpl = `
                     <div class="Luffy-dl-card">
                         <div class="Luffy-dl-right">
@@ -1545,13 +1612,13 @@ function applyLuffyAddons() {
                                 <i class="material-symbols-outlined">folder_zip</i>
                             </div>
                             <div class="Luffy-dl-meta">
-                                <span class="Luffy-dl-title" title="${escapeHtml(fileTxt)}">${escapeHtml(fileTxt)}</span>
+                                <span class="Luffy-dl-title" title="${fileTxt}">${fileTxt}</span>
                                 <span class="Luffy-dl-sub">
                                     <i class="material-symbols-outlined">verified_user</i> آمن وجاهز للتحميل
                                 </span>
                             </div>
                         </div>
-                        <a href="${escapeHtml(h)}" target="_blank" class="Luffy-dl-btn" rel="nofollow noopener">
+                        <a href="${h}" target="_blank" class="Luffy-dl-btn" rel="nofollow noopener">
                             <i class="material-symbols-outlined" style="font-size:18px">download</i> تحميل
                         </a>
                     </div>
@@ -1570,7 +1637,7 @@ function applyLuffyAddons() {
         var tgSvg = '<svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.892-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>';
         var fbSvg = '<svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
         var xSvg = '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
-        var rdSvg = '<svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.561-1.249-1.25-1.249zm-2.752 4.698c-1.514 0-2.626-.715-2.714-.793a.31.31 0 0 1-.046-.44.309.309 0 0 1 .439-.046c.045.037.957.659 2.321.659 1.366 0 2.277-.622 2.323-.659a.311.311 0 0 1 .439.046.31.31 0 0 1-.046.44c-.088.078-1.2.793-2.716.793z"/></svg>';
+        var rdSvg = '<svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.561-1.249-1.25-1.249zm-2.752 4.698c-1.514 0-2.626-.715-2.714-.793a.31.31 0 0 1-.046-.44.309.309 0 0 1 .439-.046c.045.037.957.659 2.321.659 1.366 0 2.277-.622 2.323-.659a.311.311 0 0 1 .439.046.31.31 0 0 1-.046.44c-.088.078-1.2.793-2.716.793z"/></svg>';
         var inSvg = '<svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>';
         var hubHtml = `
             <div class="Luffy-hub-container">
@@ -1600,11 +1667,16 @@ function applyLuffyAddons() {
 $(document).on('click', '.Luffy-copy-action', async function() {
     var $btn = $(this);
     var txt = $btn.closest('.Luffy-code-wrapper').find('.Luffy-code-area code').text();
+    
     try {
         await navigator.clipboard.writeText(txt);
         $btn.html('<i class="material-symbols-outlined" style="font-size:14px">done</i> تم النسخ'); 
-        setTimeout(() => { $btn.html('<i class="material-symbols-outlined" style="font-size:14px">content_copy</i> نسخ الكود'); }, 2000); 
-    } catch(e) {}
+        setTimeout(() => { 
+            $btn.html('<i class="material-symbols-outlined" style="font-size:14px">content_copy</i> نسخ الكود'); 
+        }, 2000); 
+    } catch(e) {
+        console.error("Copy failed", e);
+    }
 });
 
 $(document).on('click', '#Luffy-hub-copy', async function() {
@@ -1612,29 +1684,43 @@ $(document).on('click', '#Luffy-hub-copy', async function() {
     var cleanUrl = window.location.href.split('#')[0];
     let nl = String.fromCharCode(10);
     let cr = String.fromCharCode(13);
+    
     let textToCopy = "📋 موضوع: " + rawTitle + cr + nl + "🔗 الرابط: " + cleanUrl;
+    
     try {
         await navigator.clipboard.writeText(textToCopy);
         showToast('تم نسخ الرابط!'); 
-    } catch (err) {}
+    } catch (err) {
+        console.error("Copy failed", err);
+    }
 });
 
 function backToList() { 
-    if (currentForumId) loadForumData(currentForumId, currentForumName); 
-    else loadPremiumCategories(); 
+    if (currentForumId) {
+        loadForumData(currentForumId, currentForumName); 
+    } else {
+        loadPremiumCategories(); 
+    }
 }
 
 async function solveRecaptcha(form) {
     const spamParams = new URLSearchParams();
     form.querySelectorAll('input[type="hidden"], input[type="text"], input[type="password"], input[type="email"], select, textarea, input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(inp => { 
-        if (inp.name && inp.name !== 'g-recaptcha-response') spamParams.append(inp.name, inp.value); 
+        if (inp.name && inp.name !== 'g-recaptcha-response') {
+            spamParams.append(inp.name, inp.value); 
+        }
     });
-    if (form.querySelector('button[name="post"]') || form.querySelector('input[name="post"]')) spamParams.append('post', '1');
-    if (form.querySelector('input[name="confirm"]')) spamParams.append('confirm', '1');
-    
+    if (form.querySelector('button[name="post"]') || form.querySelector('input[name="post"]')) {
+        spamParams.append('post', '1');
+    }
+    if (form.querySelector('input[name="confirm"]')) {
+        spamParams.append('confirm', '1');
+    }
     let sitekey = '';
     let rDiv = form.querySelector('.g-recaptcha'); 
-    if (rDiv && rDiv.getAttribute('data-sitekey')) sitekey = rDiv.getAttribute('data-sitekey');
+    if (rDiv && rDiv.getAttribute('data-sitekey')) {
+        sitekey = rDiv.getAttribute('data-sitekey');
+    }
     if (!sitekey) {
         let rcScript = document.querySelector('script[src*="recaptcha/api.js?render="]');
         if (rcScript) {
@@ -1655,7 +1741,9 @@ async function solveRecaptcha(form) {
             resolve(''); 
         }
     });
-    if (token) spamParams.append('g-recaptcha-response', token); 
+    if (token) {
+        spamParams.append('g-recaptcha-response', token); 
+    }
     return spamParams;
 }
 
@@ -1692,7 +1780,9 @@ async function handleSilentRequest(url, formData) {
                     }
                     const fd = new FormData(spamForm); 
                     fd.set(btnName, btnVal); 
-                    if (!fd.has('post')) fd.set('post', '1');
+                    if (!fd.has('post')) {
+                        fd.set('post', '1');
+                    }
                     let actionAttr = spamForm.getAttribute('action');
                     let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url;
                     try { 
@@ -1716,7 +1806,9 @@ async function handleSilentRequest(url, formData) {
                 document.getElementById('adminActionContent').innerHTML = ''; 
                 document.getElementById('adminActionContent').appendChild(spamForm);
                 setTimeout(() => { 
-                    if (window.turnstile) spamForm.querySelectorAll('.cf-turnstile').forEach(el => turnstile.render(el)); 
+                    if (window.turnstile) {
+                        spamForm.querySelectorAll('.cf-turnstile').forEach(el => turnstile.render(el)); 
+                    }
                 }, 500);
             });
         } else {
@@ -1726,15 +1818,20 @@ async function handleSilentRequest(url, formData) {
             return await handleSilentRequest(fetchUrl, spamParams);
         }
     }
+    
     return html;
 }
 
 async function appendGlobalTokens(fd, doc, actionName = 'submit') {
     let sitekey = '';
     let rcScript = (doc ? doc.querySelector('script[src*="recaptcha/api.js?render="]') : null) || document.querySelector('script[src*="recaptcha/api.js?render="]');
+    
     if (rcScript) {
-        try { sitekey = rcScript.src.split('render=')[1].split('&')[0]; } catch(e) {}
+        try {
+            sitekey = rcScript.src.split('render=')[1].split('&')[0];
+        } catch(e) {}
     }
+    
     if (sitekey) {
         if (!document.querySelector(`script[src*="${sitekey}"]`)) {
             await new Promise(resolve => {
@@ -1744,10 +1841,13 @@ async function appendGlobalTokens(fd, doc, actionName = 'submit') {
                 document.head.appendChild(script);
             });
         }
+        
         if (window.grecaptcha) {
             const token = await new Promise(resolve => {
                 grecaptcha.ready(() => {
-                    grecaptcha.execute(sitekey, {action: actionName}).then(resolve).catch(() => resolve(''));
+                    grecaptcha.execute(sitekey, {action: actionName})
+                        .then(resolve)
+                        .catch(() => resolve(''));
                 });
             });
             if (token) fd.set('g-recaptcha-response', token);
@@ -1759,13 +1859,15 @@ async function preparePostModal() {
     const btn = document.getElementById('mainActionBtn');
     const btnBottom = document.getElementById('mainActionBtnBottom');
     const origText = btn ? btn.innerHTML : '';
-    if (btn) btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
-    if (btnBottom) btnBottom.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
+    if (btn) {
+        btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
+    }
+    if (btnBottom) {
+        btnBottom.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
+    }
     try {
         const res = await fetch('/post?f=' + currentForumId + '&mode=newtopic');
-        const htmlText = await res.text();
-        extractServimgTokens(htmlText);
-        const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const types = doc.querySelectorAll('input[name="topictype"]');
         const group = document.querySelector('#postModal .radio-group');
         if (group) {
@@ -1774,12 +1876,17 @@ async function preparePostModal() {
                 types.forEach((t, index) => {
                     let val = t.value;
                     let labelText = 'عادي';
-                    if (val === '1') labelText = 'مثبت'; 
-                    else if (val === '2') labelText = 'إعلان'; 
-                    else if (val === '3') labelText = 'إعلان عام';
-                    else { 
+                    if (val === '1') {
+                        labelText = 'مثبت'; 
+                    } else if (val === '2') {
+                        labelText = 'إعلان'; 
+                    } else if (val === '3') {
+                        labelText = 'إعلان عام';
+                    } else { 
                         let next = t.nextSibling; 
-                        if (next && next.nodeType === 3 && next.textContent.trim()) labelText = next.textContent.trim(); 
+                        if (next && next.nodeType === 3 && next.textContent.trim()) {
+                            labelText = next.textContent.trim(); 
+                        }
                     }
                     group.insertAdjacentHTML('beforeend', `<label><input type="radio" name="topictype" value="${val}" ${(t.hasAttribute('checked') || index === 0) ? 'checked' : ''}> ${labelText}</label>`);
                 });
@@ -1789,25 +1896,37 @@ async function preparePostModal() {
         }
         document.getElementById('topicTitle').value = '';
         let scInst = $('#topicContent').sceditor('instance');
-        if (scInst) scInst.val(''); 
-        else document.getElementById('topicContent').value = '';
+        if (scInst) {
+            scInst.val(''); 
+        } else {
+            document.getElementById('topicContent').value = '';
+        }
         openModal('postModal');
     } catch (e) { 
         showToast('حدث خطأ أثناء فتح المحرر!', true); 
+        console.error("Prepare Post Modal Error:", e);
     } finally { 
-        if (btn) btn.innerHTML = origText; 
-        if (btnBottom) btnBottom.innerHTML = origText; 
+        if (btn) {
+            btn.innerHTML = origText; 
+        }
+        if (btnBottom) {
+            btnBottom.innerHTML = origText; 
+        }
     }
 }
 
 async function submitTopic() {
     let scInst = $('#topicContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const subject = document.getElementById('topicTitle').value.trim();
     const message = document.getElementById('topicContent').value.trim();
     const btn = document.getElementById('submitBtn');
     
-    if (!subject || !message) return showToast('يجب تعبئة العنوان والمحتوى!', true);
+    if (!subject || !message) {
+        return showToast('يجب تعبئة العنوان والمحتوى!', true);
+    }
     
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري النشر...'; 
     btn.disabled = true;
@@ -1818,7 +1937,9 @@ async function submitTopic() {
         const doc = new DOMParser().parseFromString(fText, 'text/html');
         const form = doc.querySelector('form[name="post"]');
         
-        if (!form) throw new Error("تعذر الوصول لنموذج النشر. تأكد من صلاحياتك.");
+        if (!form) {
+             throw new Error("تعذر الوصول لنموذج النشر. تأكد من صلاحياتك.");
+        }
         
         const fd = new FormData(form);
         fd.set('subject', subject); 
@@ -1834,6 +1955,7 @@ async function submitTopic() {
         }
         
         await appendGlobalTokens(fd, doc, 'submit');
+        
         let finalHtml = await handleSilentRequest('/post', fd); 
         
         let errDoc = new DOMParser().parseFromString(finalHtml, 'text/html');
@@ -1841,15 +1963,24 @@ async function submitTopic() {
         let hasPostForm = errDoc.querySelector('form[name="post"]');
         let hasSuccessMsg = finalHtml.includes('بنجاح') || finalHtml.includes('تم إرسال') || finalHtml.includes('تفعيل');
 
-        if (errorEl && errorEl.textContent.trim()) throw new Error(errorEl.textContent.trim());
-        else if (hasPostForm && !hasSuccessMsg) throw new Error("حدث خطأ أثناء النشر. تأكد من إكمال البيانات المطلوبة.");
+        if (errorEl && errorEl.textContent.trim()) {
+             throw new Error(errorEl.textContent.trim());
+        } else if (hasPostForm && !hasSuccessMsg) {
+             throw new Error("حدث خطأ أثناء النشر. تأكد من إكمال البيانات المطلوبة.");
+        }
 
         showToast('تم إرسال الموضوع بنجاح!');
-        document.getElementById('topicTitle').value = ''; 
-        if (scInst) scInst.val(''); 
-        else document.getElementById('topicContent').value = '';
         
-        for (let key in AppCache) delete AppCache[key]; 
+        document.getElementById('topicTitle').value = ''; 
+        if (scInst) {
+            scInst.val(''); 
+        } else {
+            document.getElementById('topicContent').value = '';
+        }
+        
+        for (let key in AppCache) {
+            delete AppCache[key]; 
+        }
         
         setTimeout(() => { 
             closeModal('postModal'); 
@@ -1858,6 +1989,7 @@ async function submitTopic() {
         
     } catch(e) { 
         showToast(e.message || 'فشل النشر! يرجى المحاولة مرة أخرى.', true); 
+        console.error("Submit Topic Error:", e);
     } finally { 
         btn.innerHTML = '<i class="material-symbols-outlined">publish</i> نشر الموضوع'; 
         btn.disabled = false; 
@@ -1866,11 +1998,15 @@ async function submitTopic() {
 
 async function submitReply() {
     let scInst = $('#qrContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const message = document.getElementById('qrContent').value.trim();
     const btn = document.getElementById('qrSubmitBtn');
     
-    if (!message) return showToast('لا يمكنك إرسال رد فارغ!', true);
+    if (!message) {
+        return showToast('لا يمكنك إرسال رد فارغ!', true);
+    }
     
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري النشر...'; 
     btn.disabled = true;
@@ -1890,7 +2026,9 @@ async function submitReply() {
         }
         if (!fd) { 
             let tid = 0; 
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
+            if (currentTopicUrl.indexOf('/t') !== -1) {
+                tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
+            }
             const fRes = await fetch('/post?t=' + tid + '&mode=reply'); 
             const docText = await fRes.text();
             activeDoc = new DOMParser().parseFromString(docText, 'text/html');
@@ -1908,6 +2046,7 @@ async function submitReply() {
         }
         
         await appendGlobalTokens(fd, activeDoc, 'submit');
+        
         let finalHtml = await handleSilentRequest('/post', fd); 
         
         let errDoc = new DOMParser().parseFromString(finalHtml, 'text/html');
@@ -1915,18 +2054,29 @@ async function submitReply() {
         let hasPostForm = errDoc.querySelector('form[name="post"]');
         let hasSuccessMsg = finalHtml.includes('بنجاح') || finalHtml.includes('تم إرسال') || finalHtml.includes('تفعيل');
 
-        if (errorEl && errorEl.textContent.trim()) throw new Error(errorEl.textContent.trim());
-        else if (hasPostForm && !hasSuccessMsg) throw new Error("حدث خطأ أثناء إرسال الرد. تأكد من إكمال البيانات المطلوبة.");
+        if (errorEl && errorEl.textContent.trim()) {
+             throw new Error(errorEl.textContent.trim());
+        } else if (hasPostForm && !hasSuccessMsg) {
+             throw new Error("حدث خطأ أثناء إرسال الرد. تأكد من إكمال البيانات المطلوبة.");
+        }
 
         showToast('تم إرسال الرد بنجاح!');
-        if (scInst) scInst.val(''); 
-        else document.getElementById('qrContent').value = '';
         
-        for (let key in AppCache) delete AppCache[key];
+        if (scInst) {
+            scInst.val(''); 
+        } else {
+            document.getElementById('qrContent').value = '';
+        }
+        
+        for (let key in AppCache) {
+            delete AppCache[key];
+        }
+        
         setTimeout(() => openTopic(currentTopicUrl), 1000);
         
     } catch(e) { 
         showToast(e.message || 'فشل إرسال الرد!', true); 
+        console.error("Submit Reply Error:", e);
     } finally { 
         btn.innerHTML = '<i class="material-symbols-outlined">send</i> نشر الرد'; 
         btn.disabled = false; 
@@ -1935,17 +2085,23 @@ async function submitReply() {
 
 async function previewTopic() {
     let scInst = $('#topicContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const subject = document.getElementById('topicTitle').value.trim();
     const message = document.getElementById('topicContent').value.trim();
     const btn = document.getElementById('previewBtn');
-    if (!subject || !message) return showToast('يجب تعبئة العنوان والمحتوى للمعاينة!', true);
+    if (!subject || !message) {
+        return showToast('يجب تعبئة العنوان والمحتوى للمعاينة!', true);
+    }
     btn.innerHTML = 'جاري المعاينة...'; 
     btn.disabled = true;
     try {
         const fRes = await fetch('/post?f=' + currentForumId + '&mode=newtopic');
         const form = new DOMParser().parseFromString(await fRes.text(), 'text/html').querySelector('form[name="post"]');
-        if (!form) throw new Error("Form not found");
+        if (!form) {
+            throw new Error("Form not found");
+        }
         const fd = new FormData(form); 
         fd.set('subject', subject); 
         fd.set('message', message); 
@@ -1975,12 +2131,19 @@ async function previewTopic() {
 
 async function previewReply() {
     let scInst = $('#qrContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const message = document.getElementById('qrContent').value.trim();
     const btn = document.getElementById('qrPreviewBtn');
-    if (!message) return showToast('لا يمكنك معاينة رد فارغ!', true);
+    
+    if (!message) {
+        return showToast('لا يمكنك معاينة رد فارغ!', true);
+    }
+    
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري المعاينة...'; 
     btn.disabled = true;
+    
     try {
         let fd;
         if (activeReplyFormHTML) { 
@@ -1991,19 +2154,25 @@ async function previewReply() {
         }
         if (!fd) { 
             let tid = 0; 
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
+            if (currentTopicUrl.indexOf('/t') !== -1) {
+                tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
+            }
             const fRes = await fetch('/post?t=' + tid + '&mode=reply'); 
             fd = new FormData(new DOMParser().parseFromString(await fRes.text(), 'text/html').querySelector('form[name="post"]')); 
         }
+        
         fd.set('message', message); 
         fd.set('preview', '1');
+        
         if (window.currentUserIsGuest) { 
             const qName = document.getElementById('qrGuestName')?.value.trim(); 
             fd.set('username', qName ? qName : 'زائر'); 
         }
+        
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
+        
         if (previewBlock) { 
             previewBlock.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML; 
@@ -2025,45 +2194,16 @@ async function prepareEdit(url) {
     const btn = document.getElementById('editSubmitBtn'); 
     btn.innerText = 'جاري الجلب...'; 
     btn.disabled = true; 
-    const editRadioGroup = document.getElementById('editRadioGroup');
-    const editSubjectGroup = document.getElementById('editSubjectGroup');
-    if (editRadioGroup) { editRadioGroup.innerHTML = ''; editRadioGroup.style.display = 'none'; }
-    if (editSubjectGroup) editSubjectGroup.style.display = 'none';
     openModal('editModal');
     try {
         const doc = new DOMParser().parseFromString(await (await fetch(url)).text(), 'text/html');
         const msgVal = doc.querySelector('textarea[name="message"]')?.value || '';
         let scInst = $('#editContent').sceditor('instance'); 
-        if (scInst) scInst.val(msgVal); 
-        else document.getElementById('editContent').value = msgVal;
-
-        const subjectInput = doc.querySelector('input[name="subject"]');
-        if (subjectInput && editSubjectGroup) {
-            document.getElementById('editSubject').value = subjectInput.value || '';
-            editSubjectGroup.style.display = '';
+        if (scInst) {
+            scInst.val(msgVal); 
+        } else {
+            document.getElementById('editContent').value = msgVal;
         }
-
-        const types = doc.querySelectorAll('input[name="topictype"]');
-        if (types.length > 0 && editRadioGroup) {
-            editRadioGroup.innerHTML = '';
-            types.forEach((t, index) => {
-                let val = t.value;
-                let labelText = 'عادي';
-                if (val === '1') labelText = 'مثبت'; 
-                else if (val === '2') labelText = 'إعلان'; 
-                else if (val === '3') labelText = 'إعلان عام';
-                else { 
-                    let next = t.nextSibling; 
-                    if (next && next.nodeType === 3 && next.textContent.trim()) labelText = next.textContent.trim(); 
-                }
-                editRadioGroup.insertAdjacentHTML('beforeend', `<label><input type="radio" name="edit_topictype" value="${val}" ${t.hasAttribute('checked') ? 'checked' : ''}> ${labelText}</label>`);
-            });
-            if (!editRadioGroup.querySelector('input:checked') && editRadioGroup.querySelector('input')) {
-                editRadioGroup.querySelector('input').checked = true;
-            }
-            editRadioGroup.style.display = '';
-        }
-
         btn.innerHTML = '<i class="material-symbols-outlined">save</i> حفظ التعديلات'; 
         btn.disabled = false;
     } catch(e) { 
@@ -2073,33 +2213,38 @@ async function prepareEdit(url) {
 
 async function previewEdit() {
     let scInst = $('#editContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const message = document.getElementById('editContent').value.trim();
     const btn = document.getElementById('editPreviewBtn');
-    if (!message) return showToast('لا يمكنك معاينة نص فارغ!', true);
+    
+    if (!message) {
+        return showToast('لا يمكنك معاينة نص فارغ!', true);
+    }
+    
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري المعاينة...'; 
     btn.disabled = true;
+    
     try {
         const formHTML = await (await fetch(editActionUrl)).text();
         const form = new DOMParser().parseFromString(formHTML, 'text/html').querySelector('form[name="post"]');
         const fd = new FormData(form);
+        
         fd.set('message', message); 
         fd.set('preview', '1');
-        const pvSubjectGroup = document.getElementById('editSubjectGroup');
-        if (pvSubjectGroup && pvSubjectGroup.style.display !== 'none') {
-            const pvSubject = document.getElementById('editSubject');
-            if (pvSubject) fd.set('subject', pvSubject.value.trim());
-        }
-        const pvTypeChecked = document.querySelector('input[name="edit_topictype"]:checked');
-        if (pvTypeChecked) fd.set('topictype', pvTypeChecked.value);
+        
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
         const previewBlock = doc.querySelector('.post-entry, .content, .postbody, .preview-content, div[class*="content"]');
+        
         if (previewBlock) { 
             previewBlock.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             document.getElementById('previewContentHtml').innerHTML = previewBlock.innerHTML; 
+            
             closeModal('editModal');
             openModal('previewModal'); 
+            
             const backBtn = document.querySelector('#previewModal .btn-action');
             if(backBtn) {
                 backBtn.onclick = function() {
@@ -2107,6 +2252,7 @@ async function previewEdit() {
                     openModal('editModal');
                 };
             }
+            
             setTimeout(applyLuffyAddons, 100); 
         } else {
             showToast('تعذر استخراج المعاينة من السيرفر.', true);
@@ -2121,7 +2267,9 @@ async function previewEdit() {
 
 async function submitEdit() {
     let scInst = $('#editContent').sceditor('instance'); 
-    if (scInst) scInst.updateOriginal();
+    if (scInst) {
+        scInst.updateOriginal();
+    }
     const message = document.getElementById('editContent').value.trim();
     const btn = document.getElementById('editSubmitBtn');
     btn.innerText = 'جاري الحفظ...'; 
@@ -2131,19 +2279,17 @@ async function submitEdit() {
         const fd = new FormData(form);
         fd.set('message', message); 
         fd.set('post', '1');
-        const editSubjectGroup = document.getElementById('editSubjectGroup');
-        if (editSubjectGroup && editSubjectGroup.style.display !== 'none') {
-            const editSubject = document.getElementById('editSubject');
-            if (editSubject) fd.set('subject', editSubject.value.trim());
-        }
-        const editTypeChecked = document.querySelector('input[name="edit_topictype"]:checked');
-        if (editTypeChecked) fd.set('topictype', editTypeChecked.value);
         await appendGlobalTokens(fd, document, 'submit');
         await handleSilentRequest('/post', fd); 
         showToast('تم التعديل بنجاح!');
-        if (scInst) scInst.val(''); 
-        else document.getElementById('editContent').value = '';
-        for (let key in AppCache) delete AppCache[key];
+        if (scInst) {
+            scInst.val(''); 
+        } else {
+            document.getElementById('editContent').value = '';
+        }
+        for (let key in AppCache) {
+            delete AppCache[key];
+        }
         setTimeout(() => { 
             closeModal('editModal'); 
             openTopic(currentTopicUrl); 
@@ -2161,8 +2307,11 @@ function quotePost(author, htmlContent) {
     temp.innerHTML = htmlContent;
     const quoteStr = String.fromCharCode(10) + '[quote="' + author + '"]' + temp.textContent.trim() + '[/quote]' + String.fromCharCode(10);
     let scInst = $('#qrContent').sceditor('instance'); 
-    if (scInst) scInst.insert(quoteStr); 
-    else document.getElementById('qrContent').value += quoteStr;
+    if (scInst) {
+        scInst.insert(quoteStr); 
+    } else {
+        document.getElementById('qrContent').value += quoteStr;
+    }
     document.getElementById('quickReplyBox').scrollIntoView({ behavior: 'smooth' }); 
     showToast('تم إدراج الاقتباس بنجاح!');
 }
@@ -2179,10 +2328,15 @@ async function silentAdminAction(url, actionName, isTopicDelete = false) {
             await handleSilentRequest(fetchUrl, fd); 
         }
         showToast('تم ' + actionName + ' بنجاح!'); 
-        for (let key in AppCache) delete AppCache[key];
+        for (let key in AppCache) {
+            delete AppCache[key];
+        }
         setTimeout(() => { 
-            if (isTopicDelete) backToList(); 
-            else openTopic(currentTopicUrl); 
+            if (isTopicDelete) {
+                backToList(); 
+            } else {
+                openTopic(currentTopicUrl); 
+            }
         }, 1000);
     } catch(e) { 
         showToast('فشل الإجراء: ' + actionName, true); 
@@ -2324,19 +2478,25 @@ function processAuthHTML(html, url, title, icon) {
     let formNode = doc.querySelector('form[name="form_login"], form[action*="/login"], form[action*="/register"], form#frmAgreement, form[name="form_confirm"], form[name="post"], form[name="register"], form#ucp');
     if (!formNode) { 
         const pForms = Array.from(doc.querySelectorAll('form')).filter(f => f.method && f.method.toLowerCase() === 'post' && !f.action.includes('search')); 
-        if (pForms.length > 0) formNode = pForms[0]; 
+        if (pForms.length > 0) {
+            formNode = pForms[0]; 
+        }
     }
     let mainBox;
     if (formNode) {
         mainBox = formNode.closest('.panel, .forumline, .body-content, .cp, .main-inner');
-        if (!mainBox || mainBox.id === 'wrap' || mainBox.classList.contains('layout')) mainBox = formNode.parentElement;
+        if (!mainBox || mainBox.id === 'wrap' || mainBox.classList.contains('layout')) {
+            mainBox = formNode.parentElement;
+        }
     } else {
         let agreeLink = doc.querySelector('a[href*="agreed=true"]');
         if (agreeLink) {
             mainBox = agreeLink.closest('.panel, .forumline, .body-content, .cp, .main-inner') || agreeLink.parentElement;
         } else {
             let infoBlock = doc.querySelector('.block, .errorwrap, .error-box, p.error, .forumline');
-            if (infoBlock && !infoBlock.querySelector('#search-main')) mainBox = infoBlock;
+            if (infoBlock && !infoBlock.querySelector('#search-main')) {
+                mainBox = infoBlock;
+            }
         }
     }
     if (!mainBox) { 
@@ -2346,7 +2506,9 @@ function processAuthHTML(html, url, title, icon) {
         return; 
     }
     let strayError = doc.querySelector('.errorwrap, .error-box, p.error'); 
-    if (strayError && !mainBox.contains(strayError)) mainBox.prepend(strayError);
+    if (strayError && !mainBox.contains(strayError)) {
+        mainBox.prepend(strayError);
+    }
     mainBox.querySelectorAll('header, #page-footer, .navbar, .page-header, script, aside').forEach(el => el.remove());
     mainBox.querySelectorAll('a').forEach(a => {
         let text = a.textContent;
@@ -2420,7 +2582,9 @@ function processAuthHTML(html, url, title, icon) {
     });
     mainBox.querySelectorAll('table, td, tr, div').forEach(el => { 
         el.style.backgroundColor = 'transparent'; 
-        if (el.tagName === 'TABLE') el.style.width = '100%'; 
+        if (el.tagName === 'TABLE') {
+            el.style.width = '100%'; 
+        }
     });
     content.innerHTML = ''; 
     content.appendChild(mainBox);
@@ -2436,7 +2600,9 @@ function processAuthHTML(html, url, title, icon) {
     }
     if (!dynamicKey) {
         let rDiv = doc.querySelector('.g-recaptcha');
-        if (rDiv) dynamicKey = rDiv.getAttribute('data-sitekey');
+        if (rDiv) {
+            dynamicKey = rDiv.getAttribute('data-sitekey');
+        }
     }
     if (dynamicKey && !document.querySelector(`script[src*="${dynamicKey}"]`)) {
         const rcLoad = document.createElement('script');
@@ -2456,7 +2622,9 @@ function processAuthHTML(html, url, title, icon) {
             if (window.turnstile) { 
                 turnstileDivs.forEach(el => { 
                     if (!el.innerHTML.trim()) { 
-                        try { turnstile.render(el, { sitekey: el.getAttribute('data-sitekey'), action: el.getAttribute('data-action') || 'register' }); } catch(e) {} 
+                        try { 
+                            turnstile.render(el, { sitekey: el.getAttribute('data-sitekey'), action: el.getAttribute('data-action') || 'register' }); 
+                        } catch(e) {} 
                     } 
                 }); 
             } else {
@@ -2471,7 +2639,9 @@ function processAuthHTML(html, url, title, icon) {
             if (window.grecaptcha && grecaptcha.render) { 
                 recaptchaDivs.forEach(el => { 
                     if (!el.innerHTML.trim()) { 
-                        try { grecaptcha.render(el, { 'sitekey': el.getAttribute('data-sitekey') }); } catch(e) {} 
+                        try { 
+                            grecaptcha.render(el, { 'sitekey': el.getAttribute('data-sitekey') }); 
+                        } catch(e) {} 
                     } 
                 }); 
             } 
@@ -2483,8 +2653,11 @@ function processAuthHTML(html, url, title, icon) {
             const submitBtn = e.submitter || f.querySelector('input[type="submit"], button[type="submit"]');
             let origVal = submitBtn ? (submitBtn.value || submitBtn.textContent) : 'معالجة';
             if (submitBtn && submitBtn.tagName !== 'FORM') { 
-                if (submitBtn.tagName === 'INPUT') submitBtn.value = 'جاري المعالجة...'; 
-                else submitBtn.textContent = 'جاري المعالجة...'; 
+                if (submitBtn.tagName === 'INPUT') {
+                    submitBtn.value = 'جاري المعالجة...'; 
+                } else {
+                    submitBtn.textContent = 'جاري المعالجة...'; 
+                }
                 submitBtn.disabled = true; 
             }
             try {
@@ -2496,14 +2669,20 @@ function processAuthHTML(html, url, title, icon) {
                 if (turnstileDivs.length > 0 && !fd.get('cf-turnstile-response')) { 
                     showToast('الرجاء التأكيد على أنك لست روبوت!', true); 
                     if (submitBtn && submitBtn.tagName !== 'FORM') { 
-                        if (submitBtn.tagName === 'INPUT') submitBtn.value = origVal; 
-                        else submitBtn.textContent = origVal; 
+                        if (submitBtn.tagName === 'INPUT') {
+                            submitBtn.value = origVal; 
+                        } else {
+                            submitBtn.textContent = origVal; 
+                        }
                         submitBtn.disabled = false; 
                     } 
                     return; 
                 }
-                if (e.submitter && e.submitter.name) fd.set(e.submitter.name, e.submitter.value || '1'); 
-                else if (submitBtn && submitBtn.name) fd.set(submitBtn.name, submitBtn.value || '1');
+                if (e.submitter && e.submitter.name) {
+                    fd.set(e.submitter.name, e.submitter.value || '1'); 
+                } else if (submitBtn && submitBtn.name) {
+                    fd.set(submitBtn.name, submitBtn.value || '1');
+                }
                 if (f.id === 'frmAgreement') { 
                     fd.set('agreed', 'true'); 
                     fd.set('agreement', '1'); 
@@ -2535,15 +2714,21 @@ function processAuthHTML(html, url, title, icon) {
                             } 
                         }); 
                     });
-                    if (token) fd.set('g-recaptcha-response', token);
+                    if (token) {
+                        fd.set('g-recaptcha-response', token);
+                    }
                 }
                 if (isGet) { 
                     const urlObj = new URL(fetchUrl, window.location.origin); 
-                    for (const [key, value] of fd.entries()) urlObj.searchParams.append(key, value); 
+                    for (const [key, value] of fd.entries()) {
+                        urlObj.searchParams.append(key, value); 
+                    }
                     fetchUrl = urlObj.toString(); 
                     fetchOptions = { method: 'GET' }; 
                 } else { 
-                    if (!fd.has('login') && fetchUrl.includes('login')) fd.append('login', '1'); 
+                    if (!fd.has('login') && fetchUrl.includes('login')) {
+                        fd.append('login', '1'); 
+                    }
                     fetchOptions = { method: 'POST', body: fd }; 
                 }
                 const postHtml = await (await fetch(fetchUrl, fetchOptions)).text();
@@ -2576,8 +2761,11 @@ function processAuthHTML(html, url, title, icon) {
                         if (isError) { 
                             showToast(errorText, true); 
                             if (submitBtn && submitBtn.tagName !== 'FORM') { 
-                                if (submitBtn.tagName === 'INPUT') submitBtn.value = origVal; 
-                                else submitBtn.textContent = origVal; 
+                                if (submitBtn.tagName === 'INPUT') {
+                                    submitBtn.value = origVal; 
+                                } else {
+                                    submitBtn.textContent = origVal; 
+                                }
                                 submitBtn.disabled = false; 
                             } 
                         } else {
@@ -2592,8 +2780,11 @@ function processAuthHTML(html, url, title, icon) {
                     if (isError) { 
                         showToast(errorText, true); 
                         if (submitBtn && submitBtn.tagName !== 'FORM') { 
-                            if (submitBtn.tagName === 'INPUT') submitBtn.value = origVal; 
-                            else submitBtn.textContent = origVal; 
+                            if (submitBtn.tagName === 'INPUT') {
+                                submitBtn.value = origVal; 
+                            } else {
+                                submitBtn.textContent = origVal; 
+                            }
                             submitBtn.disabled = false; 
                         } 
                     } else {
@@ -2603,8 +2794,11 @@ function processAuthHTML(html, url, title, icon) {
             } catch(err) {
                 showToast('حدث خطأ في الاتصال!', true); 
                 if (submitBtn && submitBtn.tagName !== 'FORM') { 
-                    if (submitBtn.tagName === 'INPUT') submitBtn.value = origVal; 
-                    else submitBtn.textContent = origVal; 
+                    if (submitBtn.tagName === 'INPUT') {
+                        submitBtn.value = origVal; 
+                    } else {
+                        submitBtn.textContent = origVal; 
+                    }
                     submitBtn.disabled = false; 
                 }
             }
@@ -2629,7 +2823,9 @@ async function performLogout(url) {
 }
 
 async function loadSettingsPage(url, skipPush = false) {
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + url);
+    if (!skipPush) {
+        window.history.pushState({}, '', BASE_APP_PATH + '?target=' + url);
+    }
     let container = document.getElementById('settingsView');
     if (!container) { 
         container = document.createElement('div'); 
@@ -2661,15 +2857,23 @@ async function loadSettingsPage(url, skipPush = false) {
             rawTabs.forEach(t => {
                 let tName = t.textContent.trim();
                 let tHref = t.getAttribute('href'); 
-                if(!tHref || tHref === '#') tHref = url;
-                if(tName.includes('أصدقاء') || tName.includes('منبوذين') || tName.includes('متابعة') || tName.includes('إشعار') || tName.includes('مراقبة') || tName.includes('مفضل')) return; 
+                if(!tHref || tHref === '#') {
+                    tHref = url;
+                }
+                if(tName.includes('أصدقاء') || tName.includes('منبوذين') || tName.includes('متابعة') || tName.includes('إشعار') || tName.includes('مراقبة') || tName.includes('مفضل')) {
+                    return; 
+                }
                 let cleanHref = tHref.split('&_t=')[0];
                 let cleanCurrent = url.split('&_t=')[0];
                 let isActive = cleanHref === cleanCurrent || t.parentElement.classList.contains('activetab');
                 let icon = 'settings'; 
-                if(tName.includes('معلومات')) icon = 'badge'; 
-                else if(tName.includes('تفضيلات')) icon = 'tune'; 
-                else if(tName.includes('صورة')) icon = 'account_circle';
+                if(tName.includes('معلومات')) {
+                    icon = 'badge'; 
+                } else if(tName.includes('تفضيلات')) {
+                    icon = 'tune'; 
+                } else if(tName.includes('صورة')) {
+                    icon = 'account_circle';
+                }
                 tabsHTML += `<a href="${cleanHref}" onclick="event.preventDefault(); loadSettingsPage('${cleanHref}')" class="settings-tab-link ${isActive ? 'active' : ''}"><i class="material-symbols-outlined">${icon}</i> <span>${tName}</span></a>`;
             });
             document.getElementById('settingsTabsList').innerHTML = tabsHTML;
@@ -2680,7 +2884,9 @@ async function loadSettingsPage(url, skipPush = false) {
             let fid = f.getAttribute('id') || '';
             let faction = f.getAttribute('action') || '';
             let fname = f.getAttribute('name') || '';
-            if(fid === 'search-main' || faction.includes('search_where') || faction.includes('search_keywords')) continue;
+            if(fid === 'search-main' || faction.includes('search_where') || faction.includes('search_keywords')) {
+                continue;
+            }
             if(fid === 'ucp' || faction.includes('profile') || fname === 'post' || faction.includes('search_id=') || f.querySelector('.block') || f.querySelector('.forumline')) { 
                 formNode = f; 
                 break; 
@@ -2689,10 +2895,14 @@ async function loadSettingsPage(url, skipPush = false) {
         if (formNode) {
             formNode.querySelectorAll('label, tr').forEach(el => { 
                 let htmlContent = el.innerHTML || ''; 
-                if (htmlContent.includes('تغيير كلمة السر') || htmlContent.includes('change_password') || htmlContent.includes('تصدير البيانات') || htmlContent.includes('rgpd.php')) el.style.display = 'none';
+                if (htmlContent.includes('تغيير كلمة السر') || htmlContent.includes('change_password') || htmlContent.includes('تصدير البيانات') || htmlContent.includes('rgpd.php')) {
+                    el.style.display = 'none';
+                } 
             });
             formNode.querySelectorAll('.block').forEach(b => {
-                if(b.innerHTML.includes('rgpd.php')) b.style.display = 'none';
+                if(b.innerHTML.includes('rgpd.php')) {
+                    b.style.display = 'none';
+                }
                 b.className = 'settings-card'; 
             });
             formNode.className = 'settings-card'; 
@@ -2741,8 +2951,11 @@ async function loadSettingsPage(url, skipPush = false) {
                 btn.dataset.orig = bVal;
                 if (bName === 'avatargallery') { 
                     let parentLabel = btn.closest('label'); 
-                    if (parentLabel) parentLabel.remove(); 
-                    else btn.remove(); 
+                    if (parentLabel) {
+                        parentLabel.remove(); 
+                    } else {
+                        btn.remove(); 
+                    }
                     return; 
                 }
                 btn.className = 'btn-action'; 
@@ -2762,21 +2975,27 @@ async function loadSettingsPage(url, skipPush = false) {
                 d.style.marginBottom = '10px'; 
             });
             let sigBox = formNode.querySelector('#smiley-box.sig');
-            if(sigBox) sigBox.remove();
+            if(sigBox) {
+                sigBox.remove();
+            }
             let sigTextarea = formNode.querySelector('textarea[name="signature"], textarea[name="message"]');
             if (sigTextarea) {
                 let uniqueId = 'sig_editor_' + Date.now(); 
                 sigTextarea.id = uniqueId; 
                 sigTextarea.style.minHeight = '150px';
                 setTimeout(() => { 
-                    if(window.initSCEditor) window.initSCEditor('#' + uniqueId, false); 
+                    if(window.initSCEditor) {
+                        window.initSCEditor('#' + uniqueId, false); 
+                    }
                 }, 300);
             }
             formNode.onsubmit = async (e) => {
                 e.preventDefault();
                 if (sigTextarea) { 
                     let scInst = $('#' + sigTextarea.id).sceditor('instance'); 
-                    if (scInst) scInst.updateOriginal(); 
+                    if (scInst) {
+                        scInst.updateOriginal(); 
+                    }
                 }
                 let submitBtn = e.submitter || formNode.querySelector('input[type="submit"], button[type="submit"]');
                 let origVal = submitBtn ? (submitBtn.dataset.orig || submitBtn.value) : 'سجّل';
@@ -2792,7 +3011,9 @@ async function loadSettingsPage(url, skipPush = false) {
                     await handleSilentRequest(actionUrl, fd); 
                     showToast('تم حفظ البيانات بنجاح!');
                     Object.keys(AppCache).forEach(k => { 
-                        if (k.includes('profile')) delete AppCache[k]; 
+                        if (k.includes('profile')) {
+                            delete AppCache[k]; 
+                        }
                     });
                     setTimeout(async () => { 
                         await initUserSession(); 
@@ -2813,10 +3034,14 @@ async function loadSettingsPage(url, skipPush = false) {
             let altContent = doc.querySelector('.cp-content, #cp-main, .forumline, .block-content, .cp');
             if (altContent) {
                  let searchInAlt = altContent.querySelector('#search-main, form[action*="search_where"]'); 
-                 if (searchInAlt) searchInAlt.remove();
+                 if (searchInAlt) {
+                     searchInAlt.remove();
+                 }
                  altContent.querySelectorAll('label, tr').forEach(el => { 
                      let htmlContent = el.innerHTML || ''; 
-                     if (htmlContent.includes('تغيير كلمة السر') || htmlContent.includes('change_password') || htmlContent.includes('تصدير البيانات') || htmlContent.includes('rgpd.php')) el.style.display = 'none'; 
+                     if (htmlContent.includes('تغيير كلمة السر') || htmlContent.includes('change_password') || htmlContent.includes('تصدير البيانات') || htmlContent.includes('rgpd.php')) {
+                         el.style.display = 'none'; 
+                     }
                  });
                  document.getElementById('settingsContentArea').innerHTML = '<div class="settings-card">' + altContent.innerHTML + '</div>';
             } else {
@@ -2853,7 +3078,9 @@ window.addEventListener('popstate', (e) => {
 
 async function buildSidebar() {
     const sidebar = document.getElementById('mainSidebar'); 
-    if (!sidebar) return;
+    if (!sidebar) {
+        return;
+    }
     sidebar.innerHTML = `
         <div class="shq-sidebar">
             <div class="shq-block">
@@ -2936,11 +3163,17 @@ async function buildSidebar() {
             let htmlStr = blockOnline.innerHTML;
             let txtContent = blockOnline.textContent;
             let totalMatch = txtContent.match(/ككل هناك\s*(\d+)/) || txtContent.match(/هناك\s*(\d+)/) || txtContent.match(/المتواجدون الآن[:\s]*(\d+)/);
-            if (totalMatch) totalOnline = totalMatch[1];
+            if (totalMatch) {
+                totalOnline = totalMatch[1];
+            }
             let memMatch = txtContent.match(/(\d+)\s*أعضاء/) || txtContent.match(/(\d+)\s*عُ?ضو/);
-            if (memMatch) onlineMembersCount = memMatch[1];
+            if (memMatch) {
+                onlineMembersCount = memMatch[1];
+            }
             let guestMatch = txtContent.match(/(\d+)\s*زائر/) || txtContent.match(/(\d+)\s*زوار/);
-            if (guestMatch) guestsCount = guestMatch[1];
+            if (guestMatch) {
+                guestsCount = guestMatch[1];
+            }
             if (onlineMembersCount === "0" && totalOnline !== "0") { 
                 let calc = parseInt(totalOnline) - parseInt(guestsCount || "0"); 
                 onlineMembersCount = calc > 0 ? calc.toString() : "0"; 
@@ -2952,7 +3185,9 @@ async function buildSidebar() {
                 tempLegend.querySelectorAll('a').forEach(a => {
                     let gColor = rgb2hex(a.style.color || '').toLowerCase();
                     let pureGName = getCleanUsername(a, false);
-                    if (gColor && pureGName) dynamicGroups[gColor] = pureGName;
+                    if (gColor && pureGName) {
+                        dynamicGroups[gColor] = pureGName;
+                    }
                 });
             }
             let activeSection = htmlStr.split('المفتاح')[0];
@@ -2975,105 +3210,65 @@ async function buildSidebar() {
         } else {
             document.getElementById('wGroups').innerHTML = '<div class="empty-widget">لا يوجد مجموعات</div>';
         }
-
         let seenLinks = new Set();
         let staffArr = [];
-        let membersArr = [];
-
+        let displayedMembers = [];
         onlineLinks.forEach(a => {
             let href = a.getAttribute('href'); 
-            if (seenLinks.has(href)) return;
+            if (seenLinks.has(href)) {
+                return;
+            }
             seenLinks.add(href);
-            
             let span = a.querySelector('.usr_grp_clr') || a;
             let color = rgb2hex(span.style.color || a.style.color || '').toLowerCase();
             let pureName = getCleanUsername(a, false);
             let htmlName = getCleanUsername(a, true);
-            
-            if (!pureName || pureName === 'زائر') return;
-            
+            if (!pureName || pureName === 'زائر') {
+                return;
+            }
             let groupName = dynamicGroups[color] || ''; 
             let isNormalMember = groupName === '' || groupName.includes('عضو |') || groupName.includes('عضو نشيط') || groupName.includes('عضو مقيد');
-            
             if (!isNormalMember && groupName !== '') {
                 staffArr.push({ name: htmlName, pureName: pureName, href: href, color: color, role: groupName });
             } else {
-                membersArr.push({ name: htmlName, pureName: pureName, href: href, color: color || 'var(--text-strong)' });
+                displayedMembers.push(`<span class="online-member-chip" style="color:${color || 'var(--text-strong)'}; border-color:${color ? color+'40' : 'var(--item-border)'}; cursor:default;" title="${pureName}"><i class="material-symbols-outlined" style="font-size:14px;">account_circle</i> <span class="chip-name" style="display:inline-flex; align-items:center;">${htmlName}</span></span>`);
             }
         });
-
         document.getElementById('wStats').innerHTML = `
             <dl class="shq-pairs"><dt>إجمالي الأعضاء</dt><dd>${forumTotalMembers}</dd></dl>
             <dl class="shq-pairs"><dt>المتواجدون الآن</dt><dd>${totalOnline}</dd></dl>
             <dl class="shq-pairs"><dt>الأعضاء المتصلين</dt><dd>${onlineMembersCount}</dd></dl>
             <dl class="shq-pairs"><dt>الزوار</dt><dd>${guestsCount}</dd></dl>
         `;
-
         if (staffArr.length > 0) {
-            document.getElementById('wStaff').innerHTML = '<ul class="shq-list" id="dynamicStaffList"></ul>';
-            staffArr.forEach(async (s) => {
+            let staffHtmlArr = staffArr.map(s => { 
                 let displayRole = s.role;
                 if(displayRole.includes('الإدارة التنفيذية') || displayRole.includes('Executive')) {
                     displayRole = 'الإدارة التنفيذية | Executive <i class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">verified</i>';
                 }
-                let uniqueImgId = 'staff-avatar-' + s.pureName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-                let li = document.createElement('li');
-                li.className = 'shq-list-item';
-                li.innerHTML = `
-                    <div class="shq-content-row">
-                        <div class="shq-content-figure">
-                            <img id="${uniqueImgId}" src="https://2img.net/i/fa/modernbb/pp-blank-thumb.png" style="border: 2px solid ${s.color};">
+                return `
+                    <li class="shq-list-item">
+                        <div class="shq-content-row">
+                            <div class="shq-content-figure">
+                                <img src="https://2img.net/i/fa/modernbb/pp-blank-thumb.png" style="border: 2px solid ${s.color};">
+                            </div>
+                            <div class="shq-content-main" style="gap: 0;">
+                                <span class="shq-content-title" style="color:${s.color}; line-height: 1; display:flex; align-items:center; cursor:default;">${s.name}</span>
+                                <div class="shq-content-minor" style="line-height: 1; margin-top: 4px;">${displayRole}</div>
+                            </div>
                         </div>
-                        <div class="shq-content-main" style="gap: 0;">
-                            <span class="shq-content-title" style="color:${s.color}; line-height: 1; display:flex; align-items:center; cursor:default;">${s.name}</span>
-                            <div class="shq-content-minor" style="line-height: 1; margin-top: 4px;">${displayRole}</div>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('dynamicStaffList').appendChild(li);
-
-                try {
-                    let html = await fetchWithCache(s.href);
-                    let doc = new DOMParser().parseFromString(html, 'text/html');
-                    let avatarImg = doc.querySelector('.forum-profile-avatar img, .module-profile-avatar img, .user-avatar img, img.avatar, #profile-advanced-right img');
-                    if(avatarImg && avatarImg.src && !avatarImg.src.includes('pp-blank-thumb')) {
-                        let imgElement = document.getElementById(uniqueImgId);
-                        if(imgElement) imgElement.src = avatarImg.src;
-                    }
-                } catch(e) {}
+                    </li>
+                `; 
             });
+            document.getElementById('wStaff').innerHTML = `<ul class="shq-list">${staffHtmlArr.join('')}</ul>`;
         } else {
             document.getElementById('wStaff').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px; font-weight:700;">لا يوجد إداريين متصلين</div>';
         }
-
-        if (membersArr.length > 0) {
-            document.getElementById('wOnline').innerHTML = `<div class="online-members-grid" id="dynamicMembersList"></div>`;
-            membersArr.slice(0, 20).forEach(async (m) => {
-                let uniqueImgId = 'member-avatar-' + m.pureName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-                let chip = document.createElement('span');
-                chip.className = 'online-member-chip';
-                chip.style.cssText = `color:${m.color}; border-color:${m.color}40; cursor:default; padding: 4px 10px; display:inline-flex; align-items:center; gap:8px;`;
-                chip.title = m.pureName;
-                chip.innerHTML = `
-                    <img id="${uniqueImgId}" src="https://2img.net/i/fa/modernbb/pp-blank-thumb.png" style="width:20px; height:20px; border-radius:50%; object-fit:cover; border:1px solid ${m.color}60;">
-                    <span class="chip-name" style="display:inline-flex; align-items:center;">${m.name}</span>
-                `;
-                document.getElementById('dynamicMembersList').appendChild(chip);
-
-                try {
-                    let html = await fetchWithCache(m.href);
-                    let doc = new DOMParser().parseFromString(html, 'text/html');
-                    let avatarImg = doc.querySelector('.forum-profile-avatar img, .module-profile-avatar img, .user-avatar img, img.avatar, #profile-advanced-right img');
-                    if(avatarImg && avatarImg.src && !avatarImg.src.includes('pp-blank-thumb')) {
-                        let imgElement = document.getElementById(uniqueImgId);
-                        if(imgElement) imgElement.src = avatarImg.src;
-                    }
-                } catch(e) {}
-            });
+        if (displayedMembers.length > 0) {
+            document.getElementById('wOnline').innerHTML = `<div class="online-members-grid">${displayedMembers.slice(0, 20).join('')}</div>`;
         } else {
             document.getElementById('wOnline').innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; font-weight:700;">لا يوجد أعضاء متصلين</div>';
         }
-
         try {
             const memHtml = await fetchWithCache('/memberlist?mode=joined&order=DESC');
             const memDoc = new DOMParser().parseFromString(memHtml, 'text/html'); 
@@ -3083,10 +3278,14 @@ async function buildSidebar() {
             let members = Array.from(memDoc.querySelectorAll('.member-block, tr.row1, tr.row2, tr.member, table tbody tr'));
             for (let m of members) {
                 let a = m.querySelector('a[href^="/u"]'); 
-                if (!a) continue;
+                if (!a) {
+                    continue;
+                }
                 let pureName = getCleanUsername(a, false);
                 let htmlName = getCleanUsername(a, true);
-                if (validMembers.find(v => v === pureName) || validMembers.length >= 5) continue;
+                if (validMembers.find(v => v === pureName) || validMembers.length >= 5) {
+                    continue;
+                }
                 let joinDate = 'مؤخراً';
                 m.querySelectorAll('.member-details div').forEach(div => {
                     if(div.textContent.includes('تاريخ التسجيل')) {
@@ -3100,10 +3299,14 @@ async function buildSidebar() {
                     if (dateNode) {
                         let rawText = dateNode.textContent;
                         let dateMatch = rawText.match(/\d{1,4}[-/]\d{1,2}[-/]\d{1,4}/);
-                        if (dateMatch) joinDate = dateMatch[0];
+                        if (dateMatch) {
+                            joinDate = dateMatch[0];
+                        }
                     } else {
                         let match = m.textContent.match(/(?:تاريخ التسجيل|انضم)[:\s]*([\d/.-]+)/);
-                        if (match) joinDate = match[1].trim();
+                        if (match) {
+                            joinDate = match[1].trim();
+                        }
                     }
                 }
                 validMembers.push(pureName);
@@ -3150,8 +3353,11 @@ async function startApp() {
 window.addEventListener('scroll', function() { 
     const sc = document.getElementById('scrollActions'); 
     if (sc) { 
-        if (window.scrollY > 300) sc.classList.add('visible'); 
-        else sc.classList.remove('visible'); 
+        if (window.scrollY > 300) {
+            sc.classList.add('visible'); 
+        } else {
+            sc.classList.remove('visible'); 
+        }
     } 
 });
 
@@ -3164,7 +3370,9 @@ async function buildFooterStats() {
         let latestHTML = '';
         let count = 0;
         items.forEach(item => {
-            if (count >= 5) return; 
+            if (count >= 5) {
+                return; 
+            }
             const titleNode = item.querySelector("title");
             const linkNode = item.querySelector("link");
             if (titleNode && linkNode) {
@@ -3197,10 +3405,14 @@ async function buildFooterStats() {
         let validMembers = [];
         Array.from(memDoc.querySelectorAll('.member-block, tr.row1, tr.row2, tr.member, table tbody tr')).forEach(m => {
             let a = m.querySelector('a[href^="/u"]'); 
-            if (!a) return; 
+            if (!a) {
+                return; 
+            }
             let pureName = getCleanUsername(a, false);
             let htmlName = getCleanUsername(a, true);
-            if (validMembers.find(v => v.pureName === pureName) || validMembers.length >= 5) return; 
+            if (validMembers.find(v => v.pureName === pureName) || validMembers.length >= 5) {
+                return; 
+            }
             let posts = '0';
             let foundPosts = false;
             m.querySelectorAll('.member-details div').forEach(div => {
@@ -3216,10 +3428,14 @@ async function buildFooterStats() {
                 let postsNode = m.querySelector('.member-posts, .posts, td:nth-child(3), td:nth-child(4)');
                 if (postsNode) { 
                     let nums = postsNode.textContent.match(/\d+/g); 
-                    if (nums) posts = nums.join(''); 
+                    if (nums) {
+                        posts = nums.join(''); 
+                    }
                 } else { 
                     let match = m.textContent.match(/(?:مساهمات|مشاركات)[:\s]*(\d+)/) || m.textContent.match(/(\d+)[\s:]*(?:مساهمات|مشاركات)/); 
-                    if (match) posts = match[1]; 
+                    if (match) {
+                        posts = match[1]; 
+                    }
                 }
             }
             let avatarImg = m.querySelector('img.avatar, .avatar img, img');
@@ -3259,10 +3475,14 @@ async function buildFooterStats() {
         let validMembers = [];
         Array.from(memDoc.querySelectorAll('.member-block, tr.row1, tr.row2, tr.member, table tbody tr')).forEach(m => {
             let a = m.querySelector('a[href^="/u"]'); 
-            if (!a) return; 
+            if (!a) {
+                return; 
+            }
             let pureName = getCleanUsername(a, false);
             let htmlName = getCleanUsername(a, true);
-            if (validMembers.find(v => v.pureName === pureName) || validMembers.length >= 5) return; 
+            if (validMembers.find(v => v.pureName === pureName) || validMembers.length >= 5) {
+                return; 
+            }
             let joinDate = 'مؤخراً';
             m.querySelectorAll('.member-details div').forEach(div => {
                 if (div.textContent.includes('تاريخ التسجيل')) {
@@ -3276,10 +3496,14 @@ async function buildFooterStats() {
                 if (dateNode) {
                     let rawText = dateNode.textContent;
                     let dateMatch = rawText.match(/\d{1,4}[-/]\d{1,2}[-/]\d{1,4}/);
-                    if (dateMatch) joinDate = dateMatch[0];
+                    if (dateMatch) {
+                        joinDate = dateMatch[0];
+                    }
                 } else {
                     let match = m.textContent.match(/(?:تاريخ التسجيل|انضم)[:\s]*([\d/.-]+)/);
-                    if (match) joinDate = match[1].trim();
+                    if (match) {
+                        joinDate = match[1].trim();
+                    }
                 }
             }
             let avatarImg = m.querySelector('img.avatar, .avatar img, img');
