@@ -154,15 +154,45 @@ function toggleMenu(menuId) {
 function openSearch() { document.getElementById('searchModal').classList.add('active'); document.getElementById('searchInput').focus(); }
 function closeSearch() { document.getElementById('searchModal').classList.remove('active'); document.getElementById('searchInput').value = ''; document.getElementById('searchResults').innerHTML = '<div class="search-placeholder">قم بكتابة حرفين على الأقل لبدء البحث...</div>'; }
 
+var _liveSearchTimer = null;
 function performSearch() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const query = document.getElementById('searchInput').value.trim();
     const resultsContainer = document.getElementById('searchResults');
     if(query.length < 2) { resultsContainer.innerHTML = '<div class="search-placeholder">قم بكتابة حرفين على الأقل لبدء البحث...</div>'; return; }
-    const filtered = dummySearchData.filter(item => item.title.toLowerCase().includes(query));
-    if(filtered.length === 0) { resultsContainer.innerHTML = '<div class="search-placeholder">لا توجد نتائج مطابقة لـ "'+query+'"</div>'; return; }
-    let html = '';
-    filtered.forEach(item => { html += `<div class="search-result-item"><h4><a href="#">${item.title}</a></h4><span><i class="fas fa-folder-open"></i> ${item.section}</span></div>`; });
-    resultsContainer.innerHTML = html;
+
+    clearTimeout(_liveSearchTimer);
+    _liveSearchTimer = setTimeout(function() {
+        resultsContainer.innerHTML = '<div class="search-placeholder"><i class="fas fa-spinner fa-spin"></i> جارِ البحث في المنتدى...</div>';
+        fetch('/search?search_keywords=' + encodeURIComponent(query))
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+                var links = doc.querySelectorAll('a[href^="/t"]');
+                var seen = {};
+                var out = '';
+                var count = 0;
+                links.forEach(function(a) {
+                    if (count >= 10) { return; }
+                    var href = a.getAttribute('href') || '';
+                    var m = href.match(/^\/t(\d+)[p-]/);
+                    if (!m) { return; }
+                    var title = (a.textContent || '').trim();
+                    if (title.length < 3 || seen[m[1]]) { return; }
+                    seen[m[1]] = true;
+                    count++;
+                    out += '<div class="search-result-item"><h4><a href="' + href + '">' + title.replace(/</g,'&lt;') + '</a></h4></div>';
+                });
+                if (count === 0) {
+                    resultsContainer.innerHTML = '<div class="search-placeholder">لا توجد نتائج مطابقة لـ "' + query.replace(/</g,'&lt;') + '" — اضغط Enter للبحث المتقدم</div>';
+                } else {
+                    out += '<div style="text-align:center; padding:10px;"><a href="/search?search_keywords=' + encodeURIComponent(query) + '" style="color: var(--primary-color, #8b5cf6); font-weight:bold;">عرض كل النتائج <i class="fas fa-arrow-left"></i></a></div>';
+                    resultsContainer.innerHTML = out;
+                }
+            })
+            .catch(function() {
+                resultsContainer.innerHTML = '<div class="search-placeholder">تعذر البحث الفوري — اضغط Enter للانتقال لصفحة البحث</div>';
+            });
+    }, 400);
 }
 
 function changeFontSize(step) {
@@ -502,9 +532,11 @@ $(document).ready(function() {
         }
     });
 
-    Fancybox.bind('[data-fancybox="gallery"]', {
-        Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } }
-    });
+    if (typeof Fancybox !== 'undefined') {
+        Fancybox.bind('[data-fancybox="gallery"]', {
+            Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } }
+        });
+    }
 
     $('.flx-contact-toggle').on('click', function(e) {
         e.preventDefault();
