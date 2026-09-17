@@ -202,9 +202,11 @@ $(document).ready(function() {
         }
     });
 
-    Fancybox.bind('[data-fancybox="gallery"]', {
-        Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } }
-    });
+    if (typeof Fancybox !== 'undefined') {
+        Fancybox.bind('[data-fancybox="gallery"]', {
+            Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } }
+        });
+    }
 
     $('.flx-contact-toggle').on('click', function(e) {
         e.preventDefault();
