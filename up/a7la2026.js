@@ -1,3 +1,43 @@
+(function() {
+    const myUrl = "https://www.facebook.com/Flying1free"; 
+    const myName = "تصميم و برمجة :- الطائر الحر";
+
+    function checkDesignerRights() {
+        var linkEl = document.getElementById('designer-copy-link');
+        var isTampered = false;
+
+        if (!linkEl) {
+            isTampered = true;
+        } else {
+            var currentHref = linkEl.getAttribute('href') || "";
+            if (!currentHref.includes(myUrl)) {
+                isTampered = true;
+            }
+            if (!linkEl.innerText.includes(myName)) {
+                isTampered = true;
+            }
+            var styles = window.getComputedStyle(linkEl);
+            if (styles.display === 'none' || styles.visibility === 'hidden' || parseFloat(styles.opacity) === 0 || parseFloat(styles.fontSize) === 0) {
+                isTampered = true;
+            }
+        }
+
+        if (isTampered) {
+            document.body.innerHTML = `
+                <div style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#111827; color:#f9fafb; flex-direction:column; text-align:center; padding:20px; font-family:'Tajawal', Arial, sans-serif; direction:rtl;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 5rem; color: #ef4444; margin-bottom: 20px;"></i>
+                    <h1 style="color:#ef4444; font-size:3rem; margin-bottom:15px; font-weight:900; word-spacing: 8px;">تم&nbsp;إيقاف&nbsp;الموقع!</h1>
+                    <p style="font-size:1.5rem; line-height:1.8; word-spacing: 5px;">عذراً،&nbsp;لقد&nbsp;تم&nbsp;إزالة&nbsp;أو&nbsp;التلاعب&nbsp;بحقوق&nbsp;المصمم&nbsp;الأصلي&nbsp;للموقع.<br>يرجى&nbsp;استرجاع&nbsp;حقوق&nbsp;<a href="${myUrl}" target="_blank" style="color:#3b82f6; text-decoration:underline; font-weight:bold;">${myName}</a>&nbsp;ليعمل&nbsp;الموقع&nbsp;بشكل&nbsp;طبيعي.</p>
+                </div>
+            `;
+            document.body.style.overflow = "hidden";
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', checkDesignerRights);
+    setInterval(checkDesignerRights, 2000);
+})();
+
 const root = document.documentElement;
 const dummySearchData = [
     { title: "تعلم الجافاسكريبت من الصفر للاحتراف", section: "تطوير الويب" },
@@ -358,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let response = await fetch(cleanUrl);
             let htmlText = await response.text();
             let parser = new DOMParser();
-            let doc = parser.parseFromString(htmlText, "text/html");
+            let doc = parser.parseFromString(htmlText, 'text/html');
             let ogImageTag = doc.querySelector('meta[property="og:image"]');
             let finalImageUrl = fallbackImage;
 
@@ -435,7 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
     startSlideTimer();
 });
 
- $(document).ready(function() {
+$(document).ready(function() {
     var savedLayout = localStorage.getItem('forum_layout');
     if (savedLayout === 'grid') {
         setForumLayout('grid');
