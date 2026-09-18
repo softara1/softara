@@ -74,6 +74,9 @@ function shareTopic(platform) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    /* حارس تشغيل-مرة-واحدة للسلايدر (مكرر في الملفين - كان يسرّع التبديل للضعف) */
+    if (window.__flxSliderDone) { return; }
+    window.__flxSliderDone = true;
     const sliderContainer = document.getElementById('flx-dynamic-slider');
     if (!sliderContainer) return;
 
@@ -176,6 +179,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 $(document).ready(function() {
+    /* حارس تشغيل-مرة-واحدة: هذه الكتلة مكررة في a7la-Topics.js و a7la2026.js
+       وكان تكرار ربط الاحداث يسبب: وميض زر بيانات التواصل (فتح ثم اغلاق فوري)
+       وارسال الاعجاب مرتين وجلب صور المعجبين مرتين */
+    if (window.__flxTopicUiDone) { return; }
+    window.__flxTopicUiDone = true;
     var savedLayout = localStorage.getItem('forum_layout');
     if (savedLayout === 'grid') {
         setForumLayout('grid');
@@ -252,7 +260,7 @@ $(document).ready(function() {
                 
                 if(username !== "" && profileUrl !== "#") {
                     var defaultAvatar = 'https://i.servimg.com/u/f60/19/93/33/22/user10.png'; 
-                    likersHTML += '<a href="'+profileUrl+'" class="flx-liker-chip" id="'+tempId+'"><img src="'+defaultAvatar+'" alt="'+username+'"> <span>'+username+'</span></a>';
+                    likersHTML += '<a href="'+profileUrl+'" class="flx-liker-chip" id="'+tempId+'" data-title="'+username+'" title="'+username+'"><img src="'+defaultAvatar+'" alt="'+username+'"> <span>'+username+'</span></a>';
                     
                     if(avatarCache[profileUrl]) {
                         setTimeout(function(){ $('#' + tempId + ' img').attr('src', avatarCache[profileUrl]); }, 0);
