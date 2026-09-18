@@ -258,6 +258,10 @@ function toggleSubBoards(btn) {
 }
 
 function initUserDataAndNotifications() {
+    /* حارس تشغيل-مرة-واحدة: يمنع الربط المزدوج لو تحمّل الملف مرتين */
+    if (window.__flxUserNotifDone) { return; }
+    window.__flxUserNotifDone = true;
+
     if (typeof _userdata !== "undefined") {
         if (_userdata.avatar && _userdata.avatar !== "") {
             let extractedAvatar = "";
@@ -281,56 +285,148 @@ function initUserDataAndNotifications() {
         }
     }
 
-    setInterval(function() {
-        const faNotif = document.getElementById('fa_notifications');
-        const customBadge = document.getElementById('customNotifBadge');
-        if(faNotif && customBadge) {
-            const notifCount = faNotif.textContent || faNotif.innerText;
-            if(notifCount && parseInt(notifCount) > 0) {
-                customBadge.textContent = notifCount;
-                customBadge.style.display = 'inline-block';
-            } else {
-                customBadge.style.display = 'none';
-            }
+    /* ==========================================================
+       محرك الإشعارات المستقل — يجلب الإشعارات مباشرة من نقطة
+       /notif الرسمية للمنصة دون أي اعتماد على شريط الأدوات
+       (الشريط لا يُنشأ أصلاً مع قوالب awesomebb المخصصة).
+       يغذي: شارة الجرس customNotifBadge + قائمة notificationsBox
+       ========================================================== */
+    var _notifStore = [];
+    var _notifUnread = 0;
+
+    function flxEscapeHtml(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function flxNotifIcon(type) {
+        var map = {0:'fa-envelope', 1:'fa-flag', 2:'fa-user-plus', 3:'fa-users', 4:'fa-check', 5:'fa-comment', 6:'fa-exclamation-triangle', 7:'fa-reply', 8:'fa-at', 9:'fa-hashtag', 10:'fa-bullhorn', 11:'fa-heart', 12:'fa-heart-broken', 13:'fa-folder-open', 14:'fa-medal', 15:'fa-star', 16:'fa-comment-dots', 17:'fa-gift'};
+        return map[type] || 'fa-bell';
+    }
+
+    function flxNotifText(item) {
+        var t = (item && item.text) || {};
+        var rawName = (t.from && t.from.name) ? String(t.from.name) : '';
+        var name = rawName ? ('<b>' + flxEscapeHtml(rawName) + '</b> ') : '';
+        var rawTitle = (t.post && t.post.topic_title) ? String(t.post.topic_title) : '';
+        var T = rawTitle ? (' «' + flxEscapeHtml(rawTitle) + '»') : '';
+        switch (t.type) {
+            case 0:  return name + 'أرسل إليك رسالة خاصة';
+            case 1:  return name + 'قدّم بلاغاً يحتاج مراجعة';
+            case 2:  return name + 'أرسل إليك طلب صداقة';
+            case 3:  return name + 'طلب الانضمام إلى مجموعة تديرها';
+            case 4:  return name + 'قبل طلب الصداقة';
+            case 5:  return name + 'كتب على حائط ملفك الشخصي';
+            case 6:  return 'بلاغ إساءة جديد بحاجة للمراجعة';
+            case 7:  return name + 'رد في موضوع تتابعه' + T;
+            case 8:  return name + 'أشار إليك في موضوع' + T;
+            case 9:  return name + 'استخدم وسمك في موضوع' + T;
+            case 10: return 'إعلان جديد في المنتدى';
+            case 11: return name + 'أعجب بمشاركتك' + T;
+            case 12: return name + 'أبدى عدم إعجابه بمشاركتك' + T;
+            case 13: return name + 'أنشأ موضوعاً في قسم تتابعه' + T;
+            case 14: return 'حصلت على وسام أو جائزة جديدة';
+            case 15: return name + 'نشر موضوعاً جديداً' + T;
+            case 16: return name + 'نشر رداً جديداً' + T;
+            case 17: return name + 'أرسل لك تبرعاً';
+            default: return 'إشعار جديد لديك';
         }
-    }, 1000);
+    }
 
-    const customNotifBtn = document.getElementById('customNotifBtn');
-    if(customNotifBtn) {
-        customNotifBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const listContainer = document.getElementById('customNotifList');
-            if(!listContainer) return;
-            
-            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">جاري تحميل الإشعارات... <i class="fas fa-spinner fa-spin"></i></div>';
+    function flxNotifLink(item) {
+        var t = (item && item.text) || {};
+        switch (t.type) {
+            case 0:  return '/privmsg?folder=inbox';
+            case 2:
+            case 3:  return '/profile?mode=editprofile&page_profil=friends';
+            case 5:  return '/u' + ((typeof _userdata !== 'undefined' && _userdata.user_id) || '');
+            case 14: return '/profile?mode=editprofile&page_profil=awards';
+            default: break;
+        }
+        if (t.post && t.post.topic_id) { return '/t' + t.post.topic_id; }
+        if (t.from && t.from.id) { return '/u' + t.from.id; }
+        return '/';
+    }
 
-            const faNotifBtn = document.getElementById('fa_notifications');
-            if (faNotifBtn) {
-                faNotifBtn.click(); 
-                
-                let checkAttempts = 0;
-                const checkNotifs = setInterval(function() {
-                    const nativeNotifs = document.getElementById('notif_list');
-                    if (nativeNotifs && nativeNotifs.innerHTML.trim() !== '') {
-                        clearInterval(checkNotifs); 
-                        listContainer.innerHTML = nativeNotifs.innerHTML;
-                        
-                        const liveNotif = document.getElementById('live_notif');
-                        if(liveNotif) liveNotif.style.display = 'none';
-                    }
-                    checkAttempts++;
-                    if(checkAttempts >= 20) {
-                        clearInterval(checkNotifs);
-                        if (listContainer.innerHTML.includes('جاري تحميل')) {
-                            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">لا توجد إشعارات جديدة حالياً.</div>';
-                        }
-                    }
-                }, 200);
-            } else {
-                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#e74c3c;">شريط أدوات المنتدى مخفي، لا يمكن جلب الإشعارات.</div>';
-            }
+    function flxApplyBadge() {
+        var badge = document.getElementById('customNotifBadge');
+        if (!badge) { return; }
+        if (_notifUnread > 0) {
+            badge.textContent = _notifUnread > 99 ? '+99' : String(_notifUnread);
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function flxRenderNotifList() {
+        var listContainer = document.getElementById('customNotifList');
+        if (!listContainer) { return; }
+        if (!_notifStore.length) {
+            listContainer.innerHTML = '<div style="text-align:center; padding:24px 12px; color:#94a3b8;"><i class="far fa-bell-slash" style="font-size:26px; display:block; margin-bottom:8px;"></i>لا توجد إشعارات حالياً</div>';
+            return;
+        }
+        var out = '<ul style="list-style:none; margin:0; padding:0;">';
+        _notifStore.forEach(function(item) {
+            var isUnread = !item.read;
+            out += '<li style="display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-bottom:1px solid rgba(148,163,184,.15);' + (isUnread ? ' background:rgba(139,92,246,.07);' : ' opacity:.6;') + '">'
+                 + '<i class="fas ' + flxNotifIcon(item.text && item.text.type) + '" style="margin-top:3px; color:var(--primary-color, #8b5cf6); width:16px; text-align:center;"></i>'
+                 + '<a href="' + flxNotifLink(item) + '" style="color:inherit; text-decoration:none; line-height:1.7; flex:1;">' + flxNotifText(item) + '</a>'
+                 + (isUnread ? '<span title="غير مقروء" style="width:8px; height:8px; border-radius:50%; background:#ef4444; margin-top:7px; flex-shrink:0;"></span>' : '')
+                 + '</li>';
+        });
+        out += '</ul>';
+        listContainer.innerHTML = out;
+    }
+
+    function flxMarkAllRead() {
+        var ids = [];
+        _notifStore.forEach(function(it) {
+            if (!it.read && it.text && it.text.id) { ids.push(it.text.id); }
+        });
+        if (!ids.length) { return; }
+        jQuery.post('/notif', { id: ids }).done(function() {
+            _notifStore.forEach(function(it) { it.read = 1; });
+            _notifUnread = 0;
+            flxApplyBadge();
+            flxRenderNotifList();
         });
     }
+    window.flxMarkAllRead = flxMarkAllRead;
+
+    window.flxRefreshNotifications = function(callback) {
+        if (typeof jQuery === 'undefined') { return; }
+        jQuery.getJSON('/notif').done(function(data) {
+            _notifStore = (data && data.store) || [];
+            _notifUnread = (data && data.unread) || 0;
+            flxApplyBadge();
+            if (typeof callback === 'function') { callback(); }
+        }).fail(function() {
+            if (typeof callback === 'function') { callback(); }
+        });
+    };
+
+    var customNotifBtn = document.getElementById('customNotifBtn');
+    if (customNotifBtn) {
+        customNotifBtn.addEventListener('click', function(e) {
+            var box = document.getElementById('notificationsBox');
+            /* الفتح تتم إدارته عبر toggleMenu — نحدّث القائمة فقط عند الفتح الفعلي */
+            if (box && !box.classList.contains('active')) { return; }
+            var listContainer = document.getElementById('customNotifList');
+            if (!listContainer) { return; }
+            if (!_notifStore.length) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">جاري تحميل الإشعارات... <i class="fas fa-spinner fa-spin"></i></div>';
+            }
+            window.flxRefreshNotifications(function() {
+                flxRenderNotifList();
+                /* تحديد الكل كمقروء بعد 3 ثوانٍ من الفتح (نفس سلوك المنصة) */
+                setTimeout(flxMarkAllRead, 3000);
+            });
+        });
+    }
+
+    /* جلب فوري عند تحميل الصفحة + تحديث دوري كل 45 ثانية */
+    window.flxRefreshNotifications();
+    setInterval(function() { window.flxRefreshNotifications(); }, 45000);
 }
 
 (function() {
@@ -403,10 +499,29 @@ document.addEventListener("DOMContentLoaded", function () {
     if(searchModalEl) {
         searchModalEl.addEventListener('click', function(e) { if(e.target === this) closeSearch(); });
     }
+    /* إغلاق كل النوافذ المنبثقة (التخصيص/الإشعارات/قائمة العضو) عند النقر خارجها */
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.nav-icons') && !event.target.closest('#settingsPanel')) { 
-            document.querySelectorAll('.dropdown-panel').forEach(d => d.classList.remove('active')); 
+        if (event.target.closest && event.target.closest('[onclick*="toggleMenu"]')) { return; }
+        var panelIds = ['settingsPanel', 'notificationsBox', 'userDropdown'];
+        for (var pi = 0; pi < panelIds.length; pi++) {
+            var pnl = document.getElementById(panelIds[pi]);
+            if (pnl && pnl.contains(event.target)) { return; }
         }
+        if (event.target.closest && (event.target.closest('.dropdown-panel') || event.target.closest('.settings-sidebar'))) { return; }
+        panelIds.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.classList.remove('active'); }
+        });
+        document.querySelectorAll('.dropdown-panel').forEach(function(d) { d.classList.remove('active'); });
+    });
+    /* ومفتاح Escape يغلقها أيضاً */
+    document.addEventListener('keydown', function(event) {
+        if (event.key !== 'Escape') { return; }
+        ['settingsPanel', 'notificationsBox', 'userDropdown'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.classList.remove('active'); }
+        });
+        document.querySelectorAll('.dropdown-panel').forEach(function(d) { d.classList.remove('active'); });
     });
 
     loadSettings(); 
