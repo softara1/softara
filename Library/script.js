@@ -1,15 +1,37 @@
-var servImgAccount = window.servImgAccount || 'salveb@mamabood.com';
-var servImgId = window.servImgId || 'f16a39f08e356f7d8da4511105f405d8';
-var servImgF = window.servImgF || '13386037';
-var servImgTB = window.servImgTB || '1637088248';
-var servImgSL = window.servImgSL || '';
-var servImgMode = window.servImgMode || 'fae';
+/* =========================================================
+   ✦ بيانات Servimg مثبّتة على حساب z-zone (للاستخدام من softara)
+   ✦ تم إزالة "|| window.servImg..." لمنع updateServimgTokens
+      من تغطيتها ببيانات softara لاحقاً
+   ========================================================= */
+var servImgAccount = 'salveb@mamabood.com';
+var servImgId = 'f16a39f08e356f7d8da4511105f405d8';
+var servImgF = '13386037';
+var servImgTB = String(Date.now());
+var servImgSL = '';
+var servImgMode = 'fae';
 var iframeSrc = '/smilies?mode=smilies_frame&t=1785531294';
 var SCE_TopicID = '';
 var illiwebDomain = 'https://illipro.net/';
 var servimgDomain = 'servimg.com';
 var INTRANET = 0;
 var quick_reply = '';
+
+/* ✦ منع updateServimgTokens من تغطية بيانات z-zone ببيانات softara */
+Object.defineProperty(window, 'servImgAccount', {
+    get: function() { return 'salveb@mamabood.com'; },
+    set: function() { /* تجاهل — تبقى بيانات z-zone */ },
+    configurable: false
+});
+Object.defineProperty(window, 'servImgId', {
+    get: function() { return 'f16a39f08e356f7d8da4511105f405d8'; },
+    set: function() { /* تجاهل */ },
+    configurable: false
+});
+Object.defineProperty(window, 'servImgF', {
+    get: function() { return '13386037'; },
+    set: function() { /* تجاهل */ },
+    configurable: false
+});
 
 (function initThemes() {
     try {
@@ -371,33 +393,9 @@ function closeModal(id) {
 }
 
 async function updateServimgTokens() {
-    try {
-        let res = await fetch('/privmsg?mode=post');
-        let html = await res.text();
-        let accMatch = html.match(/servImgAccount\s*=\s*['"]([^'"]+)['"]/);
-        let idMatch = html.match(/servImgId\s*=\s*['"]([^'"]+)['"]/);
-        let fMatch = html.match(/servImgF\s*=\s*['"]([^'"]+)['"]/);
-        let tbMatch = html.match(/servImgTB\s*=\s*['"]([^'"]+)['"]/);
-        let slMatch = html.match(/servImgSL\s*=\s*['"]([^'"]+)['"]/);
-        let modeMatch = html.match(/servImgMode\s*=\s*['"]([^'"]+)['"]/);
-        let iframeMatch = html.match(/iframeSrc\s*=\s*['"]([^'"]+)['"]/);
-
-        if (accMatch && accMatch[1]) window.servImgAccount = accMatch[1];
-        if (idMatch && idMatch[1]) window.servImgId = idMatch[1];
-        if (fMatch && fMatch[1]) window.servImgF = fMatch[1];
-        if (tbMatch && tbMatch[1]) window.servImgTB = tbMatch[1];
-        if (slMatch && slMatch[1]) window.servImgSL = slMatch[1];
-        if (modeMatch && modeMatch[1]) window.servImgMode = modeMatch[1];
-
-        window.iframeSrc = 'https://servimg.com/multiupload.php?mode=' + (window.servImgMode || 'fae') + 
-                           '&account=' + encodeURIComponent(window.servImgAccount || '') + 
-                           '&id=' + (window.servImgId || '') + 
-                           '&f=' + (window.servImgF || '') + 
-                           '&tb=' + (window.servImgTB || '') + 
-                           '&sl=' + (window.servImgSL || '1');
-    } catch(e) {
-        console.warn("Could not update servimg tokens", e);
-    }
+    /* ✦ معطّلة — نستخدم بيانات z-zone المثبّتة في أعلى الملف
+       لو فعّلناها، ستجلب بيانات softara وتغطّي بيانات z-zone */
+    return;
 }
 
 const AppCache = {};
@@ -3541,3 +3539,105 @@ async function buildFooterStats() {
 $(document).ready(function() { 
     startApp(); 
 });
+
+// ===== إغلاق النوافذ عند الضغط خارجها =====
+document.addEventListener('click', function(e) {
+    // لو الضغط على overlay نفسه (وليس محتوى النافذة)
+    if (e.target.classList && e.target.classList.contains('modal-overlay') 
+        && e.target.classList.contains('active')) {
+        // أغلق النافذة
+        e.target.classList.remove('active');
+        // معالجة خاصة لـ quickViewModal
+        if (e.target.id === 'quickViewModal') {
+            e.target.style.display = 'none';
+            e.target.style.opacity = '0';
+            e.target.style.visibility = 'hidden';
+        }
+    }
+});
+
+// منع انتقال النقر من المحتوى إلى الـ overlay
+document.querySelectorAll('.modal-overlay .modal-box, .modal-overlay .modal-content').forEach(box => {
+    box.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+
+// ✦ إغلاق بالنقر على زر Escape أيضاً
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+            modal.classList.remove('active');
+            if (modal.id === 'quickViewModal') {
+                modal.style.display = 'none';
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
+            }
+        });
+    }
+});
+
+
+
+
+// ===== دعم اللمس لبطاقات 3D Flip =====
+(function initFlipCardTouchSupport() {
+    // تأكد من تشغيل الكود بعد تحميل البطاقات
+    function attachFlipListeners() {
+        document.querySelectorAll('.flip-card').forEach(card => {
+            if (card.dataset.flipBound) return;
+            card.dataset.flipBound = '1';
+            
+            card.addEventListener('click', function(e) {
+                // ✦ فقط على أجهزة اللمس (بلا hover)
+                if (!window.matchMedia('(hover: none)').matches) return;
+                
+                // ✦ لا تقلب إذا الضغط على عنصر تفاعلي
+                const interactive = e.target.closest('a, button, input, textarea, select, details, summary, .flip-fav-btn, .copy-btn, .part-btn, .ver-item, .adm-btn, .btn-main, .btn-sec');
+                if (interactive) return;
+                
+                // ✦ لا تقلب في وضع list-view
+                if (card.closest('.items-grid.list-view')) return;
+                
+                // ✦ قلب البطاقة
+                card.classList.toggle('flipped');
+                e.preventDefault();
+            });
+        });
+    }
+    
+    // ربط مستمع عند تحميل الصفحة
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachFlipListeners);
+    } else {
+        attachFlipListeners();
+    }
+    
+    // ✦ إعادة الربط عند إضافة بطاقات جديدة (بعد التحديث/البحث)
+    const cardObserver = new MutationObserver(function(mutations) {
+        let shouldAttach = false;
+        mutations.forEach(m => {
+            m.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && (node.classList?.contains('flip-card') || node.querySelector?.('.flip-card'))) {
+                    shouldAttach = true;
+                }
+            });
+        });
+        if (shouldAttach) setTimeout(attachFlipListeners, 50);
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const grids = document.querySelectorAll('.items-grid, #grid-software, #grid-app, #grid-pcgame, #grid-psgame, #grid-ebook');
+        grids.forEach(g => cardObserver.observe(g, { childList: true, subtree: true }));
+    });
+})();
+
+// ✦ إعادة ضبط البطاقات المقلوبة عند البحث أو الفلترة
+const originalExecuteSearchAndFilter = window.executeSearchAndFilter;
+if (originalExecuteSearchAndFilter) {
+    window.executeSearchAndFilter = function() {
+        // أعد البطاقات المقلوبة لوضعها الطبيعي قبل إعادة العرض
+        document.querySelectorAll('.flip-card.flipped').forEach(c => c.classList.remove('flipped'));
+        return originalExecuteSearchAndFilter.apply(this, arguments);
+    };
+}
