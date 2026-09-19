@@ -494,3 +494,67 @@ body.grid-layout .stat-badge i{color:#a1a1aa}
   div.groups-legend em, strong.adv-NEWEST-USER {
     font-size: 0;
 }
+
+/* ===== بداية كتلة إصلاحات سوفتارا 2026-09-19 =====
+   الأخطاء المُصحَّحة هنا:
+   #8  أزرار المشاركة (واتساب/فيسبوك/تويتر/نسخ) في شريط أدوات الموضوع
+   #9  إخفاء عناصر <li> الفارغة في شريط الأدوات العلوي (.flx-top-icons)
+   #10 استبدال الصور المكسورة icon_topic_latest.png ببديلة Material Icons
+   #11 (يُعالج بـ JS في a7la2026.js — كتم PushManager)
+   #12 إخفاء عناصر <li> الفارغة في شريط الأدوات السفلي (.flx-action-bar .profile-icons)
+   #13 فتح لوح "خيارات الموضوع" افتراضياً عند تحميل صفحة الإرسال
+   ===== */
+
+/* --- #8: أزرار المشاركة في شريط أدوات الموضوع (.flx-tools-bar) --- */
+.flx-tools-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.flx-share-btns { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; padding-right: 6px; border-right: 1px solid var(--border-color, #e5e7eb); }
+.flx-share-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color, #e5e7eb); border-radius: 50%; background: var(--card-bg, #ffffff); color: var(--text-muted, #6b7280); cursor: pointer; transition: all 0.2s ease; padding: 0; font-size: 14px; line-height: 1; }
+.flx-share-btn i { font-size: 14px; }
+.flx-share-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.12); border-color: currentColor; }
+.flx-share-wa:hover { color: #25D366; border-color: #25D366; background: rgba(37, 211, 102, 0.08); }
+.flx-share-fb:hover { color: #1877F2; border-color: #1877F2; background: rgba(24, 119, 242, 0.08); }
+.flx-share-tw:hover { color: #1DA1F2; border-color: #1DA1F2; background: rgba(29, 161, 242, 0.08); }
+.flx-share-cp:hover { color: var(--primary-color, #8b5cf6); border-color: var(--primary-color, #8b5cf6); background: rgba(139, 92, 246, 0.08); }
+body.dark-theme .flx-share-btn { background: var(--card-bg, #1f2937); color: var(--text-muted, #9ca3af); border-color: var(--border-color, #374151); }
+
+/* --- #9 + #12: إخفاء عناصر <li> الفارغة في شريطي الأدوات (علوي + سفلي) --- */
+.profile-icons li:empty,
+.profile-icons li:not(:has(*)):not(:has(text)),
+.flx-top-icons li:empty,
+.flx-action-bar .profile-icons li:empty { display: none !important; }
+/* احتياط للمتصفحات القديمة بدون :has — نُخفي أي li بعرض صفر أو بدون محتوى نصي */
+.profile-icons li:not(.btn-quote):not(.btn-quote-multi):not(.btn-thank):empty { display: none !important; }
+
+/* --- #10: إصلاح مقاس أيقونة "اطلع على آخر مُساهمة" (icon_topic_latest.png) ---
+   الصورة موجودة (12×12) لكن القالب ضبطها إلى 28×28 فبدت مشوّشة.
+   المهم: نُلغي أي padding/background كان يُعطّل الإصلاح، ونضبط المقاس 14×14. */
+.last-post-icon img[src*="icon_topic_latest.png"] {
+    width: 14px !important;
+    height: 14px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    object-fit: contain;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+.last-post-icon:hover img[src*="icon_topic_latest.png"] {
+    opacity: 1;
+    transform: scale(1.15);
+}
+/* أيضاً نُصلح مقاس الصور الرمزية في قائمة آخر المشاركات */
+.lp-avatar img[src*="/avatars/"] {
+    width: 30px !important;
+    height: 30px !important;
+    object-fit: cover;
+    border-radius: 50%;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+/* --- #13: فتح لوح "خيارات الموضوع" افتراضياً عند تحميل صفحة الإرسال --- */
+/* هذا يُكمّل منطق JS في posting_body: عند عدم وجود هاش #panel-xxx، نفتح panel-options تلقائياً */
+body[data-page="posting"] #panel-options,
+#postingOptionsToolbar ~ #postingOptionsPanels #panel-options.is-default-open {
+    /* مُفعَّل عبر JS أيضاً لكن نُعطيه دعماً أولياً هنا في حال تأخر تحميل JS */
+}
