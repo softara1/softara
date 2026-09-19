@@ -352,25 +352,31 @@ function initUserDataAndNotifications() {
             case 14: return '/profile?mode=editprofile&page_profil=awards';
             default: break;
         }
-        /* ===== إصلاح روابط المواضيع في الإشعارات =====
-           منصة Forumotion الآن ترسل topic_id فقط بدون slug العنوان.
-           الرابط /t77 يعطي 404 لأن المنتدى يتطلب /t77-slug-title.
-           الحل: نبني slug من topic_title إن وُجد، وإلا نضيف شرطة فقط:
-           /t77- الذي يجعل Forumotion يعيد التوجيه تلقائياً للرابط الصحيح. */
+        /* ===== إصلاح روابط المواضيع في الإشعارات (v4 — مُحدَّث) =====
+           Forumotion يرسل في كل إشعار:
+             - t.post.topic_id: رقم الموضوع
+             - t.post.topic_name: slug جاهز من Forumotion (مثل "Adobe-Acrobat-Reader-DC-2025")
+             - t.post.topic_display_name: العنوان العربي الكامل
+           نستخدم topic_name إن وُجد، وإلا نبني slug من topic_display_name. */
         if (t.post && t.post.topic_id) {
             var topicId = t.post.topic_id;
-            var topicTitle = (t.post && t.post.topic_title) ? String(t.post.topic_title) : '';
-            if (topicTitle) {
-                /* بناء slug: نُبقي الأحرف اللاتينية والعربية، نُبدل المسافات بـ - */
-                var slug = topicTitle
-                    .replace(/[<>\\[\\](){}'"!?.,؛:]+/g, '')
-                    .replace(/\\s+/g, '-')
+            var topicName = (t.post.topic_name) ? String(t.post.topic_name) : '';
+            var topicDisplay = (t.post.topic_display_name) ? String(t.post.topic_display_name) : '';
+            if (topicName) {
+                /* slug جاهز من Forumotion */
+                return '/t' + topicId + '-' + encodeURIComponent(topicName);
+            }
+            if (topicDisplay) {
+                /* نبني slug من العنوان العربي */
+                var slug = topicDisplay
+                    .replace(/[<>\[\](){}'"!?.,\u060C\u061B\u061F]+/g, '')
+                    .replace(/\s+/g, '-')
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '')
                     .substring(0, 80);
                 return '/t' + topicId + '-' + encodeURIComponent(slug);
             }
-            /* بدون عنوان: نضيف شرطة فقط ليُعيد Forumotion التوجيه */
+            /* بدون أي عنوان: نضيف شرطة فقط ليُعيد Forumotion التوجيه */
             return '/t' + topicId + '-';
         }
         if (t.from && t.from.id) { return '/u' + t.from.id; }
@@ -690,8 +696,8 @@ $(document).ready(function() {
         var $img = $(this);
         var parentA = $img.closest('a');
         if (parentA.length > 0) {
-            parentA.attr('data-fancybox', 'gallery'); 
-            parentA.attr('href', $img.attr('src')); 
+            parentA.attr('data-fancybox', 'gallery');
+            parentA.attr('href', $img.attr('src'));
             parentA.css('cursor', 'zoom-in');
             /* لا نمنع click الافتراضي — Fancybox سيتولى فتح الـ lightbox */
         } else {
@@ -699,31 +705,30 @@ $(document).ready(function() {
         }
     });
 
-    /* ===== إصلاح Fancybox v4: استخدام event delegation بدل .bind() =====
-       المشكلة: Fancybox.bind() لا يعمل أحياناً بسبب ترتيب تحميل السكربتات.
-       الحل: نستخدم event delegation — أي نقر على [data-fancybox] يفتح
-       المعرض تلقائياً عبر Fancybox.show() API. */
-    function initFancybox() {
+    /* ===== إصلاح Fancybox v4 (v4): event delegation بدل bind =====
+       المشكلة: Fancybox.bind() لا يعمل أحياناً بسبب ترتيب تحميل السكربتات
+       وكان preventDefault يكسر النقر. الحل: event delegation على document. */
+    function initFancyboxDelegation() {
         if (typeof Fancybox === 'undefined') {
-            setTimeout(initFancybox, 100);
+            setTimeout(initFancyboxDelegation, 100);
             return;
         }
-        /* نجمع كل صورات المعرض لإمكانية التنقل بينها */
         function getGalleryItems() {
-            return Array.from(document.querySelectorAll('[data-fancybox="gallery"]')).map(function(el) {
+            return Array.prototype.slice.call(document.querySelectorAll('[data-fancybox="gallery"]')).map(function(el) {
                 return { src: el.getAttribute('href'), type: 'image' };
             });
         }
-        /* event delegation على مستوى الـ document */
         document.addEventListener('click', function(e) {
             var target = e.target.closest ? e.target.closest('[data-fancybox="gallery"]') : null;
-            if (!target) return;
+            if (!target) { return; }
             e.preventDefault();
             e.stopPropagation();
             var items = getGalleryItems();
             var clickedHref = target.getAttribute('href');
-            var startIndex = items.findIndex(function(it) { return it.src === clickedHref; });
-            if (startIndex < 0) startIndex = 0;
+            var startIndex = 0;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].src === clickedHref) { startIndex = i; break; }
+            }
             try {
                 Fancybox.show(items, {
                     startIndex: startIndex,
@@ -736,12 +741,12 @@ $(document).ready(function() {
                     console.warn('[softara] فشل فتح Fancybox:', err.message);
                 }
             }
-        }, true); /* capture phase لتجاوز أي handlers أخرى */
+        }, true);
         if (window.console && console.info) {
-            console.info('[softara] ✅ Fancybox event delegation مُفعّل');
+            console.info('[softara] ✅ Fancybox event delegation مفعّل');
         }
     }
-    initFancybox();
+    initFancyboxDelegation();
 
     $('.flx-contact-toggle').on('click', function(e) {
         e.preventDefault();
