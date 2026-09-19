@@ -957,3 +957,149 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--primary-color,
         .pm-layout { grid-template-columns: 1fr; }
         .mobile-hidden { display: none !important; }
     }
+
+/* ===== إصلاحات v4 — 2026-09-19 ===== */
+
+/* --- #3: إصلاح تنسيق مشغل القرآن — النصوص تخرج خارج المربع --- */
+/* المشكلة: .quran-box لديها max-height: 90vh لكن العناصر الداخلية تتجاوزها */
+.quran-box {
+    max-height: 85vh !important;          /* تقليل الارتفاع */
+    overflow-y: auto !important;           /* تمرير عمودي */
+    padding: 1.2rem !important;            /* تقليل الحشو */
+    scrollbar-width: thin;                /* Firefox */
+    scrollbar-color: var(--primary-color, #8b5cf6) transparent;
+}
+.quran-box::-webkit-scrollbar { width: 6px; }
+.quran-box::-webkit-scrollbar-track { background: transparent; }
+.quran-box::-webkit-scrollbar-thumb { background: var(--primary-color, #8b5cf6); border-radius: 6px; }
+
+.quran-box h3 {
+    margin: 0 0 4px 0 !important;
+    font-size: 1.15rem !important;          /* تصغير العنوان */
+    flex-wrap: wrap;
+    word-break: break-word;
+}
+.quran-box .quran-sub {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.8rem !important;
+    word-break: break-word;
+}
+.quran-field {
+    margin-bottom: 10px !important;
+}
+.quran-field label {
+    font-size: 0.85rem !important;
+    margin-bottom: 4px !important;
+}
+.quran-field select {
+    padding: 9px 12px !important;
+    font-size: 0.9rem !important;
+    min-height: 40px !important;
+}
+.quran-now {
+    margin: 10px 0 6px !important;
+    padding: 6px 10px !important;
+    font-size: 0.9rem !important;
+    min-height: 32px !important;
+    word-break: break-word;
+    line-height: 1.5;
+}
+.quran-audio-wrap { direction: ltr; margin-bottom: 8px !important; }
+.quran-audio-wrap audio { width: 100%; max-height: 36px; }
+.quran-nav-btns { gap: 8px !important; }
+.quran-nav-btns button {
+    padding: 7px 14px !important;
+    font-size: 0.85rem !important;
+}
+.quran-hint {
+    font-size: 0.75rem !important;
+    margin-top: 8px !important;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+/* --- #4: إصلاح تنسيق بطاقات المكتبة الرقمية (h19-library) v4 ---
+   المشكلة: grid-template-rows ثابت على 220px يقص النصوص الطويلة.
+   الحل: نسمح بتمدد البطاقات لعرض نص أوصاف أطول (8 أسطر بدل 3-4). */
+.items-grid {
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(360px, auto) !important;
+    gap: 16px !important;
+}
+.flip-card {
+    height: 100% !important;
+    min-height: 360px !important;
+    max-height: none !important;
+}
+.flip-card .flip-card-inner {
+    height: 100% !important;
+}
+.flip-card .flip-front,
+.flip-card .flip-back {
+    height: 100% !important;
+    min-height: 360px !important;
+    padding: 14px !important;
+    overflow: hidden !important;
+}
+.flip-card .flip-front-body {
+    flex: 1;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+.flip-card .flip-title {
+    -webkit-line-clamp: 3 !important;
+    line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word;
+    max-height: 4.5em !important;
+    margin-bottom: 8px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700;
+    line-height: 1.5;
+}
+.flip-card .flip-short-desc {
+    -webkit-line-clamp: 8 !important;
+    line-clamp: 8 !important;
+    -webkit-box-orient: vertical !important;
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word;
+    max-height: 12em !important;
+    font-size: 0.85rem !important;
+    line-height: 1.55 !important;
+    color: var(--text-muted, #6b7280);
+    margin-top: 8px;
+}
+/* عند hover نُظهر المزيد */
+.flip-card:hover .flip-short-desc,
+.flip-card:focus-within .flip-short-desc {
+    -webkit-line-clamp: 20 !important;
+    line-clamp: 20 !important;
+    max-height: 30em !important;
+}
+.flip-card .flip-meta {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color, rgba(255,255,255,0.05));
+}
+
+/* تحسين مظهر skeleton loaders */
+.items-grid .skeleton {
+    height: 180px;
+    background: linear-gradient(90deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.1) 50%, rgba(139,92,246,0.04) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ===== نهاية إصلاحات v4 ===== */
