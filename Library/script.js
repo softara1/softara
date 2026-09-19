@@ -1,37 +1,15 @@
-/* =========================================================
-   ✦ بيانات Servimg مثبّتة على حساب z-zone (للاستخدام من softara)
-   ✦ تم إزالة "|| window.servImg..." لمنع updateServimgTokens
-      من تغطيتها ببيانات softara لاحقاً
-   ========================================================= */
-var servImgAccount = 'salveb@mamabood.com';
-var servImgId = 'f16a39f08e356f7d8da4511105f405d8';
-var servImgF = '13386037';
-var servImgTB = String(Date.now());
-var servImgSL = '';
-var servImgMode = 'fae';
+var servImgAccount = window.servImgAccount || 'salveb@mamabood.com';
+var servImgId = window.servImgId || 'f16a39f08e356f7d8da4511105f405d8';
+var servImgF = window.servImgF || '13386037';
+var servImgTB = window.servImgTB || '1637088248';
+var servImgSL = window.servImgSL || '';
+var servImgMode = window.servImgMode || 'fae';
 var iframeSrc = '/smilies?mode=smilies_frame&t=1785531294';
 var SCE_TopicID = '';
 var illiwebDomain = 'https://illipro.net/';
 var servimgDomain = 'servimg.com';
 var INTRANET = 0;
 var quick_reply = '';
-
-/* ✦ منع updateServimgTokens من تغطية بيانات z-zone ببيانات softara */
-Object.defineProperty(window, 'servImgAccount', {
-    get: function() { return 'salveb@mamabood.com'; },
-    set: function() { /* تجاهل — تبقى بيانات z-zone */ },
-    configurable: false
-});
-Object.defineProperty(window, 'servImgId', {
-    get: function() { return 'f16a39f08e356f7d8da4511105f405d8'; },
-    set: function() { /* تجاهل */ },
-    configurable: false
-});
-Object.defineProperty(window, 'servImgF', {
-    get: function() { return '13386037'; },
-    set: function() { /* تجاهل */ },
-    configurable: false
-});
 
 (function initThemes() {
     try {
@@ -393,9 +371,33 @@ function closeModal(id) {
 }
 
 async function updateServimgTokens() {
-    /* ✦ معطّلة — نستخدم بيانات z-zone المثبّتة في أعلى الملف
-       لو فعّلناها، ستجلب بيانات softara وتغطّي بيانات z-zone */
-    return;
+    try {
+        let res = await fetch('/privmsg?mode=post');
+        let html = await res.text();
+        let accMatch = html.match(/servImgAccount\s*=\s*['"]([^'"]+)['"]/);
+        let idMatch = html.match(/servImgId\s*=\s*['"]([^'"]+)['"]/);
+        let fMatch = html.match(/servImgF\s*=\s*['"]([^'"]+)['"]/);
+        let tbMatch = html.match(/servImgTB\s*=\s*['"]([^'"]+)['"]/);
+        let slMatch = html.match(/servImgSL\s*=\s*['"]([^'"]+)['"]/);
+        let modeMatch = html.match(/servImgMode\s*=\s*['"]([^'"]+)['"]/);
+        let iframeMatch = html.match(/iframeSrc\s*=\s*['"]([^'"]+)['"]/);
+
+        if (accMatch && accMatch[1]) window.servImgAccount = accMatch[1];
+        if (idMatch && idMatch[1]) window.servImgId = idMatch[1];
+        if (fMatch && fMatch[1]) window.servImgF = fMatch[1];
+        if (tbMatch && tbMatch[1]) window.servImgTB = tbMatch[1];
+        if (slMatch && slMatch[1]) window.servImgSL = slMatch[1];
+        if (modeMatch && modeMatch[1]) window.servImgMode = modeMatch[1];
+
+        window.iframeSrc = 'https://servimg.com/multiupload.php?mode=' + (window.servImgMode || 'fae') + 
+                           '&account=' + encodeURIComponent(window.servImgAccount || '') + 
+                           '&id=' + (window.servImgId || '') + 
+                           '&f=' + (window.servImgF || '') + 
+                           '&tb=' + (window.servImgTB || '') + 
+                           '&sl=' + (window.servImgSL || '1');
+    } catch(e) {
+        console.warn("Could not update servimg tokens", e);
+    }
 }
 
 const AppCache = {};
