@@ -79,13 +79,27 @@ function loadCurrent(autoplay) {
 
 window.quranSelectionChanged = function () { loadCurrent(true); };
 window.quranStep = function (dir) {
+    /* نضمن أن select مملوء قبل قراءة القيمة — حتى لو النافذة غير مفتوحة */
+    fillLists();
     var sSel = document.getElementById('quranSurah');
     if (!sSel) { return; }
-    var s = parseInt(sSel.value, 10) || 1;
+    /* نقرأ السورة من state المحفوظ لو النافذة غير مفتوحة فعلياً */
+    var state = loadState();
+    var s;
+    if (state && typeof state.surah === 'number') {
+        s = state.surah;
+    } else {
+        s = parseInt(sSel.value, 10) || 1;
+    }
     s += dir;
     if (s < 1) { s = 114; }
     if (s > 114) { s = 1; }
     sSel.value = s;
+    /* نحدّث state قبل loadCurrent لضمان القارئ الصحيح */
+    if (state) {
+        state.surah = s;
+        try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) { }
+    }
     loadCurrent(true);
 };
 
@@ -226,28 +240,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ===== استعادة الحالة عند تحميل أي صفحة =====
        لو كان المستخدم يستمع قبل تغيير الصفحة، نُنشئ audio مخفياً
-       ونستأنف التشغيل من نفس اللحظة دون إظهار أي عنصر مرئي. */
+       ونستأنف التشغيل من نفس اللحظة دون إظهار أي عنصر مرئي.
+       كذلك نُحدّث قيم select للقارئ والسورة من الحالة المحفوظة،
+       حتى لو لم يفتح المستخدم النافذة، فعند انتهاء السورة
+       ستستمر تلقائياً بنفس القارئ المختار. */
     var state = loadState();
-    if (state && state.src && !state.paused) {
-        var audioEl = document.getElementById('quranAudio');
-        if (audioEl) {
-            audioEl.src = state.src;
-            audioEl.currentTime = state.currentTime || 0;
-            if (state.isRadio) {
-                audioEl.setAttribute('data-radio', '1');
-            }
-            /* نحاول استئناف التشغيل تلقائياً */
-            audioEl.play().catch(function () {
-                /* لو منع المتصفح autoplay، نعرض زر "استئناف" في quranNowPlaying */
-                var now = document.getElementById('quranNowPlaying');
-                if (now && state.isRadio) {
-                    now.innerHTML = 'راديو القرآن الكريم المباشر — <button onclick="document.getElementById(\'quranAudio\').play()" style="background:var(--primary-color,#8b5cf6);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;">استئناف</button>';
-                } else if (now) {
-                    var surahName = state.surah ? SURAHS[state.surah - 1] : '';
-                    var reciterName = state.reciter != null ? RECITERS[state.reciter][0] : '';
-                    now.innerHTML = 'سورة ' + surahName + ' — ' + reciterName + ' — <button onclick="document.getElementById(\'quranAudio\').play()" style="background:var(--primary-color,#8b5cf6);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;">استئناف</button>';
+    if (state && state.src) {
+        /* نملأ select أولاً (لو لم تُملأ بعد) ثم نضبط القيم من state */
+        fillLists();
+        var rSel = document.getElementById('quranReciter');
+        var sSel = document.getElementById('quranSurah');
+        if (rSel && typeof state.reciter === 'number' && state.reciter >= 0 && state.reciter < RECITERS.length) {
+            rSel.value = state.reciter;
+        }
+        if (sSel && typeof state.surah === 'number' && state.surah >= 1 && state.surah <= 114) {
+            sSel.value = state.surah;
+        }
+        if (!state.paused) {
+            var audioEl = document.getElementById('quranAudio');
+            if (audioEl) {
+                audioEl.src = state.src;
+                audioEl.currentTime = state.currentTime || 0;
+                if (state.isRadio) {
+                    audioEl.setAttribute('data-radio', '1');
                 }
-            });
+                /* نحاول استئناف التشغيل تلقائياً */
+                audioEl.play().catch(function () {
+                    /* لو منع المتصفح autoplay، نعرض زر "استئناف" في quranNowPlaying */
+                    var now = document.getElementById('quranNowPlaying');
+                    if (now && state.isRadio) {
+                        now.innerHTML = 'راديو القرآن الكريم المباشر — <button onclick="document.getElementById(\'quranAudio\').play()" style="background:var(--primary-color,#8b5cf6);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;">استئناف</button>';
+                    } else if (now) {
+                        var surahName = state.surah ? SURAHS[state.surah - 1] : '';
+                        var reciterName = state.reciter != null ? RECITERS[state.reciter][0] : '';
+                        now.innerHTML = 'سورة ' + surahName + ' — ' + reciterName + ' — <button onclick="document.getElementById(\'quranAudio\').play()" style="background:var(--primary-color,#8b5cf6);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;">استئناف</button>';
+                    }
+                });
+            }
         }
     }
 });
