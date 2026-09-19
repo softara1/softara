@@ -306,7 +306,17 @@ function initUserDataAndNotifications() {
     function flxNotifText(item) {
         var t = (item && item.text) || {};
         var rawName = (t.from && t.from.name) ? String(t.from.name) : '';
-        var name = rawName ? ('<b>' + flxEscapeHtml(rawName) + '</b> ') : '';
+        /* منصة Forumotion تُرسل اسم العضو كـ HTML منسّق مسبقاً (مع span المجموعة واللون)
+           لذا إذا احتوى على وسوم HTML نعرضه كما هو بعد تطهيره من <script> و on* handlers فقط،
+           وإلا نطبّق flxEscapeHtml كالمعتاد للحماية من حقن XSS في الأسماء العادية. */
+        var name = '';
+        if (rawName) {
+            var isHtml = /<[a-z][\s\S]*?>/i.test(rawName);
+            var safeName = isHtml
+                ? rawName.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son\w+\s*=\s*"[^"]*"/gi, '').replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+                : flxEscapeHtml(rawName);
+            name = '<b>' + safeName + '</b> ';
+        }
         var rawTitle = (t.post && t.post.topic_title) ? String(t.post.topic_title) : '';
         var T = rawTitle ? (' «' + flxEscapeHtml(rawTitle) + '»') : '';
         switch (t.type) {
@@ -631,6 +641,18 @@ $(document).ready(function() {
        وارسال الاعجاب مرتين وجلب صور المعجبين مرتين */
     if (window.__flxTopicUiDone) { return; }
     window.__flxTopicUiDone = true;
+
+    /* ===== أزرار المشاركة (واتساب/فيسبوك/تويتر/نسخ الرابط) في شريط أدوات الموضوع =====
+       تُحقن في .flx-tools-bar بجوار "متابعة/طباعة". تعتمد على shareTopic(platform). */
+    var $toolsBar = $('.flx-tools-bar').first();
+    if ($toolsBar.length && !$toolsBar.find('.flx-share-btns').length) {
+        var shareWrap = $('<span class="flx-share-btns" role="group" aria-label="مشاركة الموضوع"></span>');
+        shareWrap.append('<button type="button" class="flx-share-btn flx-share-wa" onclick="shareTopic(&#39;wa&#39;)" title="مشاركة عبر واتساب" aria-label="مشاركة عبر واتساب"><i class="fab fa-whatsapp"></i></button>');
+        shareWrap.append('<button type="button" class="flx-share-btn flx-share-fb" onclick="shareTopic(&#39;fb&#39;)" title="مشاركة على فيسبوك" aria-label="مشاركة على فيسبوك"><i class="fab fa-facebook-f"></i></button>');
+        shareWrap.append('<button type="button" class="flx-share-btn flx-share-tw" onclick="shareTopic(&#39;tw&#39;)" title="مشاركة على تويتر/X" aria-label="مشاركة على تويتر/X"><i class="fab fa-twitter"></i></button>');
+        shareWrap.append('<button type="button" class="flx-share-btn flx-share-cp" onclick="shareTopic(&#39;cp&#39;)" title="نسخ رابط الموضوع" aria-label="نسخ رابط الموضوع"><i class="fas fa-link"></i></button>');
+        $toolsBar.append(shareWrap);
+    }
     var savedLayout = localStorage.getItem('forum_layout');
     if (savedLayout === 'grid') {
         setForumLayout('grid');
@@ -713,7 +735,7 @@ $(document).ready(function() {
                         setTimeout(function(){ $('#' + tempId + ' img').attr('src', avatarCache[profileUrl]); }, 0);
                     } else {
                         $.get(profileUrl, function(data) {
-                            var avatarSrc = $(data).find('.user-avatar img, .avatar img, .forumline .row1 img.avatar, .module .avatar img, dl.left-box.details img, #profile-advanced-add img, .user-profile-avatar img, .page-content .row1 img').first().attr('src');
+                            var avatarSrc = $(data).find('.pro-avatar-box img, .user-avatar img, .avatar img, .forumline .row1 img.avatar, .module .avatar img, dl.left-box.details img, #profile-advanced-add img, .user-profile-avatar img, .page-content .row1 img').first().attr('src');
                             if(avatarSrc) { 
                                 avatarCache[profileUrl] = avatarSrc; 
                                 $('#' + tempId + ' img').attr('src', avatarSrc); 
