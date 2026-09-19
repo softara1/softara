@@ -1,46 +1,54 @@
 /* ============================================================
-   سوفتارا — فتح لوح "خيارات الموضوع" افتراضياً في صفحة الإرسال
-   الخطأ #13: لوحا options و voting مغلقا افتراضياً، والمستخدم قد لا يرى خيارات
-              تعطيل BBCode/الإشعار بالردود لأنها شائعة.
-   الحل: نفتح panel-options تلقائياً بعد تحميل صفحة /post فقط (وليس reply).
-   يُحمَّل من: softara1.github.io/softara/up/softara-posting-defaults.js
+   سوفتارا — منطق صفحة الإرسال (مُحدَّث للإصدار v3)
+   ============================================================
+   التغيير في v3 (بناءً على طلب المستخدم):
+     - كل الألواح مغلقة افتراضياً، لا نفتح أي لوح تلقائياً.
+     - المستخدم يضغط على الزر لفتح اللوح الذي يريد.
+   الإصلاحات السابقة المحفوظة:
+     - استبدال "إخفاء زر اللوح الفارغ" بـ "رسالة توضيحية".
    ============================================================ */
 (function () {
     'use strict';
 
     function initPostingDefaults() {
-        /* نتأكد أننا في صفحة الإرسال (إنشاء/تعديل موضوع) */
         if (!/\/post\b/.test(window.location.pathname)) { return; }
         var toolbar = document.getElementById('postingOptionsToolbar');
         if (!toolbar) { return; }
 
-        /* إذا كان هناك هاش في URL (مثل #panel-attachments) نترك السلوك الافتراضي يعمل */
-        if (window.location.hash && window.location.hash.indexOf('#panel-') === 0) { return; }
+        /* لا نفتح أي لوح افتراضياً — كلها مغلقة حتى يضغط المستخدم */
 
-        /* نبحث عن زر "خيارات الموضوع" ونفتحه إن لم يكن مفعّلاً */
-        var optionsBtn = toolbar.querySelector('[data-target="panel-attachments"]');
-        /* نُفضّل فتح لوح المرفقات إن كان متاحاً (يحتوي على حقول)، وإلا نفتح خيارات الموضوع */
-        function openPanel(targetId) {
-            var target = document.getElementById(targetId);
-            if (!target) { return false; }
-            var fields = target.querySelectorAll('input, textarea, select');
-            if (fields.length === 0) { return false; } /* اللوح فارغ — لا نفتحه */
-            var btn = toolbar.querySelector('[data-target="' + targetId + '"]');
-            if (btn && !btn.classList.contains('is-active')) {
-                btn.click();
+        var buttons = toolbar.querySelectorAll('.posting-collapse-btn');
+        var k;
+        for (k = 0; k < buttons.length; k++) {
+            var pid = buttons[k].getAttribute('data-target');
+            var pEl = pid ? document.getElementById(pid) : null;
+            if (pEl) {
+                var fields = pEl.querySelectorAll('input, textarea, select');
+                if (fields.length === 0) {
+                    /* بدل إخفاء الزر، نُضيف رسالة توضيحية داخل اللوح */
+                    var inner = pEl.querySelector('.posting-panel-inner');
+                    if (inner && !inner.querySelector('.posting-empty-notice')) {
+                        var notice = document.createElement('div');
+                        notice.className = 'posting-empty-notice';
+                        notice.style.cssText = 'padding:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;color:#92400e;font-size:.9rem;text-align:center;line-height:1.7;margin-top:12px;';
+                        var msg = 'هذه الميزة غير مفعّلة حالياً.';
+                        if (pid === 'panel-attachments') {
+                            msg = '<strong>المرفقات معطّلة حالياً.</strong><br>لتفعيل رفع الملفات في المشاركات، فعّل الميزة من لوحة الإدارة:<br>إدارة عامة > الرسائل والإيميلات > المرفقات > تفعيل المرفقات.';
+                        } else if (pid === 'panel-seo') {
+                            msg = '<strong>تحسين محركات البحث (SEO) معطّل.</strong><br>لتفعيل حقول SEO، فعّلها من لوحة الإدارة:<br>إدارة عامة > استراتيجية SEO > تفعيل تحسين محركات البحث.';
+                        } else if (pid === 'panel-voting') {
+                            msg = '<strong>التصويت معطّل في هذا القسم.</strong>';
+                        }
+                        notice.innerHTML = '<i class="fas fa-info-circle" style="margin-left:6px;"></i>' + msg;
+                        inner.appendChild(notice);
+                    }
+                }
             }
-            return true;
         }
-
-        /* الأولوية: المرفقات ← السيو ← خيارات الموضوع */
-        if (openPanel('panel-attachments')) { return; }
-        if (openPanel('panel-seo')) { return; }
-        openPanel('panel-options'); /* هذا اللوح دائماً يحوي 4 checkboxes */
     }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
-            /* ننتظر قليلاً ليتسنّى لسكربت posting_body الأصلي إنشاء الألواح */
             setTimeout(initPostingDefaults, 100);
         });
     } else {
