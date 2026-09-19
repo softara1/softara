@@ -352,7 +352,27 @@ function initUserDataAndNotifications() {
             case 14: return '/profile?mode=editprofile&page_profil=awards';
             default: break;
         }
-        if (t.post && t.post.topic_id) { return '/t' + t.post.topic_id; }
+        /* ===== إصلاح روابط المواضيع في الإشعارات =====
+           منصة Forumotion الآن ترسل topic_id فقط بدون slug العنوان.
+           الرابط /t77 يعطي 404 لأن المنتدى يتطلب /t77-slug-title.
+           الحل: نبني slug من topic_title إن وُجد، وإلا نضيف شرطة فقط:
+           /t77- الذي يجعل Forumotion يعيد التوجيه تلقائياً للرابط الصحيح. */
+        if (t.post && t.post.topic_id) {
+            var topicId = t.post.topic_id;
+            var topicTitle = (t.post && t.post.topic_title) ? String(t.post.topic_title) : '';
+            if (topicTitle) {
+                /* بناء slug: نُبقي الأحرف اللاتينية والعربية، نُبدل المسافات بـ - */
+                var slug = topicTitle
+                    .replace(/[<>\\[\\](){}'"!?.,؛:]+/g, '')
+                    .replace(/\\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '')
+                    .substring(0, 80);
+                return '/t' + topicId + '-' + encodeURIComponent(slug);
+            }
+            /* بدون عنوان: نضيف شرطة فقط ليُعيد Forumotion التوجيه */
+            return '/t' + topicId + '-';
+        }
         if (t.from && t.from.id) { return '/u' + t.from.id; }
         return '/';
     }
@@ -673,17 +693,55 @@ $(document).ready(function() {
             parentA.attr('data-fancybox', 'gallery'); 
             parentA.attr('href', $img.attr('src')); 
             parentA.css('cursor', 'zoom-in');
-            parentA.on('click', function(e) { e.preventDefault(); });
+            /* لا نمنع click الافتراضي — Fancybox سيتولى فتح الـ lightbox */
         } else {
             $img.wrap('<a href="' + $img.attr('src') + '" data-fancybox="gallery" style="cursor: zoom-in;"></a>');
         }
     });
 
-    if (typeof Fancybox !== 'undefined') {
-        Fancybox.bind('[data-fancybox="gallery"]', {
-            Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } }
-        });
+    /* ===== إصلاح Fancybox v4: استخدام event delegation بدل .bind() =====
+       المشكلة: Fancybox.bind() لا يعمل أحياناً بسبب ترتيب تحميل السكربتات.
+       الحل: نستخدم event delegation — أي نقر على [data-fancybox] يفتح
+       المعرض تلقائياً عبر Fancybox.show() API. */
+    function initFancybox() {
+        if (typeof Fancybox === 'undefined') {
+            setTimeout(initFancybox, 100);
+            return;
+        }
+        /* نجمع كل صورات المعرض لإمكانية التنقل بينها */
+        function getGalleryItems() {
+            return Array.from(document.querySelectorAll('[data-fancybox="gallery"]')).map(function(el) {
+                return { src: el.getAttribute('href'), type: 'image' };
+            });
+        }
+        /* event delegation على مستوى الـ document */
+        document.addEventListener('click', function(e) {
+            var target = e.target.closest ? e.target.closest('[data-fancybox="gallery"]') : null;
+            if (!target) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var items = getGalleryItems();
+            var clickedHref = target.getAttribute('href');
+            var startIndex = items.findIndex(function(it) { return it.src === clickedHref; });
+            if (startIndex < 0) startIndex = 0;
+            try {
+                Fancybox.show(items, {
+                    startIndex: startIndex,
+                    Toolbar: { display: { left: ["infobar"], middle: [], right: ["zoomIn", "zoomOut", "close"] } },
+                    Hash: false,
+                    animated: true
+                });
+            } catch (err) {
+                if (window.console && console.warn) {
+                    console.warn('[softara] فشل فتح Fancybox:', err.message);
+                }
+            }
+        }, true); /* capture phase لتجاوز أي handlers أخرى */
+        if (window.console && console.info) {
+            console.info('[softara] ✅ Fancybox event delegation مُفعّل');
+        }
     }
+    initFancybox();
 
     $('.flx-contact-toggle').on('click', function(e) {
         e.preventDefault();
