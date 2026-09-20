@@ -1,3 +1,5 @@
+window.SOFTARA_APP = true;
+window.SOFTARA_APP_VERSION = "2026.09.20";
 var servImgAccount = window.servImgAccount || 'jetzem@mohemil.com';
 var servImgId = window.servImgId || '05444dce4054fc447035d18e5c92547c';
 var servImgF = window.servImgF || '13386037';
@@ -71,7 +73,7 @@ function getUserRankProgress(userPosts) {
     if (nextRank) {
         let postsNeededForNext = nextRank.threshold - currentRank.threshold;
         let postsDoneInCurrent = posts - currentRank.threshold;
-        progressPercent = (postsDoneInCurrent / postsNeededForNext) * 100;
+        progressPercent = Math.max(0, Math.min(100, (postsDoneInCurrent / postsNeededForNext) * 100));
         
         let postsLeft = nextRank.threshold - posts;
         tooltipText = `باقي ${postsLeft} مساهمة للوصول إلى رتبة (${nextRank.name})`;
@@ -80,7 +82,7 @@ function getUserRankProgress(userPosts) {
 
  
     return `
-        <div class="user-progress-wrap" title="${tooltipText}">
+        <div class="user-progress-wrap" title="${escapeHtml(tooltipText)}">
             <div class="up-header">
                 <span>الهدف: ${nextRankText}</span>
                 <span class="up-percent">${Math.floor(progressPercent)}%</span>
@@ -348,7 +350,7 @@ let activeReplyFormHTML = '';
 window.currentUserIsGuest = true;
 
 function switchView(viewId) {
-    const views = ['categoriesView', 'listView', 'topicView', 'discoverView', 'settingsView'];
+    const views = ['categoriesView', 'listView', 'topicView', 'discoverView', 'staticView', 'settingsView'];
     const currentActive = document.querySelector('.active-view');
     const nextActive = document.getElementById(viewId);
     if (currentActive && currentActive.id === viewId) return;
@@ -361,6 +363,7 @@ function switchView(viewId) {
     const navLinks = document.querySelectorAll('.nav-links a');
     if (viewId === 'categoriesView' && navLinks[0]) navLinks[0].classList.add('active');
     if (viewId === 'discoverView' && navLinks[1]) navLinks[1].classList.add('active');
+    if (viewId === 'staticView' && navLinks[2]) navLinks[2].classList.add('active');
     if (currentActive) {
         currentActive.style.animation = 'proFadeSlideOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
         setTimeout(() => {
@@ -393,6 +396,69 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function isLoggedInMarkup(html) {
+    return /_userdata\[\s*["']session_logged_in["']\s*\]\s*=\s*1/.test(String(html || ''));
+}
+
+function safeUrl(value, allowExternal = true) {
+    if (!value) return '';
+    const raw = String(value).trim();
+    if (/^(?:javascript|vbscript|file|data:text|data:application):/i.test(raw)) return '';
+    try {
+        const parsed = new URL(raw, window.location.origin);
+        if (!/^https?:$/.test(parsed.protocol)) return '';
+        if (!allowExternal && parsed.origin !== window.location.origin) return '';
+        return parsed.href;
+    } catch (e) {
+        return '';
+    }
+}
+
+function safeImageUrl(value) {
+    const raw = String(value || '').trim();
+    if (/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(raw)) return raw;
+    return safeUrl(raw, true) || 'https://2img.net/i/fa/modernbb/pp-blank-thumb.png';
+}
+
+function safeColor(value, fallback = 'var(--text-muted)') {
+    const raw = String(value || '').trim();
+    if (/^(?:#[0-9a-f]{3,8}|rgba?\([0-9 .%,]+\)|hsla?\([0-9 .%,]+\)|var\(--[a-z0-9-]+\)|[a-z]+)$/i.test(raw)) return raw;
+    return fallback;
+}
+
+/* Remove active content and unsafe URL/event attributes before remote Forumotion HTML
+   is placed inside the single-page shell. BBCode images, links, tables and forms remain usable. */
+function sanitizeRemoteHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = String(html || '');
+    template.content.querySelectorAll('script, style, link, meta, base, object, embed, iframe').forEach(el => el.remove());
+    template.content.querySelectorAll('*').forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const val = attr.value || '';
+            if (name.startsWith('on')) { el.removeAttribute(attr.name); return; }
+            if (name === 'src' || name === 'href' || name === 'action' || name === 'formaction') {
+                const allowExternal = name === 'src' || name === 'href';
+                const clean = name === 'src' ? safeImageUrl(val) : safeUrl(val, allowExternal);
+                if (!clean) el.removeAttribute(attr.name);
+                else el.setAttribute(attr.name, clean);
+            }
+            if (name === 'style' && /expression\s*\(|javascript\s*:|url\s*\(/i.test(val)) {
+                el.removeAttribute('style');
+            }
+        });
+    });
+    return template.innerHTML;
+}
+
+function setBusyButton(button, busy, busyText, idleHtml) {
+    if (!button) return;
+    if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+    button.disabled = !!busy;
+    if (busy) button.innerHTML = busyText;
+    else button.innerHTML = idleHtml || button.dataset.originalHtml;
+}
+
 function showToast(text, isError=false) {
     const t = document.getElementById('toast');
     t.style.background = isError ? 'var(--danger)' : 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
@@ -412,12 +478,12 @@ function getCleanUsername(node, returnHtml = false) {
     let iconEl = clone.querySelector('.group-icon');
     if (iconEl) {
         let iconText = iconEl.textContent.trim();
-        iconHtml = ` <i class="material-symbols-outlined group-icon-custom" style="font-size:16px !important; vertical-align:middle !important; line-height:1 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; margin:0 4px !important;">${iconText}</i>`;
+        iconHtml = ` <i class="material-symbols-outlined group-icon-custom" style="font-size:16px !important; vertical-align:middle !important; line-height:1 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; margin:0 4px !important;">${escapeHtml(iconText)}</i>`;
     }
     clone.querySelectorAll('i, svg, img').forEach(el => el.remove());
     let text = clone.innerText || clone.textContent || '';
     let pureText = text.replace(/بواسطة|by|من طرف|في/g, '').replace(/\s+/g, ' ').trim() || 'زائر';
-    let escapedText = pureText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    let escapedText = escapeHtml(pureText);
     return returnHtml ? escapedText + iconHtml : escapedText;
 }
 
@@ -459,17 +525,17 @@ const AppCache = {};
 const CACHE_LIMIT = 20;
 
 async function fetchWithCache(url) {
-    if (AppCache[url]) return AppCache[url];
+    const cacheKey = String(url).replace(/([?&])_t=\d+/g, '$1_t');
+    if (AppCache[cacheKey]) return AppCache[cacheKey];
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const html = await res.text();
-        if (Object.keys(AppCache).length >= CACHE_LIMIT) {
-            delete AppCache[Object.keys(AppCache)[0]];
-        }
-        AppCache[url] = html; 
+        if (Object.keys(AppCache).length >= CACHE_LIMIT) delete AppCache[Object.keys(AppCache)[0]];
+        AppCache[cacheKey] = html;
         return html;
-    } catch (error) { 
-        return ""; 
+    } catch (error) {
+        return '';
     }
 }
 
@@ -499,6 +565,7 @@ async function initUserSession() {
     let logoutUrl = '';
     let posts = 0;
     let points = 0;
+    let privateMessages = 0;
     try {
         let res = await fetch('/forum?_t=' + Date.now());
         let html = await res.text();
@@ -506,7 +573,7 @@ async function initUserSession() {
             res = await fetch('/?_t=' + Date.now()); 
             html = await res.text();
         }
-        if (html.indexOf('"session_logged_in"] = 1') !== -1 || html.indexOf('"session_logged_in"]=1') !== -1) {
+        if (isLoggedInMarkup(html)) {
             isLogged = true;
             let uParts = html.split('_userdata["username"] = "'); 
             if (uParts.length < 2) uParts = html.split("_userdata['username'] = '");
@@ -519,10 +586,12 @@ async function initUserSession() {
             if (oParts.length >= 2) logoutUrl = oParts[1].split('"')[0];
             
             let poParts = html.split('_userdata["user_posts"] = '); 
-            if (poParts.length >= 2) posts = parseInt(poParts[1]);
+            if (poParts.length >= 2) posts = parseInt(poParts[1]) || 0;
             
+            let pmParts = html.split('_userdata["user_nb_privmsg"] = ');
+            if (pmParts.length >= 2) privateMessages = parseInt(pmParts[1]) || 0;
             let ptParts = html.split('_userdata["user_points"] = '); 
-            if (ptParts.length >= 2) points = parseInt(ptParts[1]);
+            if (ptParts.length >= 2) points = parseInt(ptParts[1]) || 0;
         }
     } catch(e) {}
     
@@ -536,7 +605,7 @@ async function initUserSession() {
         panel.innerHTML = `
             <div class="user-panel-pill" style="padding: 5px 15px 5px 5px; height: auto;">
                 <div class="user-info-link" style="cursor: default;">
-                    <img src="${escapeHtml(avatar)}" class="user-avatar-img" title="صورة الحساب" style="cursor: default;">
+                    <img src="${escapeHtml(safeImageUrl(avatar))}" class="user-avatar-img" title="صورة الحساب" style="cursor: default;">
                     <div style="display:flex; flex-direction:column; line-height: 1.2;">
                         <span style="font-weight:800; font-size:14px; color:var(--text-strong);">${escapeHtml(username)}</span>
                         <div style="display:flex; gap:8px; font-size:12px; color:var(--text-muted); font-weight:600; margin-top:2px;">
@@ -546,10 +615,13 @@ async function initUserSession() {
                     </div>
                 </div>
                 <div style="width:1px; height:35px; background:var(--border); margin:0 8px;"></div>
+                <a href="/privmsg?folder=inbox" onclick="event.preventDefault(); routeUrl('/privmsg?folder=inbox');" title="الرسائل الخاصة" style="color:var(--text-muted); display:flex; align-items:center; justify-content:center; padding:5px; position:relative;">
+                    <i class="material-symbols-outlined" style="font-size:23px;">mail</i>${privateMessages > 0 ? `<b style="position:absolute; top:-2px; right:-2px; min-width:16px; height:16px; line-height:16px; padding:0 4px; border-radius:999px; background:var(--danger); color:#fff; font-size:10px; text-align:center;">${privateMessages}</b>` : ''}
+                </a>
                 <a href="/profile?mode=editprofile" onclick="event.preventDefault(); loadSettingsPage('/profile?mode=editprofile');" title="إعدادات الحساب" style="color:var(--text-muted); display:flex; align-items:center; justify-content:center; padding:5px; transition:0.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'">
                     <i class="material-symbols-outlined" style="font-size:24px;">settings</i>
                 </a>
-                <a href="javascript:void(0)" onclick="performLogout('${logoutUrl}')" title="تسجيل الخروج" style="color:var(--danger); display:flex; align-items:center; justify-content:center; padding:5px; margin-right:5px;">
+                <a href="javascript:void(0)" onclick="performLogout(decodeURIComponent('${safeEncode(logoutUrl)}'))" title="تسجيل الخروج" style="color:var(--danger); display:flex; align-items:center; justify-content:center; padding:5px; margin-right:5px;">
                     <i class="material-symbols-outlined" style="font-size:22px;">logout</i>
                 </a>
             </div>
@@ -575,7 +647,7 @@ window.toggleFlipSection = function(element, isSubforum) {
     icon.toggleClass('flipped');
 };
 
-const BASE_APP_PATH = window.location.pathname;
+const BASE_APP_PATH = '/';
 
 function safeEncode(str) {
     if (!str) return ''; 
@@ -587,7 +659,9 @@ function safeEncode(str) {
 function scrollToReply() {
     const qrBox = document.getElementById('quickReplyBox');
     if (qrBox && qrBox.style.display !== 'none') {
-        openReplyModal();
+        const instance = $('#qrContent').sceditor('instance');
+        const value = instance ? instance.val() : (document.getElementById('qrContent')?.value || '');
+        openReplyModal(value);
     } else {
         showToast('عذراً، هذا الموضوع مغلق أو لا تملك صلاحية الرد.', true);
     }
@@ -699,13 +773,15 @@ async function loadPremiumCategories(skipPush = false) {
         categories.forEach((cat, index) => {
             const catTitleNode = cat.querySelector('.category-title h2, .category-title span, h2.maintitle, .category-title span h2, h2, h3, .maintitle, .header');
             if (!catTitleNode) return;
-            const catTitle = catTitleNode.textContent.trim(); 
+            const catTitle = escapeHtml(catTitleNode.textContent.trim()); 
             let forumsHTML = '';
             cat.querySelectorAll('.forum-section, li.row, tr.forumrow, tr.row1, tr.row2, .board, dl.icon').forEach((forumEl, fIdx) => {
                 const aTag = forumEl.querySelector('a.forumtitle, .forum-description h3 a, h2 a, a.forumlink, h3 a'); 
                 if (!aTag) return;
                 const name = aTag.textContent.trim();
+                const safeForumName = escapeHtml(name);
                 const url = aTag.getAttribute('href') || '';
+                const safeForumUrl = escapeHtml(safeUrl(url, false) || '#');
                 let id = 0; 
                 if (url.indexOf('/f') !== -1) id = parseInt(url.split('/f')[1].split('-')[0]);
                 let isLocked = forumEl.classList.contains('forum_locked') || String(forumEl.className).includes('locked') || forumEl.querySelector('img[src*="locked"]');
@@ -719,7 +795,7 @@ async function loadPremiumCategories(skipPush = false) {
                     const sName = sub.textContent.trim();
                     const sHref = sub.getAttribute('href') || '';
                     if (sName) { 
-                        subforumsHTML += `<a href="${sHref}" data-route="forum" class="subforum-link"><i class="material-symbols-outlined" style="font-size:16px;">subdirectory_arrow_left</i> ${sName}</a>`; 
+                        subforumsHTML += `<a href="${escapeHtml(safeUrl(sHref, false) || '#')}" data-route="forum" class="subforum-link"><i class="material-symbols-outlined" style="font-size:16px;">subdirectory_arrow_left</i> ${escapeHtml(sName)}</a>`; 
                     }
                 });
                 
@@ -732,7 +808,7 @@ async function loadPremiumCategories(skipPush = false) {
                 }
                 let lpAvatar = 'https://2img.net/i/fa/modernbb/pp-blank-thumb.png';
                 let avatarImg = forumEl.querySelector('img.avatar, .avatar img, .lastpost-avatar img, .avatar-default img');
-                if (avatarImg) lpAvatar = avatarImg.getAttribute('src') || avatarImg.getAttribute('data-src') || lpAvatar;
+                if (avatarImg) lpAvatar = safeImageUrl(avatarImg.getAttribute('src') || avatarImg.getAttribute('data-src') || lpAvatar);
                 
                 let lpTitle = 'لا توجد مواضيع';
                 let lpTopicUrl = 'javascript:void(0)';
@@ -745,9 +821,9 @@ async function loadPremiumCategories(skipPush = false) {
                     if (topicLink) {
                         let href = topicLink.getAttribute('href') || '';
                         if (href) {
-                            lpTopicUrl = href;
+                            lpTopicUrl = safeUrl(href, false) || '#';
                             isCategoryEmpty = false;
-                            lpTitle = topicLink.getAttribute('title') || topicLink.textContent.trim();
+                            lpTitle = escapeHtml(topicLink.getAttribute('title') || topicLink.textContent.trim());
                         }
                     }
                     if (lpTitle.length > 30) lpTitle = lpTitle.substring(0, 30) + '...';
@@ -763,7 +839,7 @@ async function loadPremiumCategories(skipPush = false) {
                         if (timeNode) {
                             let tTxt = timeNode.textContent;
                             tTxt = tTxt.replace(/access_time|person|calendar_month/g, '');
-                            lpTime = tTxt.trim();
+                            lpTime = escapeHtml(tTxt.trim());
                         }
                     }
                 }
@@ -777,10 +853,10 @@ async function loadPremiumCategories(skipPush = false) {
                         <i class="material-symbols-outlined">info</i> لا توجد مواضيع
                     </div>` : `
                     <div class="lp-icon" style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; background: rgba(0, 229, 255, 0.05); flex-shrink: 0; padding: 0;">
-                        <img src="${lpAvatar}" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="${escapeHtml(safeImageUrl(lpAvatar))}" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="lp-info" style="justify-content: center;">
-                        <a href="${lpTopicUrl}" data-route="topic" class="lp-title" style="font-weight: 800; color: var(--text-strong); font-size: 14px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-strong)'">${lpTitle}</a>
+                        <a href="${escapeHtml(safeUrl(lpTopicUrl, false) || "#")}" data-route="topic" class="lp-title" style="font-weight: 800; color: var(--text-strong); font-size: 14px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-strong)'">${lpTitle}</a>
                         <span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; font-size: 13px; color: var(--text-muted);">
                             <span style="display: flex; align-items: center; gap: 4px;">
                                 <i class="material-symbols-outlined" style="font-size: 15px;">person</i> 
@@ -798,8 +874,8 @@ async function loadPremiumCategories(skipPush = false) {
                             <i class="material-symbols-outlined">${nodeIcon}</i>
                         </div>
                         <div class="node-main">
-                            <a href="${url}" data-route="forum" class="node-title">${lockBadge}${name}</a>
-                            <div class="node-desc">${desc}</div>
+                            <a href="${safeForumUrl}" data-route="forum" class="node-title">${lockBadge}${safeForumName}</a>
+                            <div class="node-desc">${escapeHtml(desc)}</div>
                             ${subforumsHTML ? `
                                 <div class="subforums-wrapper">
                                     <div class="subforums-label clickable-header" onclick="event.stopPropagation(); toggleFlipSection(this, true)">
@@ -899,10 +975,11 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
     if (cleanUrl.endsWith('?') || cleanUrl.endsWith('&')) {
         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
     }
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent(cleanUrl));
     
-    currentForumId = id; 
+    currentForumId = id;
     currentForumName = name;
+    isCurrentLocked = false;
     switchView('listView'); 
     document.getElementById('secTitle').innerHTML = name ? name : '';
     const container = document.getElementById('topicsContainer');
@@ -964,7 +1041,7 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
                     cleanText = cleanText.split('هذا المنتدى').join('هذا القسم');
                     let iconName = cleanText.includes('لا تستطيع') ? 'cancel' : 'check_circle';
                     let iconColor = cleanText.includes('لا تستطيع') ? 'var(--danger)' : 'var(--primary)';
-                    cleanLines.push(`<div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700;"><i class="material-symbols-outlined" style="color:${iconColor}; font-size:18px;">${iconName}</i> ${cleanText}</div>`);
+                    cleanLines.push(`<div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700;"><i class="material-symbols-outlined" style="color:${iconColor}; font-size:18px;">${iconName}</i> ${escapeHtml(cleanText)}</div>`);
                 }
             });
             if (cleanLines.length > 0) { 
@@ -1000,8 +1077,8 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
             const titleNode = t.querySelector('.posts-description h3 a, .topic-title, .topictitle');
             let cloneTitle = titleNode.cloneNode(true); 
             cloneTitle.querySelectorAll('img, i, svg').forEach(el => el.remove());
-            const title = cloneTitle.textContent.split('notifications').join('').trim();
-            const link = titleNode.getAttribute('href');
+            const title = escapeHtml(cloneTitle.textContent.split('notifications').join('').trim());
+            const link = escapeHtml(safeUrl(titleNode.getAttribute('href'), false) || '#');
             let typeBadge = '';
             let h3Node = titleNode.closest('h3') || titleNode.parentNode;
             if (h3Node) {
@@ -1018,7 +1095,7 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
                 } else if (typeText.indexOf('مثبت') !== -1) {
                     typeBadge = `<span style="background: var(--primary); color: #000; padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px; font-weight: 800;">مثبت</span>`;
                 } else if (typeText) {
-                    typeBadge = `<span style="background: rgba(255,255,255,0.1); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px;">${typeText}</span>`;
+                    typeBadge = `<span style="background: rgba(255,255,255,0.1); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px;">${escapeHtml(typeText)}</span>`;
                 }
             }
             let author = 'زائر';
@@ -1042,6 +1119,7 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
                     if (colNode.style && colNode.style.color) authorColor = colNode.style.color; 
                 }
             }
+            authorColor = safeColor(authorColor, 'var(--text-muted)');
             const repliesNode = t.querySelector('.posts-statistics-replies, td.posts, .block-topics-views'); 
             let replies = 0;
             if (repliesNode) { 
@@ -1080,7 +1158,7 @@ async function loadForumData(id, name, pageUrl = null, skipPush = false){
 
 async function loadLatestTopics(skipPush = false) {
     const targetUrl = '/search?search_id=newposts';
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + targetUrl);
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent(targetUrl));
     switchView('listView'); 
     document.getElementById('secTitle').innerHTML = '<i class="material-symbols-outlined">whatshot</i> أحدث المواضيع'; 
     document.getElementById('mainActionBtn').style.display = 'none'; 
@@ -1116,8 +1194,8 @@ async function loadLatestTopics(skipPush = false) {
             const titleNode = t.querySelector('.posts-description h3 a, .topic-title, .topictitle, a.topictitle, h2 a.topictitle');
             let cloneTitle = titleNode.cloneNode(true); 
             cloneTitle.querySelectorAll('img, i, svg').forEach(el => el.remove());
-            const title = cloneTitle.textContent.split('notifications').join('').trim();
-            const link = titleNode.getAttribute('href');
+            const title = escapeHtml(cloneTitle.textContent.split('notifications').join('').trim());
+            const link = escapeHtml(safeUrl(titleNode.getAttribute('href'), false) || '#');
             let typeBadge = '';
             let h3Node = titleNode.closest('h3') || titleNode.parentNode;
             if (h3Node) {
@@ -1134,7 +1212,7 @@ async function loadLatestTopics(skipPush = false) {
                 } else if (typeText.indexOf('مثبت') !== -1) {
                     typeBadge = `<span style="background: var(--primary); color: #000; padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px; font-weight: 800;">مثبت</span>`;
                 } else if (typeText) {
-                    typeBadge = `<span style="background: var(--item-bg); color: var(--text-strong); padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px; border: 1px solid var(--item-border);">${typeText}</span>`;
+                    typeBadge = `<span style="background: var(--item-bg); color: var(--text-strong); padding: 3px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px; border: 1px solid var(--item-border);">${escapeHtml(typeText)}</span>`;
                 }
             }
             let author = 'زائر';
@@ -1150,6 +1228,7 @@ async function loadLatestTopics(skipPush = false) {
                 let fbNode = t.querySelector('.forum-lastpost-author, .last-post-author, .block-topics-lastpost-author'); 
                 if (fbNode) author = getCleanUsername(fbNode, true); 
             }
+            authorColor = safeColor(authorColor, 'var(--text-muted)');
             const repliesNode = t.querySelector('.posts-statistics-replies, td.posts, .block-topics-views, dd.posts, .block-topics-posts'); 
             let replies = 0;
             if (repliesNode) { 
@@ -1185,7 +1264,7 @@ async function loadLatestTopics(skipPush = false) {
 }
 
 async function loadDiscoverActivity(skipPush = false) {
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=/discover');
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent('/discover'));
     switchView('discoverView'); 
     const container = document.getElementById('discoverContainer'); 
     container.innerHTML = '<div class="loader" style="margin:80px auto; display:block;"></div>';
@@ -1210,7 +1289,7 @@ async function loadDiscoverActivity(skipPush = false) {
                 let urlPart = styleAttr.split('url(')[1].split(')')[0]; 
                 avatar = urlPart.split("'").join("").split('"').join(""); 
             }
-            const time = item.querySelector('.time')?.textContent || ''; 
+            const time = escapeHtml(item.querySelector('.time')?.textContent || ''); 
             let textNode = item.querySelector('.text');
             if (textNode) {
                 textNode.querySelectorAll('a').forEach(a => {
@@ -1228,12 +1307,12 @@ async function loadDiscoverActivity(skipPush = false) {
             }
             container.insertAdjacentHTML('beforeend', `
                 <div class="activity-item">
-                    <img src="${avatar}">
+                    <img src="${escapeHtml(safeImageUrl(avatar))}">
                     <div class="activity-details">
                         <div class="activity-time">
                             <i class="material-symbols-outlined" style="font-size:16px;">schedule</i> ${time}
                         </div>
-                        <div style="font-size:14px; font-weight:600">${textNode ? textNode.innerHTML : ''}</div>
+                        <div style="font-size:14px; font-weight:600">${textNode ? sanitizeRemoteHtml(textNode.innerHTML) : ''}</div>
                     </div>
                 </div>
             `);
@@ -1247,14 +1326,17 @@ async function openTopic(url, skipPush = false){
     if (cleanUrl.endsWith('?') || cleanUrl.endsWith('&')) {
         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
     }
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + cleanUrl);
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent(cleanUrl));
     
-    currentTopicUrl = cleanUrl; 
+    currentTopicUrl = cleanUrl;
+    isCurrentLocked = false;
     switchView('topicView');
     document.getElementById('tvTitle').textContent = 'جاري التحميل...'; 
     document.getElementById('tvPostsContainer').innerHTML = '<div class="loader" style="margin:80px auto; display:block;"></div>'; 
     document.getElementById('topicPaginationTop').innerHTML = ''; 
     document.getElementById('topicPaginationBottom').innerHTML = '';
+    const qrPanel = document.getElementById('qrPanelAttach');
+    if (qrPanel) { qrPanel.innerHTML = ''; qrPanel.dataset.available = ''; }
     const replyTop = document.getElementById('replyBtnTop');
     const replyBottom = document.getElementById('replyBtnBottom');
     let scInst = $('#qrContent').sceditor('instance'); 
@@ -1277,6 +1359,16 @@ async function openTopic(url, skipPush = false){
             }
         }
         activeReplyFormHTML = doc.querySelector('#quick_reply')?.outerHTML || '';
+        const qrBox = document.getElementById('qrAttachBox');
+        const qrToggle = document.getElementById('qrAttachToggleBtn');
+        if (qrBox) { qrBox.style.display = 'none'; }
+        if (qrToggle) { qrToggle.style.display = 'none'; qrToggle.setAttribute('aria-expanded', 'false'); }
+        if (activeReplyFormHTML) {
+            const qrTemp = document.createElement('div');
+            qrTemp.innerHTML = activeReplyFormHTML;
+            populateAttachPanel('qrPanelAttach', qrTemp);
+            if (qrToggle && document.getElementById('qrPanelAttach')?.dataset.available === '1') qrToggle.style.display = 'inline-flex';
+        }
         const replyBtn = doc.querySelector('a[href*="mode=reply"]');
         const hasQuickReplyForm = doc.querySelector('#quick_reply') || doc.querySelector('form[name="post"][action*="mode=reply"]');
         const isTopicLocked = html.includes('هذا الموضوع مقفل') || html.includes('btn-topic-locked') || (replyBtn && (replyBtn.textContent.includes('مغلق') || replyBtn.querySelector('img[src*="locked"]')));
@@ -1332,7 +1424,7 @@ async function openTopic(url, skipPush = false){
                     cleanText = cleanText.split('هذا المنتدى').join('هذا القسم');
                     let iconName = cleanText.includes('لا تستطيع') ? 'cancel' : 'check_circle';
                     let iconColor = cleanText.includes('لا تستطيع') ? 'var(--danger)' : 'var(--primary)';
-                    cleanLines.push(`<div class="perms-item"><i class="material-symbols-outlined" style="color:${iconColor};">${iconName}</i> ${cleanText}</div>`);
+                    cleanLines.push(`<div class="perms-item"><i class="material-symbols-outlined" style="color:${iconColor};">${iconName}</i> ${escapeHtml(cleanText)}</div>`);
                 }
             });
             if (cleanLines.length > 0) permsHTML = cleanLines.join(''); 
@@ -1347,7 +1439,7 @@ async function openTopic(url, skipPush = false){
         if (adminTools) {
             let adminButtonsHTML = '';
             adminTools.querySelectorAll('a').forEach(a => {
-                const href = a.getAttribute('href'); 
+                const href = safeUrl(a.getAttribute('href'), false); 
                 if (!href || href.includes('split') || href.includes('merge') || href.includes('trash')) return;
                 let icon = 'settings';
                 let customTitle = 'إجراء';
@@ -1368,9 +1460,9 @@ async function openTopic(url, skipPush = false){
                 }
                 const btnClass = isTopicDel ? 'btn-icon danger' : 'btn-icon';
                 if (href.includes('move')) {
-                    adminButtonsHTML += `<button class="${btnClass}" onclick="openActionModal('${href}', '${customTitle}')" title="${customTitle}"><i class="material-symbols-outlined">${icon}</i></button>`;
+                    adminButtonsHTML += `<button class="${btnClass}" onclick="openActionModal(decodeURIComponent('${safeEncode(href)}'), '${escapeHtml(customTitle)}')" title="${customTitle}"><i class="material-symbols-outlined">${icon}</i></button>`;
                 } else {
-                    adminButtonsHTML += `<button class="${btnClass}" onclick="silentAdminAction('${href}', '${customTitle}', ${isTopicDel})" title="${customTitle}"><i class="material-symbols-outlined">${icon}</i></button>`;
+                    adminButtonsHTML += `<button class="${btnClass}" onclick="silentAdminAction(decodeURIComponent('${safeEncode(href)}'), '${escapeHtml(customTitle)}', ${isTopicDel})" title="${customTitle}"><i class="material-symbols-outlined">${icon}</i></button>`;
                 }
             });
             tvAdmin.innerHTML = adminButtonsHTML; 
@@ -1393,19 +1485,20 @@ async function openTopic(url, skipPush = false){
             let authorNode = post.querySelector('.post-author-name a, .name strong a, .name a, .name strong, .name, .post-author-name, .author');
             let pureAuthor = getCleanUsername(authorNode, false);
             let authorHtmlContent = getCleanUsername(authorNode, true);
-            let avatar = post.querySelector('.avatar-big img, .post-author-avatar img')?.src || 'https://2img.net/i/fa/modernbb/pp-blank-thumb.png';
-            let date = post.querySelector('.post-date')?.textContent || '';
+            let avatar = safeImageUrl(post.querySelector('.avatar-big img, .post-author-avatar img')?.getAttribute('src'));
+            let date = escapeHtml(post.querySelector('.post-date')?.textContent || '');
             let authorColor = 'var(--text-strong)';
             if (authorNode) { 
                 let colNode = authorNode.querySelector('[style*="color"], font[color]') || authorNode; 
                 if (colNode.style && colNode.style.color) authorColor = colNode.style.color; 
                 else if (colNode.getAttribute('color')) authorColor = colNode.getAttribute('color');
             }
+            authorColor = safeColor(authorColor, 'var(--text-strong)');
             let rankNode = post.querySelector('.post-author-title, .tz-rank');
-            let rankHTML = rankNode ? rankNode.innerHTML : 'عضو';
+            let rankHTML = rankNode ? sanitizeRemoteHtml(rankNode.innerHTML) : 'عضو';
             let sigHTML = '';
             let sigNode = post.querySelector('.post-signature, .signature_div, .sig-content, div[id^="sig"], div[class*="signature"]');
-            if (sigNode) sigHTML = sigNode.innerHTML;
+            if (sigNode) sigHTML = sanitizeRemoteHtml(sigNode.innerHTML);
             
             let contentClone = post.querySelector('.post-content, .content, .entry-content')?.cloneNode(true);
             if (contentClone) { 
@@ -1413,8 +1506,8 @@ async function openTopic(url, skipPush = false){
                 if (innerSig) innerSig.remove(); 
                 contentClone.querySelectorAll('.attachbox').forEach(e => e.remove()); 
             }
-            let contentHTML = contentClone ? contentClone.innerHTML : '';
-            let attachHTML = post.querySelector('.attachbox')?.outerHTML || '';
+            let contentHTML = contentClone ? sanitizeRemoteHtml(contentClone.innerHTML) : '';
+            let attachHTML = sanitizeRemoteHtml(post.querySelector('.attachbox')?.outerHTML || '');
             let messages = '0';
             let points = '0';
             let dts = post.querySelectorAll('.post-author-details dt');
@@ -1440,8 +1533,8 @@ async function openTopic(url, skipPush = false){
                     if (nums.length > 0) points = nums[0]; 
                 } 
             }
-            const btnEdit = post.querySelector('a[href*="mode=editpost"]')?.getAttribute('href');
-            const btnDel = post.querySelector('a[href*="mode=delete"]')?.getAttribute('href');
+            const btnEdit = safeUrl(post.querySelector('a[href*="mode=editpost"]')?.getAttribute('href'), false);
+            const btnDel = safeUrl(post.querySelector('a[href*="mode=delete"]')?.getAttribute('href'), false);
             
             let bs = String.fromCharCode(92);
             let safeAuthor = pureAuthor.split(bs).join(bs+bs).split("'").join(bs+"'").split('"').join('&quot;');
@@ -1452,11 +1545,12 @@ async function openTopic(url, skipPush = false){
                 btnsHTML += `<button class="btn-icon" onclick="quotePost(decodeURIComponent('${safeEncode(safeAuthor)}'), decodeURIComponent('${safeEncode(safeHTML)}'))" title="اقتباس"><i class="material-symbols-outlined">format_quote</i></button>`;
             }
             if (btnEdit) {
-                btnsHTML += `<button class="btn-icon" onclick="prepareEdit('${btnEdit}')" title="تعديل"><i class="material-symbols-outlined">edit</i></button>`;
+                btnsHTML += `<button class="btn-icon" onclick="prepareEdit(decodeURIComponent('${safeEncode(btnEdit)}'))" title="تعديل"><i class="material-symbols-outlined">edit</i></button>`;
             }
             if (btnDel) {
-                btnsHTML += `<button class="btn-icon danger" onclick="silentAdminAction('${btnDel}', 'حذف المساهمة', false)" title="حذف الرد"><i class="material-symbols-outlined">delete</i></button>`;
+                btnsHTML += `<button class="btn-icon danger" onclick="silentAdminAction(decodeURIComponent('${safeEncode(btnDel)}'), 'حذف المساهمة', false)" title="حذف الرد"><i class="material-symbols-outlined">delete</i></button>`;
             }
+            authorColor = safeColor(authorColor, 'var(--text-strong)');
             const authorHtml = `<span style="color:${authorColor}; display:inline-flex; align-items:center; cursor:default;">${authorHtmlContent}</span>`;
             let postOriginalId = post.getAttribute('id') || ''; 
             if (!postOriginalId && btnEdit) { 
@@ -1468,7 +1562,7 @@ async function openTopic(url, skipPush = false){
                 <div class="post-card" id="${postOriginalId}">
                     <div class="pc-sidebar">
                         <div class="pc-avatar" style="border-color:${authorColor}; cursor:default;">
-                            <img src="${avatar}">
+                            <img src="${escapeHtml(safeImageUrl(avatar))}">
                         </div>
                         <div class="pc-author">${authorHtml}</div>
                         <div class="pc-rank" style="color:${authorColor}; border-color:${authorColor}; display:flex; justify-content:center; align-items:center;">
@@ -1696,7 +1790,7 @@ async function handleSilentRequest(url, formData) {
                     fd.set(btnName, btnVal); 
                     if (!fd.has('post')) fd.set('post', '1');
                     let actionAttr = spamForm.getAttribute('action');
-                    let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url;
+                    let fetchUrl = safeUrl(actionAttr, false) || safeUrl(url, false) || window.location.href;
                     try { 
                         let finalHtml = await handleSilentRequest(fetchUrl, fd); 
                         closeModal('adminModal'); 
@@ -1724,7 +1818,7 @@ async function handleSilentRequest(url, formData) {
         } else {
             const spamParams = await solveRecaptcha(spamForm); 
             let actionAttr = spamForm.getAttribute('action');
-            let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url;
+            let fetchUrl = safeUrl(actionAttr, false) || safeUrl(url, false) || window.location.href;
             return await handleSilentRequest(fetchUrl, spamParams);
         }
     }
@@ -1768,6 +1862,19 @@ async function preparePostModal() {
         const htmlText = await res.text();
         extractServimgTokens(htmlText);
         const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+        const postExtraBar = document.getElementById('postExtraBar');
+        const postSeoTab = document.getElementById('postSeoTab');
+        ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].forEach(id => {
+            const panel = document.getElementById(id);
+            if (panel) { panel.innerHTML = ''; panel.dataset.available = ''; panel.style.display = 'none'; }
+        });
+        if (postSeoTab) postSeoTab.style.display = 'none';
+        if (postExtraBar) postExtraBar.style.display = 'none';
+        populateSeoPanel(doc, 'postPanelSeo', 'postSeoTab');
+        populateOptionsPanel('postPanelOptions', doc);
+        populateAttachPanel('postPanelAttach', doc);
+        const hasPostPanels = ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].some(id => document.getElementById(id)?.dataset.available === '1');
+        if (hasPostPanels && postExtraBar) { postExtraBar.style.display = ''; togglePostPanel('attach'); }
         const types = doc.querySelectorAll('input[name="topictype"]');
         const group = document.querySelector('#postModal .radio-group');
         if (group) {
@@ -1829,6 +1936,9 @@ async function submitTopic() {
         
         const tType = document.querySelector('input[name="topictype"]:checked')?.value || '0'; 
         fd.set('topictype', tType);
+        applySeoFieldsToForm(fd, 'postPanelSeo');
+        applyCheckboxesToForm(fd, 'postPanelOptions');
+        applyAttachToForm(fd, 'postPanelAttach');
         
         if (window.currentUserIsGuest) { 
             const gName = document.getElementById('guestName')?.value.trim(); 
@@ -1904,6 +2014,7 @@ async function submitReply() {
         fd.set('message', message); 
         fd.set('post', '1');
         
+        applyAttachToForm(fd, 'qrPanelAttach');
         if (window.currentUserIsGuest) { 
             const qName = document.getElementById('qrGuestName')?.value.trim(); 
             fd.set('username', qName ? qName : 'زائر'); 
@@ -1952,6 +2063,9 @@ async function previewTopic() {
         fd.set('subject', subject); 
         fd.set('message', message); 
         fd.set('preview', '1');
+        applySeoFieldsToForm(fd, 'postPanelSeo');
+        applyCheckboxesToForm(fd, 'postPanelOptions');
+        applyAttachToForm(fd, 'postPanelAttach');
         if (window.currentUserIsGuest) { 
             const gName = document.getElementById('guestName')?.value.trim(); 
             fd.set('username', gName ? gName : 'زائر'); 
@@ -1981,6 +2095,31 @@ async function previewReply() {
     const message = document.getElementById('qrContent').value.trim();
     if (!message) return showToast('لا يمكنك معاينة رد فارغ!', true);
     openReplyModal(message);
+}
+
+function togglePostPanel(name) {
+    document.querySelectorAll('#postExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
+    ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].forEach(id => {
+        const panel = document.getElementById(id);
+        if (panel) panel.style.display = 'none';
+    });
+    const map = { attach: 'postPanelAttach', seo: 'postPanelSeo', options: 'postPanelOptions' };
+    const panel = document.getElementById(map[name]);
+    if (panel) panel.style.display = '';
+    const index = { attach: 0, seo: 1, options: 2 };
+    const tabs = document.querySelectorAll('#postExtraBar .extra-tab-btn');
+    if (tabs[index[name]]) tabs[index[name]].classList.add('active');
+}
+
+function toggleQRAttach() {
+    const box = document.getElementById('qrAttachBox');
+    const button = document.getElementById('qrAttachToggleBtn');
+    if (!box || !button) return;
+    const open = box.style.display === 'none' || !box.style.display;
+    box.style.display = open ? 'block' : 'none';
+    button.setAttribute('aria-expanded', open ? 'true' : 'false');
+    const label = open ? 'إخفاء المرفق' : 'إرفاق ملف';
+    button.lastChild && (button.lastChild.textContent = ' ' + label);
 }
 
 function toggleEditPanel(name) {
@@ -2047,33 +2186,38 @@ function populateAttachPanel(panelId, doc) {
     panel.dataset.available = '1';
 }
 
-function populateSeoPanel(doc) {
-    const panel = document.getElementById('editPanelSeo');
-    const seoTab = document.getElementById('editSeoTab');
+function populateSeoPanel(doc, panelId = 'editPanelSeo', tabId = 'editSeoTab') {
+    const panel = document.getElementById(panelId);
+    const seoTab = document.getElementById(tabId);
     if (!panel) return;
+    panel.innerHTML = '';
+    panel.dataset.available = '';
     const seoTitle = doc.querySelector('input[name="topic_seo_title"]');
     const seoDesc = doc.querySelector('textarea[name="topic_seo_description"]');
     const ogTwitter = doc.querySelector('input[name="topic_og_img_twitter"]');
     const ogFacebook = doc.querySelector('input[name="topic_og_img_facebook"]');
-    if (!seoTitle && !seoDesc && !ogTwitter && !ogFacebook) return;
+    if (!seoTitle && !seoDesc && !ogTwitter && !ogFacebook) {
+        if (seoTab) seoTab.style.display = 'none';
+        return;
+    }
     let html = '';
     if (seoTitle) {
         html += '<div class="seo-field"><label>عنوان SEO</label>';
-        html += '<input type="text" name="topic_seo_title" maxlength="75" value="' + (seoTitle.value || '') + '">';
+        html += '<input type="text" name="topic_seo_title" maxlength="75" value="' + escapeHtml(seoTitle.value || '') + '">';
         html += '<div class="seo-hint">حد أقصى 75 حرف</div></div>';
     }
     if (seoDesc) {
         html += '<div class="seo-field"><label>وصف SEO</label>';
-        html += '<textarea name="topic_seo_description" maxlength="170" rows="2">' + (seoDesc.value || '') + '</textarea>';
+        html += '<textarea name="topic_seo_description" maxlength="170" rows="2">' + escapeHtml(seoDesc.value || '') + '</textarea>';
         html += '<div class="seo-hint">حد أقصى 170 حرف</div></div>';
     }
     if (ogTwitter) {
         html += '<div class="seo-field"><label>صورة Twitter</label>';
-        html += '<input type="url" name="topic_og_img_twitter" maxlength="255" value="' + (ogTwitter.value || '') + '" placeholder="https://..."></div>';
+        html += '<input type="url" name="topic_og_img_twitter" maxlength="255" value="' + escapeHtml(ogTwitter.value || '') + '" placeholder="https://..."></div>';
     }
     if (ogFacebook) {
         html += '<div class="seo-field"><label>صورة Facebook</label>';
-        html += '<input type="url" name="topic_og_img_facebook" maxlength="255" value="' + (ogFacebook.value || '') + '" placeholder="https://..."></div>';
+        html += '<input type="url" name="topic_og_img_facebook" maxlength="255" value="' + escapeHtml(ogFacebook.value || '') + '" placeholder="https://..."></div>';
     }
     panel.innerHTML = html;
     panel.dataset.available = '1';
@@ -2092,8 +2236,8 @@ function applyCheckboxesToForm(fd, panelId) {
     });
 }
 
-function applySeoFieldsToForm(fd) {
-    const panel = document.getElementById('editPanelSeo');
+function applySeoFieldsToForm(fd, panelId = 'editPanelSeo') {
+    const panel = document.getElementById(panelId);
     if (!panel || panel.dataset.available !== '1') return;
     panel.querySelectorAll('input[name^="topic_"], textarea[name^="topic_"]').forEach(function(el) {
         fd.set(el.name, el.value);
@@ -2165,7 +2309,7 @@ async function prepareEdit(url) {
         const seoTab = document.getElementById('editSeoTab');
         if (editExtraBar) editExtraBar.style.display = 'none';
         if (seoTab) seoTab.style.display = 'none';
-        populateSeoPanel(doc);
+        populateSeoPanel(doc, 'editPanelSeo', 'editSeoTab');
         populateOptionsPanel('editPanelOptions', doc);
         populateAttachPanel('editPanelAttach', doc);
         const hasAnyPanel = document.getElementById('editPanelSeo')?.dataset.available === '1' ||
@@ -2278,7 +2422,7 @@ async function submitEdit() {
 function quotePost(author, htmlContent) {
     const temp = document.createElement('div'); 
     temp.innerHTML = htmlContent;
-    const quoteStr = String.fromCharCode(10) + '[quote="' + author + '"]' + temp.textContent.trim() + '[/quote]' + String.fromCharCode(10);
+    const quoteStr = String.fromCharCode(10) + '[quote="' + String(author || 'عضو').replace(/[\"\[\]]/g, '') + '"]' + temp.textContent.trim() + '[/quote]' + String.fromCharCode(10);
     let scInst = $('#qrContent').sceditor('instance'); 
     if (scInst) scInst.insert(quoteStr); 
     else document.getElementById('qrContent').value += quoteStr;
@@ -2441,7 +2585,7 @@ async function silentAdminAction(url, actionName, isTopicDelete = false) {
             const fd = new FormData(form); 
             fd.set('confirm', '1'); 
             let actionAttr = form.getAttribute('action');
-            let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url; 
+            let fetchUrl = safeUrl(actionAttr, false) || safeUrl(url, false) || window.location.href; 
             await handleSilentRequest(fetchUrl, fd); 
         }
         showToast('تم ' + actionName + ' بنجاح!'); 
@@ -2549,7 +2693,7 @@ async function openActionModal(url, title) {
                 }
                 try { 
                     let actionAttr = form.getAttribute('action');
-                    let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url; 
+                    let fetchUrl = safeUrl(actionAttr, false) || safeUrl(url, false) || window.location.href; 
                     await handleSilentRequest(fetchUrl, fd); 
                     showToast('تم ' + title + ' بنجاح!'); 
                     closeModal('adminModal'); 
@@ -2613,10 +2757,23 @@ function processAuthHTML(html, url, title, icon) {
     }
     let strayError = doc.querySelector('.errorwrap, .error-box, p.error'); 
     if (strayError && !mainBox.contains(strayError)) mainBox.prepend(strayError);
-    mainBox.querySelectorAll('header, #page-footer, .navbar, .page-header, script, aside').forEach(el => el.remove());
+    mainBox.querySelectorAll('header, #page-footer, .navbar, .page-header, script, style, link, meta, base, object, embed, iframe, aside').forEach(el => el.remove());
+    mainBox.querySelectorAll('*').forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+            const attrName = attr.name.toLowerCase();
+            const attrValue = attr.value || '';
+            if (attrName.startsWith('on')) { el.removeAttribute(attr.name); return; }
+            if (['href', 'src', 'action', 'formaction'].includes(attrName) && /^(?:javascript|vbscript|file|data:text|data:application):/i.test(attrValue.trim())) el.removeAttribute(attr.name);
+            if (attrName === 'style' && /expression\s*\(|javascript\s*:|url\s*\(/i.test(attrValue)) el.removeAttribute(attr.name);
+        });
+    });
     mainBox.querySelectorAll('a').forEach(a => {
         let text = a.textContent;
         let href = a.getAttribute('href');
+        const cleanHref = href && !href.startsWith('#') ? safeUrl(href, false) : href;
+        if (href && !href.startsWith('#') && !cleanHref) { a.removeAttribute('href'); return; }
+        if (cleanHref && cleanHref !== href) a.setAttribute('href', cleanHref);
+        href = cleanHref;
         if (href && href.includes('/privacy')) { 
             let span = document.createElement('span'); 
             span.innerHTML = a.innerHTML; 
@@ -2630,7 +2787,7 @@ function processAuthHTML(html, url, title, icon) {
         } else if (href && !href.startsWith('javascript:') && !href.startsWith('#')) { 
             a.onclick = (e) => { 
                 e.preventDefault(); 
-                openAuthModal(new URL(href, new URL(url, window.location.origin)).toString(), title, icon); 
+                openAuthModal(cleanHref || url, title, icon); 
             }; 
             if (href.includes('agreed=true')) {
                 a.className = 'btn-action';
@@ -2756,7 +2913,7 @@ function processAuthHTML(html, url, title, icon) {
             try {
                 const isGet = f.method && f.method.toUpperCase() === 'GET'; 
                 let actionAttr = f.getAttribute('action');
-                let fetchUrl = actionAttr ? new URL(actionAttr, new URL(url, window.location.origin)).toString() : url;
+                let fetchUrl = safeUrl(actionAttr, false) || safeUrl(url, false) || window.location.href;
                 let fetchOptions = {}; 
                 const fd = new FormData(f);
                 if (turnstileDivs.length > 0 && !fd.get('cf-turnstile-response')) { 
@@ -2813,7 +2970,7 @@ function processAuthHTML(html, url, title, icon) {
                     fetchOptions = { method: 'POST', body: fd }; 
                 }
                 const postHtml = await (await fetch(fetchUrl, fetchOptions)).text();
-                let isLoginTrue = postHtml.includes('تم دخولك') || postHtml.includes('لقد تم دخولك') || postHtml.indexOf('"session_logged_in"] = 1') !== -1 || postHtml.indexOf('"session_logged_in"]=1') !== -1;
+                let isLoginTrue = postHtml.includes('تم دخولك') || postHtml.includes('لقد تم دخولك') || isLoggedInMarkup(postHtml);
                 if (isLoginTrue || postHtml.includes('تم تسجيل') || postHtml.includes('نجاح') || postHtml.includes('بريدك الإلكتروني') || postHtml.includes('حسابك')) {
                     if ((url.includes('register') || fetchUrl.includes('register') || postHtml.includes('تفعيل') || postHtml.includes('مراجعة') || postHtml.includes('تسجيلك')) && !isLoginTrue) {
                         closeModal('authModal');
@@ -2895,7 +3052,7 @@ async function performLogout(url) {
 }
 
 async function loadSettingsPage(url, skipPush = false) {
-    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + url);
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent(url));
     let container = document.getElementById('settingsView');
     if (!container) { 
         container = document.createElement('div'); 
@@ -2929,14 +3086,15 @@ async function loadSettingsPage(url, skipPush = false) {
                 let tHref = t.getAttribute('href'); 
                 if(!tHref || tHref === '#') tHref = url;
                 if(tName.includes('أصدقاء') || tName.includes('منبوذين') || tName.includes('متابعة') || tName.includes('إشعار') || tName.includes('مراقبة') || tName.includes('مفضل')) return; 
-                let cleanHref = tHref.split('&_t=')[0];
-                let cleanCurrent = url.split('&_t=')[0];
+                let cleanHref = safeUrl(tHref, false) || safeUrl(url, false) || '/profile?mode=editprofile';
+                cleanHref = cleanHref.split('&_t=')[0];
+                let cleanCurrent = (safeUrl(url, false) || url).split('&_t=')[0];
                 let isActive = cleanHref === cleanCurrent || t.parentElement.classList.contains('activetab');
                 let icon = 'settings'; 
                 if(tName.includes('معلومات')) icon = 'badge'; 
                 else if(tName.includes('تفضيلات')) icon = 'tune'; 
                 else if(tName.includes('صورة')) icon = 'account_circle';
-                tabsHTML += `<a href="${cleanHref}" onclick="event.preventDefault(); loadSettingsPage('${cleanHref}')" class="settings-tab-link ${isActive ? 'active' : ''}"><i class="material-symbols-outlined">${icon}</i> <span>${tName}</span></a>`;
+                tabsHTML += `<a href="${escapeHtml(cleanHref)}" onclick="event.preventDefault(); loadSettingsPage(decodeURIComponent('${safeEncode(cleanHref)}'))" class="settings-tab-link ${isActive ? 'active' : ''}"><i class="material-symbols-outlined">${icon}</i> <span>${escapeHtml(tName)}</span></a>`;
             });
             document.getElementById('settingsTabsList').innerHTML = tabsHTML;
         }
@@ -2953,6 +3111,10 @@ async function loadSettingsPage(url, skipPush = false) {
             }
         }
         if (formNode) {
+            const safeFormHolder = document.createElement('div');
+            safeFormHolder.innerHTML = sanitizeRemoteHtml(formNode.outerHTML);
+            formNode = safeFormHolder.firstElementChild;
+            if (!formNode) throw new Error('تعذر تجهيز نموذج الإعدادات');
             formNode.querySelectorAll('label, tr').forEach(el => { 
                 let htmlContent = el.innerHTML || ''; 
                 if (htmlContent.includes('تغيير كلمة السر') || htmlContent.includes('change_password') || htmlContent.includes('تصدير البيانات') || htmlContent.includes('rgpd.php')) el.style.display = 'none';
@@ -3053,7 +3215,7 @@ async function loadSettingsPage(url, skipPush = false) {
                 }
                 let fd = new FormData(formNode); 
                 fd.set(btnName, origVal); 
-                let actionUrl = formNode.getAttribute('action') || url; 
+                let actionUrl = safeUrl(formNode.getAttribute('action'), false) || safeUrl(url, false) || window.location.href; 
                 try {
                     await handleSilentRequest(actionUrl, fd); 
                     showToast('تم حفظ البيانات بنجاح!');
@@ -3094,27 +3256,127 @@ async function loadSettingsPage(url, skipPush = false) {
     }
 }
 
+let currentStaticUrl = '';
+
+function remotePageSource(doc) {
+    const source = doc.querySelector('#wrap') || doc.querySelector('main') || doc.body;
+    if (!source) return '';
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script, style, link, meta, noscript, header, footer, #page-footer, #search-main, .navbar, .page-header, .breadcrumbs, #breadcrumbs').forEach(el => el.remove());
+    return sanitizeRemoteHtml(clone.innerHTML);
+}
+
+function bindRemotePage(container, sourceUrl) {
+    if (!container) return;
+    container.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const submitter = event.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitter) { submitter.disabled = true; submitter.dataset.oldText = submitter.value || submitter.textContent || ''; }
+            try {
+                const action = safeUrl(form.getAttribute('action') || sourceUrl, false) || sourceUrl;
+                const fd = new FormData(form);
+                if (submitter && submitter.name) fd.set(submitter.name, submitter.value || '1');
+                if ((form.getAttribute('method') || 'get').toLowerCase() === 'get') {
+                    const target = new URL(action, window.location.origin);
+                    for (const [key, value] of fd.entries()) if (typeof value === 'string') target.searchParams.append(key, value);
+                    await loadGenericPage(target.pathname + target.search, false);
+                } else {
+                    const result = await handleSilentRequest(action, fd);
+                    const parsed = new DOMParser().parseFromString(result, 'text/html');
+                    const error = parsed.querySelector('.errorwrap, .error, p.error, .block-content-error, .error-box');
+                    if (error && error.textContent.trim()) throw new Error(error.textContent.trim());
+                    showToast('تم تنفيذ العملية بنجاح.');
+                    await loadGenericPage(sourceUrl, true);
+                }
+            } catch (error) {
+                showToast(error.message || 'تعذر تنفيذ العملية.', true);
+            } finally {
+                if (submitter) { submitter.disabled = false; submitter.value = submitter.dataset.oldText || submitter.value; }
+            }
+        });
+    });
+    container.addEventListener('click', function (event) {
+        const link = event.target.closest('a[href]');
+        if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+        const href = link.getAttribute('href');
+        if (!href || /^(?:javascript:|mailto:|tel:|#)/i.test(href)) return;
+        try {
+            const parsed = new URL(href, window.location.origin);
+            if (parsed.origin !== window.location.origin) return;
+            const path = parsed.pathname.length > 1 ? parsed.pathname.replace(/\/+$/, '') : '/';
+            if (/^\/(?:f|t|u|g)\d+/.test(path) || ['/profile', '/privmsg', '/login', '/register', '/faq', '/search', '/latest', '/newest', '/discover', '/memberlist', '/groups', '/statistics', '/post'].includes(path)) {
+                event.preventDefault();
+                routeUrl(path + parsed.search);
+            }
+        } catch (e) {}
+    }, { once: true });
+}
+
+async function loadGenericPage(url, skipPush = false, title = '') {
+    const target = new URL(url || '/', window.location.origin);
+    const cleanUrl = target.pathname + target.search;
+    currentStaticUrl = cleanUrl;
+    if (!skipPush) window.history.pushState({}, '', BASE_APP_PATH + '?target=' + encodeURIComponent(cleanUrl));
+    switchView('staticView');
+    const heading = document.getElementById('staticTitle');
+    const container = document.getElementById('staticContainer');
+    if (!container) return;
+    if (heading) heading.innerHTML = '<i class="material-symbols-outlined">article</i> ' + escapeHtml(title || 'جاري التحميل...');
+    container.innerHTML = '<div class="loader" style="margin:80px auto; display:block;"></div>';
+    if (target.pathname === '/events') {
+        container.innerHTML = '<div class="empty-state"><i class="material-symbols-outlined" style="font-size:40px;">event_busy</i><br>صفحة الأحداث غير متاحة حالياً على المنتدى الأصلي.</div>';
+        return;
+    }
+    try {
+        const html = await fetchWithCache(cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + '_t=' + Date.now());
+        if (!html) throw new Error('empty response');
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        if (heading) heading.innerHTML = '<i class="material-symbols-outlined">article</i> ' + escapeHtml(title || doc.title || 'صفحة المنتدى');
+        const remoteHtml = remotePageSource(doc);
+        container.innerHTML = remoteHtml || '<div class="empty-state">لا توجد بيانات لعرضها.</div>';
+        bindRemotePage(container, cleanUrl);
+        enforceGroupIcons();
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state"><i class="material-symbols-outlined" style="font-size:40px;">wifi_off</i><br>تعذر تحميل الصفحة المطلوبة.</div>';
+    }
+}
+
 function routeUrl(url, skipPush = false) {
-    if (!url || url === '/' || url === '/forum' || url.indexOf('/h') === 0 || url.indexOf('/c') === 0) {
+    let parsed;
+    try { parsed = new URL(url || '/', window.location.origin); } catch (e) { parsed = new URL('/', window.location.origin); }
+    const path = parsed.pathname.length > 1 ? parsed.pathname.replace(/\/+$/, '') : '/';
+    const target = path + parsed.search;
+    if (path === '/' || path === '/forum' || /^\/h\d+/.test(path) || /^\/c\d+/.test(path)) {
         loadPremiumCategories(skipPush);
-    } else if (url.indexOf('/profile') !== -1) {
-        loadSettingsPage(url, skipPush);
-    } else if (url.indexOf('/t') !== -1 || url.indexOf('mode=reply') !== -1) {
-        openTopic(url, skipPush);
-    } else if (url.indexOf('/f') !== -1) { 
-        let fid = url.split('/f')[1].split('-')[0].split('?')[0]; 
-        loadForumData(parseInt(fid), '', url, skipPush); 
-    } else if (url.indexOf('/discover') !== -1) {
+    } else if (/^\/profile/.test(path)) {
+        loadSettingsPage(target, skipPush);
+    } else if (/^\/t\d+/.test(path)) {
+        openTopic(target, skipPush);
+    } else if (/^\/f\d+/.test(path)) {
+        const match = path.match(/^\/f(\d+)/);
+        loadForumData(match ? parseInt(match[1], 10) : 0, '', target, skipPush);
+    } else if (path === '/discover') {
         loadDiscoverActivity(skipPush);
+    } else if (path === '/latest' || (path === '/search' && parsed.searchParams.get('search_id') === 'newposts')) {
+        loadLatestTopics(skipPush);
+    } else if (path === '/login') {
+        openAuthModal(target, 'تسجيل الدخول', 'login');
+    } else if (path === '/register') {
+        openAuthModal(target, 'إنشاء حساب جديد', 'person_add');
+    } else if (path === '/post' && parsed.searchParams.get('t')) {
+        openTopic('/t' + parsed.searchParams.get('t'), skipPush);
+    } else if (['/faq', '/search', '/newest', '/memberlist', '/groups', '/statistics', '/privmsg', '/chatbox', '/events', '/post'].includes(path)) {
+        const labels = { '/faq': 'الأسئلة الشائعة', '/search': 'البحث المتقدم', '/newest': 'البحث في الأحدث', '/memberlist': 'الأعضاء', '/groups': 'المجموعات', '/statistics': 'إحصائيات المنتدى', '/privmsg': 'الرسائل الخاصة', '/chatbox': 'الدردشة', '/events': 'الأحداث', '/post': 'النشر' };
+        loadGenericPage(target, skipPush, labels[path]);
     } else {
         loadPremiumCategories(skipPush);
     }
 }
 
-window.addEventListener('popstate', (e) => {
+window.addEventListener('popstate', () => {
     const target = new URLSearchParams(window.location.search).get('target');
-    const path = window.location.pathname;
-    routeUrl(target || path, true);
+    routeUrl(target || window.location.pathname, true);
 });
 
 async function buildSidebar() {
