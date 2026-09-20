@@ -347,6 +347,10 @@ let currentTopicUrl = null;
 let editActionUrl = '';
 let previewSourceModal = '';
 let activeReplyFormHTML = '';
+let activeReplyFullFormHTML = '';
+let activeReplyFormDoc = null;
+let replyFormRequest = null;
+let replyFormRequestTopic = '';
 window.currentUserIsGuest = true;
 
 function switchView(viewId) {
@@ -1345,6 +1349,12 @@ async function openTopic(url, skipPush = false){
     } else {
         document.getElementById('qrContent').value = '';
     }
+    activeReplyFormHTML = '';
+    activeReplyFullFormHTML = '';
+    activeReplyFormDoc = null;
+    replyFormRequest = null;
+    replyFormRequestTopic = '';
+    resetReplyComposerPanels();
     try {
         const html = await fetchWithCache(`${cleanUrl}${cleanUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`);
         extractServimgTokens(html); 
@@ -1359,16 +1369,11 @@ async function openTopic(url, skipPush = false){
             }
         }
         activeReplyFormHTML = doc.querySelector('#quick_reply')?.outerHTML || '';
-        const qrBox = document.getElementById('qrAttachBox');
-        const qrToggle = document.getElementById('qrAttachToggleBtn');
-        if (qrBox) { qrBox.style.display = 'none'; }
-        if (qrToggle) { qrToggle.style.display = 'none'; qrToggle.setAttribute('aria-expanded', 'false'); }
-        if (activeReplyFormHTML) {
-            const qrTemp = document.createElement('div');
-            qrTemp.innerHTML = activeReplyFormHTML;
-            populateAttachPanel('qrPanelAttach', qrTemp);
-            if (qrToggle && document.getElementById('qrPanelAttach')?.dataset.available === '1') qrToggle.style.display = 'inline-flex';
-        }
+        activeReplyFullFormHTML = '';
+        activeReplyFormDoc = null;
+        replyFormRequest = null;
+        replyFormRequestTopic = '';
+        resetReplyComposerPanels();
         const replyBtn = doc.querySelector('a[href*="mode=reply"]');
         const hasQuickReplyForm = doc.querySelector('#quick_reply') || doc.querySelector('form[name="post"][action*="mode=reply"]');
         const isTopicLocked = html.includes('هذا الموضوع مقفل') || html.includes('btn-topic-locked') || (replyBtn && (replyBtn.textContent.includes('مغلق') || replyBtn.querySelector('img[src*="locked"]')));
@@ -1404,6 +1409,7 @@ async function openTopic(url, skipPush = false){
                 replyBottom.style.display = 'inline-flex'; 
                 replyBottom.onclick = scrollToReply; 
             }
+            loadReplyComposerForm().catch(function() {});
         }
         let titleNode = doc.querySelector('.topic-header h1 a, h1');
         if (titleNode) { 
@@ -1858,23 +1864,29 @@ async function preparePostModal() {
     if (btn) btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
     if (btnBottom) btnBottom.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري التحضير...';
     try {
-        const res = await fetch('/post?f=' + currentForumId + '&mode=newtopic');
+        if (!currentForumId || currentForumId === 'latest') throw new Error('تعذر تحديد القسم الحالي.');
+        const res = await fetch('/post?f=' + encodeURIComponent(currentForumId) + '&mode=newtopic', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('تعذر تحميل نموذج الموضوع.');
         const htmlText = await res.text();
         extractServimgTokens(htmlText);
         const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+        if (!doc.querySelector('form[name="post"]')) throw new Error('يجب تسجيل الدخول أو لا تملك صلاحية إنشاء موضوع.');
         const postExtraBar = document.getElementById('postExtraBar');
         const postSeoTab = document.getElementById('postSeoTab');
-        ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].forEach(id => {
+        const postPollTab = document.getElementById('postPollTab');
+        ['postPanelAttach', 'postPanelSeo', 'postPanelOptions', 'postPanelPoll'].forEach(id => {
             const panel = document.getElementById(id);
             if (panel) { panel.innerHTML = ''; panel.dataset.available = ''; panel.style.display = 'none'; }
         });
         if (postSeoTab) postSeoTab.style.display = 'none';
+        if (postPollTab) postPollTab.style.display = 'none';
         if (postExtraBar) postExtraBar.style.display = 'none';
         populateSeoPanel(doc, 'postPanelSeo', 'postSeoTab');
         populateOptionsPanel('postPanelOptions', doc);
         populateAttachPanel('postPanelAttach', doc);
-        const hasPostPanels = ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].some(id => document.getElementById(id)?.dataset.available === '1');
-        if (hasPostPanels && postExtraBar) { postExtraBar.style.display = ''; togglePostPanel('attach'); }
+        populatePollPanel(doc, 'postPanelPoll', 'postPollTab');
+        const hasPostPanels = ['postPanelAttach', 'postPanelSeo', 'postPanelOptions', 'postPanelPoll'].some(id => document.getElementById(id)?.dataset.available === '1');
+        if (hasPostPanels && postExtraBar) { postExtraBar.style.display = 'block'; togglePostPanel('attach'); }
         const types = doc.querySelectorAll('input[name="topictype"]');
         const group = document.querySelector('#postModal .radio-group');
         if (group) {
@@ -1902,7 +1914,7 @@ async function preparePostModal() {
         else document.getElementById('topicContent').value = '';
         openModal('postModal');
     } catch (e) { 
-        showToast('حدث خطأ أثناء فتح المحرر!', true); 
+        showToast(e.message || 'حدث خطأ أثناء فتح المحرر!', true); 
     } finally { 
         if (btn) btn.innerHTML = origText; 
         if (btnBottom) btnBottom.innerHTML = origText; 
@@ -1922,7 +1934,7 @@ async function submitTopic() {
     btn.disabled = true;
     
     try {
-        const fRes = await fetch('/post?f=' + currentForumId + '&mode=newtopic');
+        const fRes = await fetch('/post?f=' + encodeURIComponent(currentForumId) + '&mode=newtopic', { credentials: 'same-origin' });
         const fText = await fRes.text();
         const doc = new DOMParser().parseFromString(fText, 'text/html');
         const form = doc.querySelector('form[name="post"]');
@@ -1938,6 +1950,7 @@ async function submitTopic() {
         fd.set('topictype', tType);
         applySeoFieldsToForm(fd, 'postPanelSeo');
         applyCheckboxesToForm(fd, 'postPanelOptions');
+        applyPollFieldsToForm(fd, 'postPanelPoll');
         applyAttachToForm(fd, 'postPanelAttach');
         
         if (window.currentUserIsGuest) { 
@@ -1988,32 +2001,17 @@ async function submitReply() {
     btn.disabled = true;
     
     try {
+        if (!activeReplyFormDoc) await loadReplyComposerForm();
+        let activeDoc = activeReplyFormDoc;
         let fd;
-        let activeDoc;
-        
-        if (activeReplyFormHTML) { 
-            const temp = document.createElement('div'); 
-            temp.innerHTML = activeReplyFormHTML; 
-            const form = temp.querySelector('form[name="post"]'); 
-            if (form) {
-                fd = new FormData(form); 
-                activeDoc = document; 
-            }
-        }
-        if (!fd) { 
-            let tid = 0; 
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]); 
-            const fRes = await fetch('/post?t=' + tid + '&mode=reply'); 
-            const docText = await fRes.text();
-            activeDoc = new DOMParser().parseFromString(docText, 'text/html');
-            const form = activeDoc.querySelector('form[name="post"]');
-            if (!form) throw new Error("لا تملك صلاحية الرد على هذا الموضوع.");
-            fd = new FormData(form); 
-        }
+        const sourceForm = activeDoc?.querySelector('form[name="post"]');
+        if (sourceForm) fd = new FormData(sourceForm);
+        if (!fd) throw new Error("لا تملك صلاحية الرد على هذا الموضوع.");
         
         fd.set('message', message); 
         fd.set('post', '1');
         
+        applyCheckboxesToForm(fd, 'qrPanelOptions');
         applyAttachToForm(fd, 'qrPanelAttach');
         if (window.currentUserIsGuest) { 
             const qName = document.getElementById('qrGuestName')?.value.trim(); 
@@ -2056,7 +2054,7 @@ async function previewTopic() {
     btn.innerHTML = 'جاري المعاينة...'; 
     btn.disabled = true;
     try {
-        const fRes = await fetch('/post?f=' + currentForumId + '&mode=newtopic');
+        const fRes = await fetch('/post?f=' + encodeURIComponent(currentForumId) + '&mode=newtopic', { credentials: 'same-origin' });
         const form = new DOMParser().parseFromString(await fRes.text(), 'text/html').querySelector('form[name="post"]');
         if (!form) throw new Error("Form not found");
         const fd = new FormData(form); 
@@ -2065,6 +2063,7 @@ async function previewTopic() {
         fd.set('preview', '1');
         applySeoFieldsToForm(fd, 'postPanelSeo');
         applyCheckboxesToForm(fd, 'postPanelOptions');
+        applyPollFieldsToForm(fd, 'postPanelPoll');
         applyAttachToForm(fd, 'postPanelAttach');
         if (window.currentUserIsGuest) { 
             const gName = document.getElementById('guestName')?.value.trim(); 
@@ -2099,14 +2098,14 @@ async function previewReply() {
 
 function togglePostPanel(name) {
     document.querySelectorAll('#postExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
-    ['postPanelAttach', 'postPanelSeo', 'postPanelOptions'].forEach(id => {
+    ['postPanelAttach', 'postPanelSeo', 'postPanelOptions', 'postPanelPoll'].forEach(id => {
         const panel = document.getElementById(id);
         if (panel) panel.style.display = 'none';
     });
-    const map = { attach: 'postPanelAttach', seo: 'postPanelSeo', options: 'postPanelOptions' };
+    const map = { attach: 'postPanelAttach', seo: 'postPanelSeo', options: 'postPanelOptions', poll: 'postPanelPoll' };
     const panel = document.getElementById(map[name]);
     if (panel) panel.style.display = '';
-    const index = { attach: 0, seo: 1, options: 2 };
+    const index = { attach: 0, seo: 1, options: 2, poll: 3 };
     const tabs = document.querySelectorAll('#postExtraBar .extra-tab-btn');
     if (tabs[index[name]]) tabs[index[name]].classList.add('active');
 }
@@ -2119,19 +2118,30 @@ function toggleQRAttach() {
     box.style.display = open ? 'block' : 'none';
     button.setAttribute('aria-expanded', open ? 'true' : 'false');
     const label = open ? 'إخفاء المرفق' : 'إرفاق ملف';
-    button.lastChild && (button.lastChild.textContent = ' ' + label);
+    const textNode = Array.from(button.childNodes).find(node => node.nodeType === 3);
+    if (textNode) textNode.textContent = ' ' + label;
+}
+
+function toggleQROptions() {
+    const box = document.getElementById('qrOptionsBox');
+    const button = document.getElementById('qrOptionsToggleBtn');
+    if (!box || !button) return;
+    const open = box.style.display === 'none' || !box.style.display;
+    box.style.display = open ? 'block' : 'none';
+    button.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
 function toggleEditPanel(name) {
     document.querySelectorAll('#editExtraBar .extra-tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('editPanelAttach').style.display = 'none';
-    document.getElementById('editPanelSeo').style.display = 'none';
-    document.getElementById('editPanelOptions').style.display = 'none';
-    const map = { attach: 'editPanelAttach', seo: 'editPanelSeo', options: 'editPanelOptions' };
+    ['editPanelAttach', 'editPanelSeo', 'editPanelOptions', 'editPanelPoll'].forEach(id => {
+        const panel = document.getElementById(id);
+        if (panel) panel.style.display = 'none';
+    });
+    const map = { attach: 'editPanelAttach', seo: 'editPanelSeo', options: 'editPanelOptions', poll: 'editPanelPoll' };
     const panel = document.getElementById(map[name]);
     if (panel) panel.style.display = '';
     const btns = document.querySelectorAll('#editExtraBar .extra-tab-btn');
-    const idx = { attach: 0, seo: 1, options: 2 };
+    const idx = { attach: 0, seo: 1, options: 2, poll: 3 };
     if (btns[idx[name]]) btns[idx[name]].classList.add('active');
 }
 
@@ -2155,13 +2165,13 @@ function populateOptionsPanel(panelId, doc) {
         { name: 'disable_bbcode', label: 'تعطيل أكواد المنتدى' },
         { name: 'disable_smilies', label: 'تعطيل الابتسامات' },
         { name: 'attach_sig', label: 'إرفاق التوقيع', defaultChecked: true },
-        { name: 'notify', label: 'إشعاري بالردود', defaultChecked: true }
+        { name: 'notify', label: 'إشعاري بالردود', defaultChecked: false }
     ];
     let html = '';
     checks.forEach(function(c) {
-        const el = doc.querySelector('input[name="' + c.name + '"]');
+        const el = doc && doc.querySelector ? doc.querySelector('input[name="' + c.name + '"]') : null;
         if (!el) return;
-        const isChecked = el.hasAttribute('checked') || c.defaultChecked;
+        const isChecked = el.hasAttribute('checked') || el.checked || c.defaultChecked;
         html += '<label><input type="checkbox" name="' + c.name + '" ' + (isChecked ? 'checked' : '') + '> ' + c.label + '</label>';
     });
     if (html) {
@@ -2170,13 +2180,80 @@ function populateOptionsPanel(panelId, doc) {
     }
 }
 
+function getPollRadioLabel(input, fallback) {
+    const label = input && input.closest ? input.closest('label') : null;
+    const text = label ? label.textContent.replace(/\s+/g, ' ').trim() : '';
+    return text || fallback;
+}
+
+function populatePollPanel(doc, panelId = 'postPanelPoll', tabId = 'postPollTab') {
+    const panel = document.getElementById(panelId);
+    const tab = document.getElementById(tabId);
+    if (!panel) return;
+    panel.innerHTML = '';
+    panel.dataset.available = '';
+    panel.classList.remove('poll-panel');
+    const title = doc && doc.querySelector ? doc.querySelector('input[name="poll_title"]') : null;
+    const options = doc && doc.querySelector ? doc.querySelector('textarea[name="poll_option_text"]') : null;
+    if (!title && !options) {
+        if (tab) tab.style.display = 'none';
+        return;
+    }
+    const length = doc.querySelector('input[name="poll_length"]');
+    const html = [];
+    html.push('<div class="poll-field"><label for="softara_poll_title">سؤال التصويت</label><input id="softara_poll_title" type="text" name="poll_title" maxlength="255" value="' + escapeHtml(title?.value || '') + '" placeholder="اكتب السؤال الذي سيصوت عليه الأعضاء"></div>');
+    html.push('<div class="poll-field"><label for="softara_poll_options">اختيارات التصويت</label><textarea id="softara_poll_options" name="poll_option_text" rows="4" placeholder="اكتب كل اختيار في سطر مستقل، بحد أقصى 10 اختيارات">' + escapeHtml(options?.value || '') + '</textarea><div class="poll-hint">اكتب كل اختيار في سطر مستقل.</div></div>');
+    if (length) html.push('<div class="poll-field"><label for="softara_poll_length">مدة التصويت بالأيام</label><input id="softara_poll_length" type="number" name="poll_length" min="0" max="999" value="' + escapeHtml(length.value || '') + '" placeholder="0 = بلا نهاية"></div>');
+    const groups = [
+        { name: 'poll_multiple', title: 'اختيارات متعددة', labels: ['نعم', 'لا'] },
+        { name: 'poll_cancel_vote', title: 'السماح بإلغاء التصويت', labels: ['نعم', 'لا'] },
+        { name: 'poll_public_members', title: 'عرض قائمة الأعضاء الذين صوتوا', labels: ['نعم', 'لا'] },
+        { name: 'poll_public_whovoted', title: 'عرض من صوّت لكل اختيار', labels: ['عند انتهاء التصويت', 'نعم', 'لا'] }
+    ];
+    groups.forEach(function(group) {
+        const inputs = Array.from(doc.querySelectorAll('input[name="' + group.name + '"]'));
+        if (!inputs.length) return;
+        html.push('<fieldset class="poll-radio-group"><legend>' + group.title + '</legend>');
+        inputs.forEach(function(input, index) {
+            const label = getPollRadioLabel(input, group.labels[index] || ('اختيار ' + (index + 1)));
+            html.push('<label><input type="radio" name="' + group.name + '" value="' + escapeHtml(input.value || '') + '" ' + ((input.hasAttribute('checked') || input.checked) ? 'checked' : '') + '> ' + escapeHtml(label) + '</label>');
+        });
+        html.push('</fieldset>');
+    });
+    panel.innerHTML = html.join('');
+    panel.dataset.available = '1';
+    panel.classList.add('poll-panel');
+    if (tab) tab.style.display = '';
+}
+
+function applyPollFieldsToForm(fd, panelId = 'postPanelPoll') {
+    const panel = document.getElementById(panelId);
+    if (!panel || panel.dataset.available !== '1') return;
+    const names = new Set();
+    panel.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el) {
+        names.add(el.name);
+    });
+    names.forEach(function(name) {
+        const fields = Array.from(panel.querySelectorAll('input[name], textarea[name], select[name]')).filter(el => el.name === name);
+        const field = fields[0];
+        const selected = fields.find(el => (el.type === 'radio' || el.type === 'checkbox') && el.checked);
+        if (field && (field.type === 'radio' || field.type === 'checkbox')) {
+            fd.delete(name);
+            if (selected) fd.set(name, selected.value || '1');
+        } else if (field) {
+            fd.set(name, field.value || '');
+        }
+    });
+}
+
 function populateAttachPanel(panelId, doc) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
     const fileInput = doc.querySelector('input[name="fileupload"]');
     if (!fileInput) return;
     const fileComment = doc.querySelector('input[name="filecomment"]');
-    let html = '<div style="margin-bottom:6px;"><input type="file" name="fileupload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.gif,.jpg,.png,.mp3,.mp4"></div>';
+    let html = '<div class="attach-info">يمكنك إرفاق ملف مع هذه المساهمة. الحجم والامتدادات المسموحة يحددهما المنتدى.</div>';
+    html += '<div style="margin-bottom:6px;"><input type="file" name="fileupload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.gif,.jpg,.png,.mp3,.mp4"></div>';
     html += '<input type="text" name="filecomment" class="attach-comment" placeholder="تعليق على الملف (اختياري)">';
     const addFileBtn = doc.querySelector('input[name="add_file"]');
     if (addFileBtn) {
@@ -2307,14 +2384,19 @@ async function prepareEdit(url) {
 
         const editExtraBar = document.getElementById('editExtraBar');
         const seoTab = document.getElementById('editSeoTab');
+        const editPollTab = document.getElementById('editPollTab');
+        ['editPanelAttach', 'editPanelSeo', 'editPanelOptions', 'editPanelPoll'].forEach(id => {
+            const panel = document.getElementById(id);
+            if (panel) { panel.innerHTML = ''; panel.dataset.available = ''; panel.style.display = 'none'; }
+        });
         if (editExtraBar) editExtraBar.style.display = 'none';
         if (seoTab) seoTab.style.display = 'none';
+        if (editPollTab) editPollTab.style.display = 'none';
         populateSeoPanel(doc, 'editPanelSeo', 'editSeoTab');
         populateOptionsPanel('editPanelOptions', doc);
         populateAttachPanel('editPanelAttach', doc);
-        const hasAnyPanel = document.getElementById('editPanelSeo')?.dataset.available === '1' ||
-            document.getElementById('editPanelOptions')?.dataset.available === '1' ||
-            document.getElementById('editPanelAttach')?.dataset.available === '1';
+        populatePollPanel(doc, 'editPanelPoll', 'editPollTab');
+        const hasAnyPanel = ['editPanelSeo', 'editPanelOptions', 'editPanelAttach', 'editPanelPoll'].some(id => document.getElementById(id)?.dataset.available === '1');
         if (hasAnyPanel && editExtraBar) {
             editExtraBar.style.display = '';
             toggleEditPanel('attach');
@@ -2350,6 +2432,7 @@ async function previewEdit() {
         if (pvTypeChecked) fd.set('topictype', pvTypeChecked.value);
         applyCheckboxesToForm(fd, 'editPanelOptions');
         applySeoFieldsToForm(fd);
+        applyPollFieldsToForm(fd, 'editPanelPoll');
         applyAttachToForm(fd, 'editPanelAttach');
         const res = await fetch('/post', { method: 'POST', body: fd });
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
@@ -2400,6 +2483,7 @@ async function submitEdit() {
         if (editTypeChecked) fd.set('topictype', editTypeChecked.value);
         applyCheckboxesToForm(fd, 'editPanelOptions');
         applySeoFieldsToForm(fd);
+        applyPollFieldsToForm(fd, 'editPanelPoll');
         applyAttachToForm(fd, 'editPanelAttach');
         await appendGlobalTokens(fd, document, 'submit');
         await handleSilentRequest('/post', fd); 
@@ -2430,6 +2514,73 @@ function quotePost(author, htmlContent) {
     showToast('تم إدراج الاقتباس بنجاح!');
 }
 
+function getCurrentTopicId() {
+    const match = String(currentTopicUrl || '').match(/\/t(\d+)/i);
+    return match ? parseInt(match[1], 10) : 0;
+}
+
+function resetReplyComposerPanels() {
+    ['replyPanelAttach', 'replyPanelOptions', 'qrPanelAttach', 'qrPanelOptions'].forEach(id => {
+        const panel = document.getElementById(id);
+        if (panel) { panel.innerHTML = ''; panel.dataset.available = ''; }
+    });
+    ['replyExtraBar', 'qrAttachBox', 'qrOptionsBox'].forEach(id => {
+        const box = document.getElementById(id);
+        if (box) box.style.display = 'none';
+    });
+    ['qrAttachToggleBtn', 'qrOptionsToggleBtn'].forEach(id => {
+        const button = document.getElementById(id);
+        if (button) { button.style.display = 'none'; button.setAttribute('aria-expanded', 'false'); }
+    });
+}
+
+function renderReplyComposerPanels(doc) {
+    resetReplyComposerPanels();
+    if (!doc) return false;
+    populateAttachPanel('replyPanelAttach', doc);
+    populateOptionsPanel('replyPanelOptions', doc);
+    populateAttachPanel('qrPanelAttach', doc);
+    populateOptionsPanel('qrPanelOptions', doc);
+    const modalAttach = document.getElementById('replyPanelAttach')?.dataset.available === '1';
+    const modalOptions = document.getElementById('replyPanelOptions')?.dataset.available === '1';
+    const quickAttach = document.getElementById('qrPanelAttach')?.dataset.available === '1';
+    const quickOptions = document.getElementById('qrPanelOptions')?.dataset.available === '1';
+    const replyBar = document.getElementById('replyExtraBar');
+    if (replyBar && (modalAttach || modalOptions)) {
+        replyBar.style.display = 'block';
+        toggleReplyPanel(modalAttach ? 'attach' : 'options');
+    }
+    const attachButton = document.getElementById('qrAttachToggleBtn');
+    if (attachButton && quickAttach) attachButton.style.display = 'inline-flex';
+    const optionsButton = document.getElementById('qrOptionsToggleBtn');
+    if (optionsButton && quickOptions) optionsButton.style.display = 'inline-flex';
+    return modalAttach || modalOptions || quickAttach || quickOptions;
+}
+
+async function loadReplyComposerForm() {
+    if (activeReplyFormDoc) return activeReplyFormDoc;
+    if (replyFormRequest) return replyFormRequest;
+    const requestedTopic = String(currentTopicUrl || '');
+    const topicId = getCurrentTopicId();
+    if (!topicId) throw new Error('تعذر تحديد الموضوع الحالي.');
+    replyFormRequestTopic = requestedTopic;
+    replyFormRequest = (async function() {
+        const response = await fetch('/post?t=' + topicId + '&mode=reply', { credentials: 'same-origin' });
+        if (!response.ok) throw new Error('تعذر تحميل خيارات الرد.');
+        const text = await response.text();
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        const form = doc.querySelector('form[name="post"]');
+        if (!form) throw new Error('لا تملك صلاحية الرد على هذا الموضوع.');
+        if (requestedTopic !== String(currentTopicUrl || '')) return doc;
+        activeReplyFormDoc = doc;
+        activeReplyFullFormHTML = form.outerHTML;
+        renderReplyComposerPanels(doc);
+        return doc;
+    })();
+    try { return await replyFormRequest; }
+    finally { replyFormRequest = null; replyFormRequestTopic = ''; }
+}
+
 function openReplyModal(prefillContent) {
     openModal('replyModal');
     let scInst = $('#replyContent').sceditor('instance');
@@ -2445,26 +2596,13 @@ function openReplyModal(prefillContent) {
         else document.getElementById('replyContent').value = '';
     }
     if (scInst) setTimeout(function() { scInst.focus(); }, 100);
-
-    const replyExtraBar = document.getElementById('replyExtraBar');
-    if (replyExtraBar) replyExtraBar.style.display = 'none';
-    const rpAttach = document.getElementById('replyPanelAttach');
-    const rpOptions = document.getElementById('replyPanelOptions');
-    if (rpAttach) { rpAttach.innerHTML = ''; rpAttach.dataset.available = ''; }
-    if (rpOptions) { rpOptions.innerHTML = ''; rpOptions.dataset.available = ''; }
-
-    if (activeReplyFormHTML) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = activeReplyFormHTML;
-        const replyDoc = tmp;
-        populateAttachPanel('replyPanelAttach', replyDoc);
-        populateOptionsPanel('replyPanelOptions', replyDoc);
-        const hasReplyPanel = (rpAttach && rpAttach.dataset.available === '1') ||
-            (rpOptions && rpOptions.dataset.available === '1');
-        if (hasReplyPanel && replyExtraBar) {
-            replyExtraBar.style.display = '';
-            toggleReplyPanel('attach');
-        }
+    if (activeReplyFormDoc) {
+        renderReplyComposerPanels(activeReplyFormDoc);
+    } else {
+        resetReplyComposerPanels();
+        const replyExtraBar = document.getElementById('replyExtraBar');
+        if (replyExtraBar) replyExtraBar.style.display = 'block';
+        loadReplyComposerForm().catch(function(error) { showToast(error.message || 'تعذر تحميل خيارات الرد.', true); });
     }
 }
 
@@ -2477,22 +2615,11 @@ async function submitReplyModal() {
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري النشر...';
     btn.disabled = true;
     try {
-        let fd, activeDoc;
-        if (activeReplyFormHTML) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = activeReplyFormHTML;
-            const frm = tmp.querySelector('form[name="post"]');
-            if (frm) { fd = new FormData(frm); activeDoc = document; }
-        }
-        if (!fd) {
-            let tid = 0;
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]);
-            const docText = await (await fetch('/post?t=' + tid + '&mode=reply')).text();
-            activeDoc = new DOMParser().parseFromString(docText, 'text/html');
-            const frm = activeDoc.querySelector('form[name="post"]');
-            if (!frm) throw new Error("لا تملك صلاحية الرد على هذا الموضوع.");
-            fd = new FormData(frm);
-        }
+        if (!activeReplyFormDoc) await loadReplyComposerForm();
+        let fd, activeDoc = activeReplyFormDoc;
+        const sourceForm = activeDoc?.querySelector('form[name="post"]');
+        if (sourceForm) fd = new FormData(sourceForm);
+        if (!fd) throw new Error("لا تملك صلاحية الرد على هذا الموضوع.");
         fd.set('message', message);
         fd.set('post', '1');
         if (window.currentUserIsGuest) {
@@ -2532,21 +2659,11 @@ async function previewReplyModal() {
     btn.innerHTML = '<i class="material-symbols-outlined" style="animation: spin 1s infinite;">hourglass_empty</i> جاري المعاينة...';
     btn.disabled = true;
     try {
+        if (!activeReplyFormDoc) await loadReplyComposerForm();
+        const activeDoc = activeReplyFormDoc;
         let fd;
-        if (activeReplyFormHTML) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = activeReplyFormHTML;
-            const frm = tmp.querySelector('form[name="post"]');
-            if (frm) fd = new FormData(frm);
-        }
-        if (!fd) {
-            let tid = 0;
-            if (currentTopicUrl.indexOf('/t') !== -1) tid = parseInt(currentTopicUrl.split('/t')[1].split('-')[0]);
-            const docText = await (await fetch('/post?t=' + tid + '&mode=reply')).text();
-            const doc = new DOMParser().parseFromString(docText, 'text/html');
-            const frm = doc.querySelector('form[name="post"]');
-            if (frm) fd = new FormData(frm);
-        }
+        const sourceForm = activeDoc?.querySelector('form[name="post"]');
+        if (sourceForm) fd = new FormData(sourceForm);
         if (!fd) throw new Error("تعذر الوصول لنموذج الرد.");
         fd.set('message', message);
         fd.set('preview', '1');
