@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مكتبة القرآن الكريم — مشغل مستقل</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --primary-color: #8b5cf6;
+    --card-bg: #ffffff;
+    --text-color: #1f2937;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --bg-color: #f4f6f9;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --card-bg: #1f2937;
+        --text-color: #f9fafb;
+        --text-muted: #9ca3af;
+        --border-color: #374151;
+        --bg-color: #111827;
+    }
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.quran-box {
+    background: var(--card-bg);
+    color: var(--text-color);
+    width: 100%;
+    max-width: 520px;
+    border-radius: 18px;
+    padding: 1.6rem;
+    box-shadow: 0 20px 45px rgba(0,0,0,.15);
+    position: relative;
+}
+.quran-box h3 {
+    margin: 0 0 4px 0;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.25rem;
+}
+.quran-box .quran-sub {
+    color: var(--text-muted);
+    font-size: .85rem;
+    margin-bottom: 1rem;
+}
+/* صناديق select */
+.quran-field { margin-bottom: 12px; position: relative; }
+.quran-field .select {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block;
+}
+.quran-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: .9rem;
+    margin-bottom: 5px;
+    text-align: right;
+    color: var(--text-color);
+}
+.quran-field label i { color: var(--primary-color); }
+.quran-field select {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 11px 14px 11px 36px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: .95rem;
+    font-weight: 600;
+    direction: rtl;
+    text-align: right;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 44px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.quran-field::after {
+    content: "\25BC";
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--primary-color);
+    font-size: .7rem;
+    z-index: 1;
+    line-height: 1;
+}
+@-moz-document url-prefix() {
+    .quran-field::after { display: none; }
+    .quran-field select {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238b5cf6' d='M0 0l5 6 5-6z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        padding-left: 36px;
+    }
+}
+.quran-field select:hover { border-color: var(--primary-color); }
+.quran-field select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+.quran-field select option {
+    padding: 8px 12px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-weight: 500;
+    font-family: inherit;
+}
+.quran-field select option:checked,
+.quran-field select option:selected {
+    background: var(--primary-color);
+    color: #ffffff;
+    font-weight: 700;
+}
+.quran-now {
+    text-align: center;
+    font-weight: 800;
+    margin: 12px 0 8px;
+    min-height: 28px;
+    color: var(--primary-color);
+    font-size: 1rem;
+    padding: 8px 12px;
+    background: rgba(139, 92, 246, 0.06);
+    border-radius: 8px;
+    border: 1px dashed rgba(139, 92, 246, 0.25);
+    word-break: break-word;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.quran-audio-wrap { direction: ltr; margin-bottom: 8px; }
+.quran-audio-wrap audio {
+    width: 100%;
+    max-height: 40px;
+    border-radius: 8px;
+}
+/* أزرار التنقل + الراديو */
+.quran-nav-btns {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.quran-nav-btns button {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity .2s, transform .15s;
+    font-size: .85rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.quran-nav-btns button:hover { opacity: .88; transform: translateY(-1px); }
+.quran-nav-btns button:active { transform: translateY(0); }
+.quran-nav-btns button.q-secondary {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+#quranRadioBtn { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+#quranRadioBtn:hover { opacity: .9; }
+#quranRadioBtn.radio-playing {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    animation: radioPulse 1.5s ease-in-out infinite;
+}
+@keyframes radioPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .4); }
+    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+.quran-hint {
+    font-size: .78rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 10px;
+    word-break: break-word;
+    line-height: 1.5;
+}
+/* توقيع المصمم */
+.quran-designer-credit {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    font-size: .82rem;
+    line-height: 1.6;
+}
+.quran-designer-credit .designer-name {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color .2s;
+    display: inline-block;
+}
+.quran-designer-credit .designer-name:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+}
+.quran-designer-credit .sadaqa-jaria {
+    color: var(--text-muted);
+    font-size: .78rem;
+    margin-top: 4px;
+}
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 480px) {
+    .quran-box { padding: 1.2rem; border-radius: 14px; }
+    .quran-box h3 { font-size: 1.05rem; }
+    .quran-box .quran-sub { font-size: .8rem; }
+    .quran-field label { font-size: .85rem; }
+    .quran-field select {
+        padding: 10px 12px 10px 32px;
+        font-size: .9rem;
+        min-height: 40px;
+    }
+    .quran-now { font-size: .9rem; padding: 6px 10px; }
+    .quran-nav-btns button {
+        padding: 8px 12px;
+        font-size: .8rem;
+        flex: 1 1 auto;
+        min-width: 90px;
+        justify-content: center;
+    }
+    .quran-nav-btns { gap: 6px; }
+}
+@media (max-width: 360px) {
+    .quran-nav-btns { flex-direction: column; }
+    .quran-nav-btns button { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="quran-box">
+    <h3><i class="fas fa-mosque"></i> مكتبة القرآن الكريم</h3>
+    <div class="quran-sub">استماع مباشر بجودة عالية — اختر القارئ والسورة</div>
+
+    <div class="quran-field">
+        <label for="quranReciter"><i class="fas fa-user"></i> القارئ</label>
+        <div class="select"><select id="quranReciter" onchange="quranSelectionChanged()"></select></div>
+    </div>
+
+    <div class="quran-field">
+        <label for="quranSurah"><i class="fas fa-book-open"></i> السورة</label>
+        <div class="select"><select id="quranSurah" onchange="quranSelectionChanged()"></select></div>
+    </div>
+
+    <div class="quran-now" id="quranNowPlaying"></div>
+
+    <div class="quran-audio-wrap">
+        <audio id="quranAudio" controls preload="none"></audio>
+    </div>
+
+    <div class="quran-nav-btns">
+        <button type="button" onclick="quranStep(1)" title="السورة التالية"><i class="fas fa-forward"></i> التالية</button>
+        <button type="button" id="quranRadioBtn" onclick="toggleQuranRadio()" title="راديو القرآن المباشر"><i class="fas fa-broadcast-tower"></i> <span>راديو مباشر</span></button>
+        <button type="button" class="q-secondary" onclick="quranStep(-1)" title="السورة السابقة"><i class="fas fa-backward"></i> السابقة</button>
+    </div>
+
+    <div class="quran-hint">عند انتهاء السورة ينتقل المشغل تلقائياً إلى السورة التالية — المصدر: mp3quran.net</div>
+
+    <div class="quran-designer-credit">
+        <a href="https://almoatn.blogspot.com" target="_blank" rel="noopener" class="designer-name">تصميم وبرمجة عوض السوداني</a>
+        <div class="sadaqa-jaria">صدقة جارية لي ولوالدي وللمسلمين</div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   مشغل القرآن الكريم — صفحة مستقلة (تبقى تعمل أثناء تصفح المنتدى)
+   ============================================================
+   هذه الصفحة تُفتح في نافذة منبثقة مستقلة (popup window).
+   لأن النافذة منفصلة عن تبويب المنتدى، الصوت لا ينقطع أبداً
+   عند التنقل بين صفحات المنتدى.
+   ============================================================ */
+var RECITERS = [
+    ["مشاري راشد العفاسي", "https://server8.mp3quran.net/afs/"],
+    ["ماهر المعيقلي", "https://server12.mp3quran.net/maher/"],
+    ["عبدالباسط عبدالصمد", "https://server7.mp3quran.net/basit/"],
+    ["محمود خليل الحصري", "https://server13.mp3quran.net/husr/"],
+    ["عبدالرحمن السديس", "https://server11.mp3quran.net/sds/"],
+    ["ياسر الدوسري", "https://server11.mp3quran.net/yasser/"],
+    ["أحمد بن علي العجمي", "https://server10.mp3quran.net/ajm/"],
+    ["ناصر القطامي", "https://server6.mp3quran.net/qtm/"],
+    ["أبو بكر الشاطري", "https://server11.mp3quran.net/shatri/"],
+    ["إبراهيم الأخضر", "https://server6.mp3quran.net/akdr/"],
+    ["الزين محمد أحمد", "https://server9.mp3quran.net/alzain/"]
+];
+var SURAHS = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدّخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+var STATE_KEY = 'quran_player_state_v2';
+var RADIO_URL = 'https://server8.mp3quran.net/afs/001.mp3';
+
+function pad3(n) { n = String(n); while (n.length < 3) { n = '0' + n; } return n; }
+
+function fillLists() {
+    var rSel = document.getElementById('quranReciter');
+    var sSel = document.getElementById('quranSurah');
+    if (!rSel || !sSel) { return; }
+    if (rSel.options.length > 0) { return; }
+    var i, opt;
+    for (i = 0; i < RECITERS.length; i++) {
+        opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = RECITERS[i][0];
+        rSel.appendChild(opt);
+    }
+    for (i = 0; i < SURAHS.length; i++) {
+        opt = document.createElement('option');
+        opt.value = i + 1;
+        opt.textContent = (i + 1) + '. سورة ' + SURAHS[i];
+        sSel.appendChild(opt);
+    }
+    /* نستعيد آخر اختيار */
+    var state = loadState();
+    var lr = 0, ls = 1;
+    if (state && typeof state.reciter === 'number') { lr = state.reciter; }
+    if (state && typeof state.surah === 'number') { ls = state.surah; }
+    if (lr >= 0 && lr < RECITERS.length) { rSel.value = lr; }
+    if (ls >= 1 && ls <= 114) { sSel.value = ls; }
+}
+
+function loadCurrent(autoplay) {
+    var rSel = document.getElementById('quranReciter');
+    var sSel = document.getElementById('quranSurah');
+    var audio = document.getElementById('quranAudio');
+    var now = document.getElementById('quranNowPlaying');
+    if (!rSel || !sSel || !audio) { return; }
+    var r = parseInt(rSel.value, 10) || 0;
+    var s = parseInt(sSel.value, 10) || 1;
+    audio.src = RECITERS[r][1] + pad3(s) + '.mp3';
+    if (now) { now.textContent = 'سورة ' + SURAHS[s - 1] + ' — ' + RECITERS[r][0]; }
+    saveState();
+    if (autoplay) { audio.play().catch(function () { }); }
+}
+
+function quranSelectionChanged() { loadCurrent(true); }
+
+function quranStep(dir) {
+    var sSel = document.getElementById('quranSurah');
+    if (!sSel) { return; }
+    var s = parseInt(sSel.value, 10) || 1;
+    s += dir;
+    if (s < 1) { s = 114; }
+    if (s > 114) { s = 1; }
+    sSel.value = s;
+    loadCurrent(true);
+}
+
+function updateNowPlaying(r, s) {
+    var now = document.getElementById('quranNowPlaying');
+    if (!now) { return; }
+    if (r == null || r < 0 || r >= RECITERS.length) { r = 0; }
+    if (s == null || s < 1 || s > 114) { s = 1; }
+    now.textContent = 'سورة ' + SURAHS[s - 1] + ' — ' + RECITERS[r][0];
+}
+
+function saveState() {
+    var audio = document.getElementById('quranAudio');
+    if (!audio) { return; }
+    var rSel = document.getElementById('quranReciter');
+    var sSel = document.getElementById('quranSurah');
+    var r = rSel ? parseInt(rSel.value, 10) : 0;
+    var s = sSel ? parseInt(sSel.value, 10) : 1;
+    try {
+        var state = {
+            src: audio.src,
+            currentTime: audio.currentTime || 0,
+            paused: audio.paused,
+            reciter: isNaN(r) ? 0 : r,
+            surah: isNaN(s) ? 1 : s,
+            isRadio: audio.getAttribute('data-radio') === '1',
+            ts: Date.now()
+        };
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    } catch (e) { }
+}
+
+function loadState() {
+    try {
+        var raw = localStorage.getItem(STATE_KEY);
+        if (!raw) { return null; }
+        return JSON.parse(raw);
+    } catch (e) { return null; }
+}
+
+function playQuranRadio() {
+    var audio = document.getElementById('quranAudio');
+    var now = document.getElementById('quranNowPlaying');
+    if (!audio) { return; }
+    audio.src = RADIO_URL;
+    audio.setAttribute('data-radio', '1');
+    audio.play().catch(function () { });
+    if (now) { now.textContent = 'راديو القرآن الكريم المباشر — تلاوة متواصلة'; }
+    var radioBtn = document.getElementById('quranRadioBtn');
+    if (radioBtn) {
+        radioBtn.innerHTML = '<i class="fas fa-stop"></i> <span>إيقاف الراديو</span>';
+        radioBtn.classList.add('radio-playing');
+    }
+    saveState();
+}
+
+function stopQuranRadio() {
+    var audio = document.getElementById('quranAudio');
+    if (!audio) { return; }
+    audio.pause();
+    audio.removeAttribute('data-radio');
+    var radioBtn = document.getElementById('quranRadioBtn');
+    if (radioBtn) {
+        radioBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i> <span>راديو مباشر</span>';
+        radioBtn.classList.remove('radio-playing');
+    }
+    saveState();
+}
+
+function toggleQuranRadio() {
+    var radioBtn = document.getElementById('quranRadioBtn');
+    if (radioBtn && radioBtn.classList.contains('radio-playing')) {
+        stopQuranRadio();
+    } else {
+        playQuranRadio();
+    }
+}
+
+/* ===== التهيئة عند تحميل الصفحة ===== */
+document.addEventListener('DOMContentLoaded', function () {
+    fillLists();
+
+    var audio = document.getElementById('quranAudio');
+    if (audio) {
+        audio.addEventListener('ended', function () { quranStep(1); });
+        /* حفظ الحالة كل 5 ثوانٍ */
+        setInterval(function () {
+            if (audio && !audio.paused) { saveState(); }
+        }, 5000);
+        audio.addEventListener('pause', saveState);
+        audio.addEventListener('play', saveState);
+        audio.addEventListener('timeupdate', function () {
+            if (Math.floor(audio.currentTime) % 5 === 0) { saveState(); }
+        });
+    }
+
+    /* استعادة الحالة عند فتح النافذة */
+    var state = loadState();
+    if (state && state.src) {
+        var rSel = document.getElementById('quranReciter');
+        var sSel = document.getElementById('quranSurah');
+        if (rSel && typeof state.reciter === 'number') {
+            rSel.value = state.reciter;
+        }
+        if (sSel && typeof state.surah === 'number') {
+            sSel.value = state.surah;
+        }
+        updateNowPlaying(state.reciter, state.surah);
+
+        /* لو كان الراديو يعمل، نُحدّث الزر */
+        if (state.isRadio) {
+            var radioBtn = document.getElementById('quranRadioBtn');
+            if (radioBtn) {
+                radioBtn.innerHTML = '<i class="fas fa-stop"></i> <span>إيقاف الراديو</span>';
+                radioBtn.classList.add('radio-playing');
+            }
+            var now = document.getElementById('quranNowPlaying');
+            if (now) { now.textContent = 'راديو القرآن الكريم المباشر — تلاوة متواصلة'; }
+        }
+    }
+});
+</script>
+</body>
+</html>
