@@ -4070,6 +4070,10 @@ ul.radio-group li label:has(input:checked) {
     font-size: 13px;
 }
 
+.extra-panel.poll-panel {
+    max-height: 420px;
+}
+
 .extra-panel label {
     display: flex;
     align-items: center;
@@ -4146,6 +4150,62 @@ ul.radio-group li label:has(input:checked) {
     font-family: inherit;
     margin-top: 8px;
     box-sizing: border-box;
+}
+
+.extra-panel .poll-field {
+    margin-bottom: 11px;
+}
+
+.extra-panel .poll-field > label,
+.extra-panel .poll-radio-group legend {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.extra-panel .poll-field input[type="text"],
+.extra-panel .poll-field input[type="number"],
+.extra-panel .poll-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid var(--item-border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.extra-panel .poll-field textarea {
+    min-height: 75px;
+    resize: vertical;
+}
+
+.extra-panel .poll-hint {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.extra-panel .poll-radio-group {
+    border: 1px solid var(--item-border);
+    border-radius: 9px;
+    padding: 7px 10px 5px;
+    margin: 8px 0;
+}
+
+.extra-panel .poll-radio-group label {
+    display: inline-flex;
+    margin-left: 14px;
+    padding: 4px 0;
+}
+
+.extra-panel .poll-radio-group input[type="radio"] {
+    accent-color: var(--primary);
+    margin-left: 5px;
 }
 
 @media (max-width: 768px) {
@@ -4389,6 +4449,9 @@ ul.radio-group li label:has(input:checked) {
         max-height: 140px;
         padding: 8px;
         border-radius: 8px;
+    }
+    .extra-panel.poll-panel {
+        max-height: 320px;
     }
     .extra-panel .seo-field {
         margin-bottom: 6px;
