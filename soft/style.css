@@ -4642,3 +4642,56 @@ ul.radio-group li label:has(input:checked) {
         height: 180px;
     }
 }
+
+
+/* Softara 2026 hardening and remote-page support */
+button, input, select, textarea { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+img { max-width: 100%; }
+.remote-page-content {
+    min-width: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--item-border);
+    border-radius: var(--radius);
+    padding: clamp(16px, 3vw, 30px);
+    box-shadow: 0 12px 35px var(--shadow-color);
+    overflow-wrap: anywhere;
+}
+.remote-page-content .block,
+.remote-page-content .panel,
+.remote-page-content .forumline,
+.remote-page-content .block-content {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--item-border);
+}
+.remote-page-content h1, .remote-page-content h2, .remote-page-content h3,
+.remote-page-content .block-header, .remote-page-content .maintitle {
+    color: var(--text-strong);
+}
+.remote-page-content a { color: var(--primary); }
+.remote-page-content input:not([type="radio"]):not([type="checkbox"]),
+.remote-page-content select, .remote-page-content textarea {
+    max-width: 100%;
+    background: var(--input-bg);
+    color: var(--text-strong);
+    border: 1px solid var(--item-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.remote-page-content table { width: 100%; max-width: 100%; overflow-x: auto; display: block; }
+.remote-page-content .block { margin-bottom: 18px; }
+@media (max-width: 680px) {
+    .header-container { padding-inline: 12px !important; }
+    .brand span { max-width: 42vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-links { order: 3; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 2px; }
+    .nav-links a { flex: 0 0 auto; padding: 8px 12px; }
+    .section-toolbar, .tr-toolbar { padding: 15px; }
+    .quick-reply { padding: 18px; }
+    .quick-reply > div:last-child { flex-wrap: wrap; }
+    .quick-reply > div:last-child > button { flex: 1 1 100% !important; }
+    .remote-page-content { padding: 14px; }
+}
