@@ -1,3 +1,8 @@
+/* ============================================================
+   ⚠️ تنبيه أمني: الأسطر التالية تحتوي على بيانات حساب رفع الصور
+   على servimg.com (خدمة أحلى منتدى). لا تكشف هذه البيانات للعامة.
+   يُنصح بتدوير هذه المفاتيح دورياً عبر لوحة إدارة servimg.com.
+   ============================================================ */
 var servImgAccount = window.servImgAccount || 'salveb@mamabood.com';
 var servImgId = window.servImgId || 'f16a39f08e356f7d8da4511105f405d8';
 var servImgF = window.servImgF || '13386037';
@@ -625,7 +630,7 @@ async function loadAnnouncements() {
                 const cards = container.querySelectorAll('.pro-announce-card');
                 const dots = container.querySelectorAll('.dot');
                 let currentIdx = 0;
-                setInterval(() => {
+                window.__softaraLibInterval = setInterval(() => {
                     cards[currentIdx].classList.remove('active'); 
                     dots[currentIdx].classList.remove('active');
                     currentIdx = (currentIdx + 1) % cards.length;
@@ -3539,7 +3544,7 @@ async function buildFooterStats() {
 }
 
 $(document).ready(function() { 
-    startApp(); 
+    startApp().catch(function(e){if(typeof console!=="undefined")console.error("[Softara Library] startApp failed:",e)}); 
 });
 
 // ===== إغلاق النوافذ عند الضغط خارجها =====
@@ -3643,3 +3648,8 @@ if (originalExecuteSearchAndFilter) {
         return originalExecuteSearchAndFilter.apply(this, arguments);
     };
 }
+
+/* تنظيف الموارد عند مغادرة الصفحة - إصلاح memory leak */
+window.addEventListener('pagehide', function(){
+  if (window.__softaraLibInterval) { clearInterval(window.__softaraLibInterval); window.__softaraLibInterval = null; }
+});
