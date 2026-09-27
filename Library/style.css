@@ -24,6 +24,12 @@
     --font-main: 'Alexandria', sans-serif;
     --radius: 16px;
     --trans: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ===== متغيرات CSS المفقودة (إصلاح) ===== */
+    --btn-text: #ffffff;
+    --nav-bg: var(--surface, #111827);
+    --text-main: var(--text, #e2e8f0);
+    --text-sec: var(--text-muted, #8b9bb4);
 }
 
 [data-theme="light"] {
@@ -41,6 +47,12 @@
     --shadow-color: rgba(0, 0, 0, 0.05);
     --gradient-overlay: linear-gradient(145deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.03));
     --input-bg: #f1f5f9;
+
+    /* ===== متغيرات light theme المفقودة (إصلاح) ===== */
+    --btn-text: #1f2937;
+    --nav-bg: var(--surface, #f8fafc);
+    --text-main: var(--text, #1f2937);
+    --text-sec: var(--text-muted, #6b7280);
 }
 
 * {
@@ -702,6 +714,7 @@ body.settings-active .page-container {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    -webkit-user-select: none;
     user-select: none;
     transition: var(--trans);
     position: relative;
@@ -861,6 +874,7 @@ body.settings-active .page-container {
     width: fit-content;
     gap: 8px;
     margin-bottom: 12px;
+    -webkit-user-select: none;
     user-select: none;
     transition: var(--trans);
     padding: 8px 16px;
