@@ -1,0 +1,43 @@
+{
+ "phase": 3,
+ "task": "task36",
+ "created": "2026-10-02 21:04:09",
+ "base_url": "https://softara1.github.io/softara/up/",
+ "files": {
+  "softara-wall-messenger-v1": {
+   "forum_id": 10,
+   "sha1_gitblob": "822bb8930f0f456082bf4fe105543c9f75facc5b",
+   "bytes": 16872
+  },
+  "softara-member-cards-hover": {
+   "forum_id": 12,
+   "sha1_gitblob": "ae30b6b405c5b0d463429960aa3888e6f5bd6857",
+   "bytes": 23343
+  },
+  "softara-theme-core-a7la": {
+   "forum_id": 16,
+   "sha1_gitblob": "053d7743d7f9a43ef3ab3581c8228a0505dcae56",
+   "bytes": 67797
+  },
+  "softara-points-awards-v4": {
+   "forum_id": 17,
+   "sha1_gitblob": "99928c7455bf0d8510c2746e757b4347605ed38b",
+   "bytes": 18290
+  },
+  "softara-honors-badges": {
+   "forum_id": 18,
+   "sha1_gitblob": "9e44f1075ff2e232275ff47946fc551742d83e1f",
+   "bytes": 7265
+  },
+  "softara-ui-v11-core": {
+   "forum_id": 19,
+   "sha1_gitblob": "067129da62e68f0d842bcb3ba2d53ae48618715b",
+   "bytes": 108737
+  },
+  "softara-internal-links-v1": {
+   "forum_id": 25,
+   "sha1_gitblob": "01dbf24ebba7bac75a086125d51947fb608aa5a4",
+   "bytes": 9511
+  }
+ }
+}
