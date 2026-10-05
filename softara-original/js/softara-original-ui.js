@@ -104,6 +104,13 @@
     var lang = '';
     var m = (code.className || '').match(/(?:language|lang)-([\w-]+)/);
     if (m) { lang = m[1]; }
+    else {
+      /* AwesomeBB: highlight.js يضيف اللغة كصنف مجرد بجانب hljs */
+      var cls = (code.className || '').split(/\s+/).filter(function (c) {
+        return c && c !== 'hljs';
+      });
+      if (cls.length) { lang = cls[0]; }
+    }
 
     var meta = document.createElement('span');
     meta.className = 'so-code-meta';
