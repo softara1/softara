@@ -1413,3 +1413,1320 @@ footer #forum-statistics b {
 #header-banner:has(.wrap:empty) .wrap {
   display: none;
 }
+
+/* =============================================================================
+   10) طبقة P3 — تجربة القراءة (صفحة الموضوع والمحرر)
+   -----------------------------------------------------------------------------
+   الخيط الجانبي يصل الأفاتارات كعقد (يمين في RTL) — متحف الكود داكن دائمًا —
+   الاقتباس إطار بنفسجي بعقدة — المرفقات والتوقيع والإعجابات بلغة سُطور.
+   © 2026 Softara — https://softara.yoo7.com — جزء أصيل من Softara Original.
+   ============================================================================= */
+
+/* ---------- 10.1 ترويسة الموضوع والفتات ---------- */
+main#topic {
+  max-width: 1220px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.topic-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 20px 22px;
+  margin-block-end: 14px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+  position: relative;
+  overflow: hidden;
+}
+
+.topic-header::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--so-brand) 0%, rgba(157, 107, 255, .75) 45%, rgba(184, 134, 11, .4) 100%);
+}
+
+.topic-header h1 {
+  font-family: var(--so-font-display);
+  font-size: clamp(19px, 2.6vw, 26px);
+  font-weight: 700;
+  color: var(--so-ink);
+  margin: 0;
+  line-height: 1.5;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.topic-header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.topic-header h1 a:hover {
+  color: var(--so-brand);
+}
+
+.topic-header h1 .material-symbols-outlined {
+  display: none;
+}
+
+.topic-header .btn {
+  margin: 0;
+}
+
+#breadcrumbs {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12.5px;
+  color: var(--so-ink-3);
+  margin: 0;
+}
+
+#breadcrumbs a {
+  color: var(--so-ink-2);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 7px;
+  padding: 2px 8px;
+  transition: background var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+#breadcrumbs a:hover {
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+#breadcrumbs a .material-symbols-outlined {
+  font-size: 15px;
+}
+
+/* أسماء المشاركين شريطًا حيًا */
+.posters-list,
+.topic-header .posters {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.posters-list img,
+.topic-header .posters img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--so-surface);
+  box-shadow: 0 0 0 1.5px var(--so-line-strong);
+  transition: box-shadow var(--so-t-fast) var(--so-ease), transform var(--so-t-fast) var(--so-ease);
+}
+
+.posters-list img:hover,
+.topic-header .posters img:hover {
+  box-shadow: 0 0 0 2px var(--so-brand);
+  transform: translateY(-1px);
+}
+
+.quick-nav-topics {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-block: 12px;
+}
+
+.quick-nav-topics a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 10px;
+  color: var(--so-ink-2);
+  font-size: 13px;
+  text-decoration: none;
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), box-shadow var(--so-t-fast) var(--so-ease);
+}
+
+.quick-nav-topics a:hover {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+  box-shadow: 0 4px 14px var(--so-brand-glow);
+}
+
+.quick-nav-topics a[style*="float: right"] {
+  float: none;
+}
+
+/* ---------- 10.2 الخيط الجانبي — العمود الفقري للمشاركات ---------- */
+.post-body {
+  position: static;
+}
+
+.post-wrap {
+  display: block;
+  position: relative;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+  padding: 0;
+  margin-block: 0 18px;
+  overflow: visible;
+}
+
+/* العمود الجانبي إلى جهة البداية (يمين في RTL) — order منطقي لا row-reverse */
+.post-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0;
+}
+
+aside.post-aside {
+  order: -1;
+  flex: 0 0 188px;
+  inline-size: 188px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 14px 22px;
+  margin: 0;
+  background: transparent;
+  border-inline-end: 0;
+}
+
+/* خط الخيط داخل العمود الجانبي — يمتد عبر الفجوات ليوصل البطاقات */
+aside.post-aside::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: calc(14px + 29px - 1px);
+  inset-block-start: -19px;
+  inset-block-end: -19px;
+  inline-size: 2px;
+  background: linear-gradient(180deg, var(--so-brand-glow) 0%, var(--so-line-strong) 50%, var(--so-brand-glow) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.post-wrap:first-of-type aside.post-aside::before {
+  inset-block-start: 56px;
+}
+
+.post-wrap:last-of-type aside.post-aside::before {
+  inset-block-end: calc(100% - 56px);
+}
+
+/* الأفاتار عقدة على الخيط */
+.post-author-avatar {
+  order: -2;
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.post-author-avatar .avatar-big img,
+.post-author-avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--so-surface);
+  outline: 2px solid var(--so-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--so-brand-glow);
+}
+
+/* الاسم والرتبة */
+.post-author {
+  order: -1;
+  text-align: center;
+  margin: 0;
+}
+
+.post-author-name {
+  display: block;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--so-ink);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.post-author-name a,
+.post-author-name a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-author-name a:hover {
+  color: var(--so-brand);
+}
+
+.post-author-title {
+  display: inline-block;
+  margin-block-start: 4px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--so-brand);
+  background: var(--so-brand-wash);
+  border: 1px solid var(--so-brand-glow);
+  border-radius: 999px;
+  line-height: 1.6;
+}
+
+.post-author-title img {
+  display: block;
+  margin: 4px auto 0;
+  max-width: 120px;
+}
+
+/* تفاصيل الكاتب */
+.post-author-details {
+  margin: 6px 0 0;
+  padding: 0;
+  width: 100%;
+  font-size: 12px;
+}
+
+.post-author-details dt {
+  color: var(--so-ink-3);
+  font-weight: 500;
+  margin-block-start: 6px;
+  text-align: center;
+}
+
+.post-author-details dd {
+  margin: 1px 0 0;
+  color: var(--so-ink-2);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.post-author-details dt, .post-author-details dd {
+  border: 0;
+  padding: 0;
+}
+
+.post-author-rpg {
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+}
+
+.post-author-rpg br {
+  display: none;
+}
+
+/* قائمة التواصل */
+.post-author-contact {
+  margin-block-start: 4px;
+  position: relative;
+}
+
+.post-author-contact > .material-symbols-outlined {
+  cursor: pointer;
+  color: var(--so-ink-3);
+  font-size: 22px;
+  transition: color var(--so-t-fast) var(--so-ease), transform var(--so-t-fast) var(--so-ease);
+}
+
+.post-author-contact:hover > .material-symbols-outlined {
+  color: var(--so-brand);
+}
+
+.post-author-contact .dropdown-box {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 10px;
+  box-shadow: var(--so-shadow-2);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 120px;
+  z-index: 50;
+}
+
+.post-author-contact .dropdown-box a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  color: var(--so-ink-2);
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: background var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+.post-author-contact .dropdown-box a:hover {
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.post-author-contact .dropdown-box img {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- 10.3 بطاقة المشاركة — الرأس والأزرار ---------- */
+.post-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 14px 20px;
+  border-block-end: 1px dashed var(--so-line);
+  margin: 0;
+  background: transparent;
+}
+
+.post-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--so-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--so-ink-3);
+  min-width: 0;
+}
+
+.post-header h2 > .material-symbols-outlined:first-child {
+  display: none;
+}
+
+.post-header h2 .post-heading-wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-width: 0;
+}
+
+.post-header h2 .post-heading-wrap a {
+  color: var(--so-ink-2);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--so-t-fast) var(--so-ease);
+}
+
+.post-header h2 .post-heading-wrap a:hover {
+  color: var(--so-brand);
+}
+
+.post-header .post-date {
+  font-size: 12px;
+  color: var(--so-ink-3);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* أزرار المشاركة أيقونات هادئة */
+.post-buttons ul {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-buttons li {
+  margin: 0;
+  padding: 0;
+}
+
+.post-buttons li:empty {
+  display: none;
+}
+
+.post-buttons a,
+.post-buttons img {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 8px;
+  color: var(--so-ink-3);
+  transition: background var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+.post-buttons a img,
+.post-buttons img[src] {
+  inline-size: 18px;
+  block-size: 18px;
+  border: 0;
+  padding: 7px;
+  box-sizing: content-box;
+  object-fit: contain;
+}
+
+.post-buttons a:hover,
+.post-buttons img:hover {
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.post-buttons .btn-delete a:hover,
+.post-buttons .btn-delete img:hover {
+  background: rgba(220, 68, 87, .12);
+  color: var(--so-danger);
+}
+
+/* قائمة الجوال المنسدلة */
+.post-buttons-mobile {
+  cursor: pointer;
+  position: relative;
+  color: var(--so-ink-3);
+}
+
+.post-buttons-mobile > .material-symbols-outlined {
+  font-size: 22px;
+  padding: 4px;
+}
+
+.post-buttons-mobile .dropdown-box {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 10px;
+  box-shadow: var(--so-shadow-2);
+  padding: 6px;
+  min-inline-size: 150px;
+  z-index: 50;
+}
+
+.post-buttons-mobile .dropdown-box a img {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+/* جسم المحتوى */
+.post-body .post {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 18px 20px 6px;
+  background: transparent;
+  border: 0;
+}
+
+.post-content {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--so-ink);
+  overflow-wrap: break-word;
+}
+
+.post-content p {
+  margin: 0 0 12px;
+}
+
+.post-content a {
+  color: var(--so-brand);
+  text-decoration: none;
+  border-block-end: 1px solid var(--so-brand-glow);
+  transition: border-color var(--so-t-fast) var(--so-ease);
+}
+
+.post-content a:hover {
+  border-block-end-color: var(--so-brand);
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.post-content h1, .post-content h2, .post-content h3, .post-content h4 {
+  font-family: var(--so-font-display);
+  color: var(--so-ink);
+  line-height: 1.5;
+  margin: 18px 0 10px;
+}
+
+.post-content ul, .post-content ol {
+  padding-inline-start: 22px;
+  margin: 0 0 12px;
+}
+
+.post-content li {
+  margin-block: 4px;
+  position: relative;
+}
+
+.post-content ul li::marker {
+  color: var(--so-brand);
+}
+
+.post-content hr {
+  border: 0;
+  border-block-start: 1px dashed var(--so-line-strong);
+  margin: 16px 0;
+}
+
+.post-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-block: 12px;
+  font-size: 13.5px;
+}
+
+.post-content table td, .post-content table th {
+  border: 1px solid var(--so-line);
+  padding: 8px 12px;
+}
+
+.post-content table th {
+  background: var(--so-surface-dim);
+  font-family: var(--so-font-display);
+  font-weight: 600;
+}
+
+.post-content strong, .post-content b {
+  color: var(--so-ink);
+}
+
+/* ---------- 10.4 متحف الكود — داكن دائمًا في الوضعين ---------- */
+.post-content div.codebox,
+.codebox {
+  direction: ltr;
+  background: #131218;
+  border: 1px solid rgba(160, 139, 255, .26);
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(108, 76, 241, .07), 0 6px 22px rgba(108, 76, 241, .10);
+  margin: 14px 0;
+  overflow: hidden;
+}
+
+.codebox > p {
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(160, 139, 255, .09);
+  border-block-end: 1px solid rgba(160, 139, 255, .16);
+  font-family: var(--so-font-mono);
+  font-size: 11.5px;
+  color: #a08bff;
+  line-height: 1.6;
+}
+
+.codebox > p::before {
+  content: '';
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: #a08bff;
+  box-shadow: 0 0 8px rgba(160, 139, 255, .8);
+  flex: 0 0 auto;
+  order: -2;
+}
+
+.codebox > code,
+.codebox code.hljs {
+  display: block;
+  direction: ltr;
+  text-align: left;
+  margin: 0;
+  padding: 14px 16px;
+  background: transparent;
+  color: #e6e3f2;
+  font-family: var(--so-font-mono);
+  font-size: 12.8px;
+  line-height: 1.75;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.codebox code::-webkit-scrollbar,
+.sceditor-container textarea::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.codebox code::-webkit-scrollbar-thumb,
+.sceditor-container textarea::-webkit-scrollbar-thumb {
+  background: rgba(160, 139, 255, .3);
+  border-radius: 4px;
+}
+
+/* لوحة ألوان سُطور للتظليل — ثابتة في الوضعين */
+.hljs-comment, .hljs-quote { color: #6f6b85; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #a08bff; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: #7fd1a8; }
+.hljs-number, .hljs-symbol, .hljs-bullet { color: #f0b453; }
+.hljs-title, .hljs-title.function_, .hljs-section, .hljs-name { color: #7fb3ff; }
+.hljs-built_in, .hljs-type, .hljs-class .hljs-title { color: #64d8d0; }
+.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable { color: #e0a3ff; }
+.hljs-meta, .hljs-doctag { color: #8f8aa8; }
+.hljs-deletion { color: #ff8fa3; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+
+/* زر النسخ وشارة Softara Code (يبنيها UI Kit) */
+.so-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid rgba(160, 139, 255, .35);
+  border-radius: 7px;
+  color: #c9beff;
+  font-family: var(--so-font-body);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background var(--so-t-fast) var(--so-ease), border-color var(--so-t-fast) var(--so-ease);
+}
+
+.so-code-copy:hover {
+  background: rgba(160, 139, 255, .16);
+  border-color: rgba(160, 139, 255, .6);
+}
+
+.so-code-copy.so-copied {
+  color: #7fd1a8;
+  border-color: rgba(127, 209, 168, .6);
+}
+
+.so-code-copy .material-symbols-outlined {
+  font-size: 13px;
+}
+
+.so-code-badge {
+  font-family: var(--so-font-mono);
+  font-size: 10px;
+  letter-spacing: .4px;
+  color: rgba(201, 190, 255, .72);
+}
+
+.so-code-badge::before {
+  content: '◆ ';
+  color: #a08bff;
+}
+
+/* ---------- 10.5 الاقتباس — إطار بنفسجي بعقدة ---------- */
+.post-content blockquote,
+blockquote {
+  position: relative;
+  margin: 14px 0;
+  padding: 12px 18px;
+  background: var(--so-brand-wash);
+  border: 1px solid var(--so-brand-glow);
+  border-inline-start: 3px solid var(--so-brand);
+  border-radius: 10px;
+  color: var(--so-ink-2);
+  font-size: 14px;
+}
+
+blockquote::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -7px;
+  inset-block-start: 16px;
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 50%;
+  background: var(--so-brand);
+  box-shadow: 0 0 0 3px var(--so-brand-wash), 0 0 10px var(--so-brand-glow);
+}
+
+blockquote cite {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--so-brand);
+  font-style: normal;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+blockquote .quote_content {
+  color: inherit;
+}
+
+/* اقتباس متداخل يتدرج */
+blockquote blockquote {
+  background: var(--so-surface-dim);
+}
+
+/* ---------- 10.6 الإخفاء (Spoiler) ---------- */
+.spoiler {
+  margin: 14px 0;
+  border: 1px dashed var(--so-line-strong);
+  border-radius: 10px;
+  background: var(--so-surface-dim);
+  overflow: hidden;
+}
+
+.spoiler .spoiler_title {
+  padding: 9px 14px;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--so-ink-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+}
+
+.spoiler .spoiler_title::before {
+  content: '';
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--so-brand);
+  flex: 0 0 auto;
+}
+
+.spoiler .spoiler_content {
+  padding: 12px 16px;
+  border-block-start: 1px dashed var(--so-line-strong);
+  color: var(--so-ink);
+  line-height: 1.8;
+}
+
+/* ---------- 10.7 المرفقات ---------- */
+.attachbox {
+  margin: 14px 0;
+  padding: 12px 16px;
+  background: var(--so-surface-dim);
+  border: 1px solid var(--so-line);
+  border-radius: 12px;
+}
+
+.attachbox > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--so-font-display);
+  font-size: 12.5px;
+  color: var(--so-ink-2);
+}
+
+.attachbox dl.attachments {
+  margin: 10px 0 0;
+}
+
+.attachbox dt {
+  margin: 0;
+}
+
+.attachbox dt a.postlink,
+.attachbox dt .postlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line-strong);
+  border-radius: 10px;
+  color: var(--so-ink);
+  font-size: 13px;
+  text-decoration: none;
+  transition: border-color var(--so-t-fast) var(--so-ease), box-shadow var(--so-t-fast) var(--so-ease);
+}
+
+.attachbox dt a.postlink:hover,
+.attachbox dt .postlink:hover {
+  border-color: var(--so-brand);
+  box-shadow: 0 4px 14px var(--so-brand-glow);
+}
+
+.attachbox dt .material-symbols-outlined {
+  color: var(--so-brand);
+  font-size: 18px;
+}
+
+.attachbox dd {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--so-ink-3);
+}
+
+.attachbox dd p {
+  margin: 2px 0;
+}
+
+/* ---------- 10.8 التوقيع ---------- */
+.post-signature {
+  margin-block-start: 14px;
+  padding-block-start: 12px;
+  border-block-start: 1px dashed var(--so-line-strong);
+  position: relative;
+  font-size: 13.5px;
+  color: var(--so-ink-3);
+  line-height: 1.7;
+}
+
+.post-signature::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: -4px;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: var(--so-line-strong);
+}
+
+.post-signature img {
+  max-width: 100%;
+}
+
+/* ---------- 10.9 الإعجابات والتصويت ---------- */
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 20px 14px;
+  margin: 0;
+  background: transparent;
+  border: 0;
+}
+
+.rep-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: transparent;
+  border: 1.5px solid var(--so-line-strong);
+  border-radius: 999px;
+  color: var(--so-ink-2);
+  font-family: var(--so-font-body);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), transform var(--so-t-fast) var(--so-ease);
+}
+
+.rep-button:hover {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+  background: var(--so-brand-wash);
+  transform: translateY(-1px);
+}
+
+.rep-button .rep-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.rep-button .rep-cat .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.rep-button.fa_like.rep-button-liked,
+.rep-button.fa_like[style*="liked"], .rep-button.liked {
+  border-color: var(--so-brand);
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.vote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vote a {
+  color: var(--so-ink-3);
+  transition: color var(--so-t-fast) var(--so-ease), transform var(--so-t-fast) var(--so-ease);
+}
+
+.vote a:hover {
+  color: var(--so-brand);
+  transform: translateY(-1px);
+}
+
+.vote-bar {
+  inline-size: 140px;
+}
+
+.vote-bars {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--so-surface-dim);
+  overflow: hidden;
+  display: flex;
+}
+
+.vote-bar-plus { background: var(--so-success); height: 100%; }
+.vote-bar-minus { background: var(--so-danger); height: 100%; }
+
+.fa_like_div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- 10.10 الرد السريع والمحرر ---------- */
+#quick_reply {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+  padding: 18px 20px;
+  margin-block: 22px;
+}
+
+.quick-reply-textarea-wrap {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+#quick-reply-avatar {
+  flex: 0 0 44px;
+}
+
+#quick-reply-avatar img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--so-surface);
+  outline: 1.5px solid var(--so-brand);
+  outline-offset: 1px;
+}
+
+/* حاوية SCEditor بلغة سُطور */
+.sceditor-container {
+  flex: 1 1 auto;
+  background: var(--so-surface);
+  border: 1.5px solid var(--so-line-strong);
+  border-radius: 10px;
+  font-family: var(--so-font-body);
+}
+
+.sceditor-container.focus {
+  border-color: var(--so-brand);
+  box-shadow: 0 0 0 3px var(--so-brand-glow);
+}
+
+.sceditor-toolbar {
+  background: var(--so-surface-dim);
+  border-block-end: 1px solid var(--so-line);
+  border-radius: 8px 8px 0 0;
+  padding: 6px 8px;
+}
+
+.sceditor-group {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 8px;
+  padding: 2px;
+  margin: 2px;
+}
+
+.sceditor-button {
+  border-radius: 6px;
+  inline-size: 26px;
+  block-size: 26px;
+}
+
+.sceditor-button:hover, .sceditor-button.active {
+  background: var(--so-brand-wash);
+}
+
+.sceditor-container iframe,
+.sceditor-container textarea {
+  background: #ffffff;
+  color: #171522;
+  font-family: var(--so-font-body);
+  border-radius: 0 0 8px 8px;
+}
+
+/* وضع المصدر = متحف مصغّر */
+.sceditor-container.sourceMode textarea {
+  background: #131218;
+  color: #e6e3f2;
+  font-family: var(--so-font-mono);
+  font-size: 13px;
+  direction: ltr;
+  text-align: left;
+}
+
+.sceditor-resizer, .sceditor-grip {
+  filter: opacity(.4);
+}
+
+#quick_reply .quick-reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+/* صفحة النشر الكاملة (posting) — بلوكات ونماذج */
+form.panelform, .panel-roster, form#post,
+.block-sub-header, .posting-block,
+#postingbox, .module-post {
+  background: transparent;
+}
+
+form#post .block,
+.posting-body .block,
+.main .block {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+}
+
+/* ---------- 10.11 الزر العائم والأسفلية ---------- */
+.btn-fixed {
+  inset-inline-end: 22px;
+  inset-block-end: 22px;
+  background: var(--so-brand);
+  color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px var(--so-brand-glow), 0 2px 8px rgba(23, 21, 34, .18);
+  transition: transform var(--so-t-fast) var(--so-ease), box-shadow var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+.btn-fixed:hover {
+  background: var(--so-brand-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px var(--so-brand-glow);
+}
+
+.btn-fixed .btn-fixed-txt {
+  font-family: var(--so-font-display);
+  font-weight: 600;
+}
+
+/* الاستطلاعات */
+.poll, [id^="poll"] {
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+}
+
+.poll-question { font-family: var(--so-font-display); font-weight: 600; color: var(--so-ink); }
+
+/* ---------- 10.12 وضع الليل — تجربة القراءة ---------- */
+[data-so-theme="dark"] .post-wrap,
+[data-so-theme="dark"] .topic-header,
+[data-so-theme="dark"] #quick_reply,
+[data-so-theme="dark"] .poll,
+[data-so-theme="dark"] form#post .block,
+[data-so-theme="dark"] .posting-body .block,
+[data-so-theme="dark"] .main .block {
+  background: var(--so-surface);
+  border-color: var(--so-line);
+  box-shadow: 0 0 0 1px rgba(160, 139, 255, .05), var(--so-shadow-1);
+}
+
+[data-so-theme="dark"] aside.post-aside::before {
+  background: linear-gradient(180deg, rgba(160, 139, 255, .3) 0%, rgba(160, 139, 255, .12) 50%, rgba(160, 139, 255, .3) 100%);
+}
+
+[data-so-theme="dark"] .post-author-avatar .avatar-big img,
+[data-so-theme="dark"] .post-author-avatar img {
+  outline-color: var(--so-brand);
+  box-shadow: 0 0 0 6px rgba(160, 139, 255, .12), 0 0 18px rgba(160, 139, 255, .2);
+}
+
+[data-so-theme="dark"] .post-buttons a:hover,
+[data-so-theme="dark"] .post-buttons img:hover {
+  background: rgba(160, 139, 255, .14);
+  color: #a08bff;
+}
+
+[data-so-theme="dark"] blockquote {
+  background: rgba(160, 139, 255, .07);
+  border-color: rgba(160, 139, 255, .2);
+}
+
+[data-so-theme="dark"] blockquote::before {
+  box-shadow: 0 0 0 3px #1a1824, 0 0 10px rgba(160, 139, 255, .5);
+}
+
+[data-so-theme="dark"] blockquote blockquote {
+  background: rgba(160, 139, 255, .04);
+}
+
+[data-so-theme="dark"] .spoiler {
+  background: rgba(160, 139, 255, .05);
+  border-color: rgba(160, 139, 255, .18);
+}
+
+[data-so-theme="dark"] .attachbox {
+  background: rgba(160, 139, 255, .05);
+  border-color: rgba(160, 139, 255, .14);
+}
+
+[data-so-theme="dark"] .attachbox dt a.postlink,
+[data-so-theme="dark"] .attachbox dt .postlink {
+  background: #1a1824;
+  border-color: rgba(160, 139, 255, .2);
+}
+
+[data-so-theme="dark"] .sceditor-container iframe {
+  background: #1a1824;
+}
+
+/* ---------- 10.13 تجاوب تجربة القراءة ---------- */
+@media (max-width: 900px) {
+  aside.post-aside {
+    flex: 0 0 132px;
+    inline-size: 132px;
+    padding: 16px 8px 18px;
+  }
+
+  .post-author-avatar .avatar-big img,
+  .post-author-avatar img {
+    width: 48px;
+    height: 48px;
+  }
+
+  aside.post-aside::before {
+    inset-inline-start: calc(8px + 24px - 1px);
+  }
+
+  .post-wrap:first-of-type aside.post-aside::before { inset-block-start: 44px; }
+  .post-wrap:last-of-type aside.post-aside::before { inset-block-end: calc(100% - 44px); }
+
+  .post-author-details { font-size: 11px; }
+}
+
+@media (max-width: 640px) {
+  main#topic {
+    padding-inline: 10px;
+  }
+
+  .topic-header {
+    padding: 14px 14px;
+    gap: 8px 10px;
+  }
+
+  /* الجوال: العمود الجانبي يصير رأس مشاركة مدمجًا فوق المحتوى */
+  .post-body {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  aside.post-aside {
+    order: -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    inline-size: 100%;
+    flex-basis: auto;
+    gap: 4px 10px;
+    padding: 12px 14px 0;
+  }
+
+  aside.post-aside::before {
+    inset-inline-start: 22px;
+    inset-block-start: -19px;
+    inset-block-end: calc(100% - 32px);
+    background: linear-gradient(180deg, var(--so-line-strong) 0%, var(--so-brand-glow) 100%);
+  }
+
+  .post-wrap:first-of-type aside.post-aside::before,
+  .post-wrap:last-of-type aside.post-aside::before {
+    inset-block-start: -19px;
+    inset-block-end: calc(100% - 32px);
+  }
+
+  .post-author-avatar,
+  .post-author {
+    order: 0;
+  }
+
+  .post-author-avatar .avatar-big img,
+  .post-author-avatar img {
+    width: 40px;
+    height: 40px;
+    outline-width: 1.5px;
+    box-shadow: 0 0 0 4px var(--so-brand-glow);
+  }
+
+  .post-author {
+    text-align: start;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .post-author-name { font-size: 13.5px; }
+  .post-author-title { margin-block-start: 1px; padding: 1px 8px; font-size: 10px; }
+
+  .post-author-details,
+  .post-author-rpg,
+  .post-author-contact {
+    display: none;
+  }
+
+  .post-header {
+    padding: 10px 14px 8px;
+  }
+
+  .post-header h2 { font-size: 12px; }
+
+  .post-body .post {
+    padding: 12px 14px 4px;
+  }
+
+  .post-footer {
+    padding: 4px 14px 12px;
+  }
+
+  .post-content { font-size: 14.5px; }
+
+  .post-content blockquote {
+    padding: 10px 14px;
+  }
+
+  #quick_reply {
+    padding: 14px 12px;
+  }
+
+  .quick-reply-textarea-wrap { flex-wrap: wrap; }
+  #quick-reply-avatar { flex: 0 0 36px; }
+  #quick-reply-avatar img { width: 36px; height: 36px; }
+
+  .btn-fixed {
+    inset-inline-end: 14px;
+    inset-block-end: 14px;
+    padding: 12px 18px;
+  }
+
+  .btn-fixed .btn-fixed-txt {
+    display: inline;
+  }
+}
+
+/* ---------- نهاية طبقة P3 — سُطور ---------- */
