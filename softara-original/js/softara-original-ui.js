@@ -278,7 +278,7 @@
   var SO_ICON_NAMES = {
     send: 1, save: 1, search: 1, visibility: 1, visibility_off: 1, delete: 1,
     edit: 1, lock: 1, reply: 1, check: 1, close: 1, done: 1, cancel: 1,
-    add: 1, remove: 1, star: 1, share: 1, notifications: 1, create: 1,
+    confirm: 1, add: 1, remove: 1, star: 1, share: 1, notifications: 1, create: 1,
     mode_edit: 1, arrow_forward: 1, arrow_back: 1, arrow_upward: 1,
     delete_forever: 1, content_copy: 1, chat: 1, forum: 1, help: 1,
     info: 1, warning: 1, favorite: 1, thumb_up: 1, print: 1,
