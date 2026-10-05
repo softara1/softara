@@ -3037,6 +3037,31 @@ html[data-so-theme='dark'] .sceditor-emoticons {
   background: #1a1824 !important;
 }
 
+/* ---------- H12 رقاقة الإعجاب — قتل الأزرق الافتراضي rep-cat ---------- */
+.rep-button .rep-cat {
+  background: var(--so-brand) !important;
+  color: #fff !important;
+  border-radius: 8px;
+  padding: 4px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rep-button .rep-cat .material-symbols-outlined {
+  color: #fff !important;
+  font-size: 16px;
+}
+
+.rep-button:hover .rep-cat {
+  background: var(--so-brand-hover) !important;
+}
+
+.rep-button.fa_liked .rep-cat,
+.rep-button.fa_disliked .rep-cat {
+  background: var(--so-brand) !important;
+}
+
 /* ---------- H11 جوال — أدوات المحرر بأحجام معقولة ---------- */
 @media (max-width: 640px) {
   .sceditor-button {
