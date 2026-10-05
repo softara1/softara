@@ -2841,6 +2841,8 @@ input.so-icon-btn {
 }
 
 form .quick-reply-upload {
+  position: static !important;
+  inset: auto !important;
   display: inline-flex;
   align-items: center;
   gap: 6px;
