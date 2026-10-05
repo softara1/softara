@@ -1397,3 +1397,19 @@ footer #forum-statistics b {
 /* =============================================================================
    نهاية طبقة P2 — سُطور
    ============================================================================= */
+
+/* ---------- P2-fix: بانر بلا وصف = شريط أفق رفيع (لا حجز مساحة) ---------- */
+#header-banner:has(.wrap:empty) {
+  padding: 0;
+  height: 10px;
+  background: linear-gradient(90deg, var(--so-brand) 0%, #9d6bff 30%, rgba(184, 134, 11, .55) 70%, transparent 100%);
+  border-block-end: 1px solid var(--so-line);
+}
+
+#header-banner:has(.wrap:empty)::before {
+  display: none;
+}
+
+#header-banner:has(.wrap:empty) .wrap {
+  display: none;
+}
