@@ -1,18 +1,19 @@
-/* =============================================================================
-   Softara Original UI Kit — v0.3.0 (سُطور / Sutūr Design Language)
+/* -----------------------------------------------------------------------------
+   Softara Original UI Kit — v0.3.1 (سُطور / Sutūr Design Language)
    -----------------------------------------------------------------------------
    جزء أصيل من استايل Softara Original — أول استايل أصلي بالكامل من صنع سوفتارا
    التصميم والتكويد: سوفتارا — https://softara.yoo7.com
    © 2026 Softara. عمل أصلي — يُمنع النسب الزائف لهذا العمل.
    -----------------------------------------------------------------------------
    المهام: تبديل الوضع + تكثيف الترويسة + متحف الكود (رأس لغة + نسخ + شارة)
-           + خط المحرر داخل iframe + بصمة الهوية window.SoftaraOriginal
+           + خط المحرر داخل iframe + حارس تلوين دائم + معالج أزرار الأيقونات
+           + بصمة الهوية window.SoftaraOriginal
    القواعد: صفر اعتماديات خارجية — jQuery اختياري فقط إن وجد.
    ============================================================================= */
 (function (window, document) {
   'use strict';
 
-  var VERSION = '0.3.0';
+  var VERSION = '0.3.1';
 
   /* بصمة الهوية — الحقوق جزء من الكود نفسه */
   window.SoftaraOriginal = {
@@ -201,7 +202,7 @@
   function paintEditorFrame(iframe) {
     var doc = null;
     try { doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document); } catch (e) { doc = null; }
-    if (!doc || !doc.body) { return; }
+    if (!doc || !doc.body) { return false; }
     var dark = root.getAttribute('data-so-theme') === 'dark';
     var s = doc.getElementById('so-editor-style');
     if (!s) {
@@ -209,7 +210,7 @@
       s.id = 'so-editor-style';
       doc.head.appendChild(s);
     }
-    s.textContent = 'body{font-family:"IBM Plex Sans Arabic","Alexandria",sans-serif;font-size:14.5px;line-height:1.8;' +
+    s.textContent = 'html{background:' + (dark ? '#1a1824' : '#ffffff') + ';}body{font-family:"IBM Plex Sans Arabic","Alexandria",sans-serif;font-size:14.5px;line-height:1.8;' +
       'color:' + (dark ? '#eceaf4' : '#171522') + ';background:' + (dark ? '#1a1824' : '#ffffff') + ';padding:12px 14px;margin:0;' +
       'overflow-wrap:break-word;} a{color:' + (dark ? '#a08bff' : '#6c4cf1') + ';} pre,code{font-family:"JetBrains Mono",monospace;' +
       'background:rgba(160,139,255,.08);border-radius:6px;padding:2px 6px;} blockquote{border-inline-start:3px solid #6c4cf1;' +
@@ -217,6 +218,8 @@
       'img{max-width:100%;height:auto;}';
     doc.body.style.color = dark ? '#eceaf4' : '#171522';
     doc.body.style.background = dark ? '#1a1824' : '#ffffff';
+    try { doc.documentElement.style.background = dark ? '#1a1824' : '#ffffff'; } catch (e) { }
+    return true;
   }
 
   function paintEditorFrames() {
@@ -235,9 +238,68 @@
     var scans = 0;
     var timer = window.setInterval(function () {
       paintEditorFrames();
-      if (++scans >= 12) { window.clearInterval(timer); }
+      healIconButtons();
+      if (++scans >= 12) {
+        window.clearInterval(timer);
+        /* حارس دائم خفيف: يلتقط أي إعادة بناء للمحرر أو أيقونة منكسرة جديدة */
+        window.setInterval(function () {
+          guardEditorFrames();
+          healIconButtons();
+        }, 3000);
+      }
     }, 1000);
     document.addEventListener('so-themechange', paintEditorFrames);
+    /* مراقب سمات الجذر: أي تغيير للوضع من أي مصدر يعيد تلوين المحرر فورًا */
+    try {
+      var mo = new MutationObserver(function () { paintEditorFrames(); });
+      mo.observe(root, { attributes: true, attributeFilter: ['data-so-theme'] });
+    } catch (e) { /* متصفح بلا MutationObserver — الحارس الدائم يكفي */ }
+  }
+
+  /* الحارس: يعيد التلوين فقط عند انحراف لون جسم iframe عن المتوقع */
+  function guardEditorFrames() {
+    var dark = root.getAttribute('data-so-theme') === 'dark';
+    var expected = dark ? 'rgb(26, 24, 36)' : 'rgb(255, 255, 255)';
+    var frames = document.querySelectorAll('.sceditor-container iframe');
+    for (var i = 0; i < frames.length; i++) {
+      var doc = null;
+      try { doc = frames[i].contentDocument; } catch (e) { doc = null; }
+      if (doc && doc.body) {
+        var bg = '';
+        try { bg = getComputedStyle(doc.body).backgroundColor; } catch (e) { bg = ''; }
+        if (bg !== expected) { paintEditorFrame(frames[i]); }
+      }
+    }
+  }
+
+  /* ---------------- 5ب) معالج أزرار القيم الأيقونية ----------------
+     المنصة تستخدم قيمة الزر كاسم أيقونة (send/save/…) ويكسر خطنا العام
+     ربطها — نعيد خط Material Symbols لأي زر قيمته اسم أيقونة معروف */
+  var SO_ICON_NAMES = {
+    send: 1, save: 1, search: 1, visibility: 1, visibility_off: 1, delete: 1,
+    edit: 1, lock: 1, reply: 1, check: 1, close: 1, done: 1, cancel: 1,
+    add: 1, remove: 1, star: 1, share: 1, notifications: 1, create: 1,
+    mode_edit: 1, arrow_forward: 1, arrow_back: 1, arrow_upward: 1,
+    delete_forever: 1, content_copy: 1, chat: 1, forum: 1, help: 1,
+    info: 1, warning: 1, favorite: 1, thumb_up: 1, print: 1,
+    attach_file: 1, insert_link: 1, undo: 1, redo: 1
+  };
+
+  function healIconButtons() {
+    var btns = document.querySelectorAll('input[type=submit], input[type=button], button');
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      if (b.getAttribute('data-so-icon') === '1' || b.children.length) { continue; }
+      var v = (b.value || '').trim();
+      if (v && SO_ICON_NAMES[v]) {
+        b.setAttribute('data-so-icon', '1');
+        b.style.fontFamily = "'Material Symbols Outlined', sans-serif";
+        b.style.fontSize = '20px';
+        b.style.fontWeight = 'normal';
+        b.style.lineHeight = '1';
+        b.style.direction = 'ltr';
+      }
+    }
   }
 
   /* ---------------- 6) الإقلاع ---------------- */
@@ -245,6 +307,7 @@
     bindThemeToggle();
     bindMobileSearch();
     initMuseum();
+    healIconButtons();
     watchEditorFrames();
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
