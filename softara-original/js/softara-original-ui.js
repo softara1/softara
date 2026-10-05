@@ -157,6 +157,25 @@
     bar.textContent = '';
     bar.appendChild(meta);
     bar.appendChild(btn);
+
+    /* highlight.js يُطبق أصناف اللغة بعد جاهزية jQuery — نلتقطها لاحقًا */
+    if (!lang) {
+      var tries = 0;
+      var langTimer = window.setInterval(function () {
+        var c2 = codebox.querySelector('code, pre');
+        var L = '';
+        if (c2) {
+          var m2 = (c2.className || '').match(/(?:language|lang)-([\w-]+)/);
+          if (m2) { L = m2[1]; }
+          else {
+            var cs2 = (c2.className || '').split(/\s+/).filter(function (x) { return x && x !== 'hljs'; });
+            if (cs2.length) { L = cs2[0]; }
+          }
+        }
+        if (L) { langEl.textContent = L; window.clearInterval(langTimer); }
+        else if (++tries >= 8) { window.clearInterval(langTimer); }
+      }, 500);
+    }
   }
 
   function fallbackCopy(txt, done) {
