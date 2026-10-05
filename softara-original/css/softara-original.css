@@ -852,3 +852,548 @@ html.so-theme-anim #page-footer {
    Softara Original — نهاية طبقة الأساس v0.1.0
    تطوير: سوفتارا — softara.yoo7.com — © 2026
    ============================================================================= */
+
+/* =============================================================================
+   طبقة P2 — القوائم: خيط العقد (سُطور)
+   الفئات والأقسام وقوائم المواضيع — خط حي + عقد حالات — صفر تعديل DOM
+   ============================================================================= */
+
+/* ---------- إصلاح حتمي: عنوان البانر (كان يعتمد على JS المنصة المتقلب) ---------- */
+#header-banner h1,
+#header-banner h2 {
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+/* ---------- بطاقة الفئة ---------- */
+.forum {
+  margin-block-end: 22px;
+  overflow: hidden;
+}
+
+/* رأس الفئة — من الأزرق الافتراضي إلى هوية سُطور */
+.forum .forum-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: linear-gradient(180deg, var(--so-surface-dim), transparent);
+  border-block-end: 1px solid var(--so-line);
+}
+
+.forum .category-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--so-ink);
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.forum .category-title .material-symbols-outlined {
+  color: var(--so-brand);
+  font-size: 20px;
+}
+
+/* عقدة عنوان الفئة */
+.forum .category-title::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--so-brand);
+  box-shadow: 0 0 0 3px var(--so-brand-wash);
+}
+
+.forum-statistics-header,
+.forum-lastpost-header {
+  color: var(--so-ink-3);
+  font-size: 11.5px;
+}
+
+.forum-statistics-header .material-symbols-outlined,
+.forum-lastpost-header .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* زر طي الفئة — يبقى وظيفيًا بلمسة سُطور */
+.forum-hide {
+  opacity: .55;
+  cursor: pointer;
+  transition: opacity var(--so-t-fast) var(--so-ease);
+}
+
+.forum-hide:hover {
+  opacity: 1;
+}
+
+/* ---------- صفوف الأقسام: الخيط والعقد ---------- */
+.forum .forum-section {
+  position: relative;
+  padding: 14px 18px;
+  padding-inline-start: 68px;
+  border-block-start: 1px solid var(--so-line);
+  transition: background var(--so-t-fast) var(--so-ease);
+}
+
+.forum .forum-header + .forum-section {
+  border-block-start: 0;
+}
+
+.forum .forum-section:hover {
+  background: var(--so-surface-dim);
+}
+
+/* الخيط — قطاع خط يمر عبر الصف */
+.forum .forum-section::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 31px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--so-thread);
+  pointer-events: none;
+}
+
+/* الخيط يبدأ وينتهي عند العقدة الأولى والأخيرة */
+.forum .forum-header + .forum-section::before {
+  top: 50%;
+}
+
+.forum .forum-section:last-of-type::before {
+  bottom: 50%;
+}
+
+/* العقدة — إعادة توليد أيقونة القسم كعقدة */
+.forum .forum-icon {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--so-surface);
+  border: 2px solid var(--so-line-strong);
+  color: var(--so-ink-3);
+  box-shadow: 0 0 0 4px var(--so-bg);
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+.forum .forum-icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.forum .forum-section:hover .forum-icon {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+}
+
+/* حالة القسم غير المقروء */
+.forum .forum-section.folder_new .forum-icon {
+  border-color: var(--so-brand);
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.forum .forum-section.folder_new .forum-icon .material-symbols-outlined {
+  animation: so-breathe 2.4s infinite var(--so-ease);
+}
+
+@keyframes so-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+
+/* ---------- محتوى الصف ---------- */
+.forum .forum-description h3 {
+  margin: 0;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+
+.forum .forum-description h3 a {
+  color: var(--so-ink);
+}
+
+.forum .forum-description h3 a:hover {
+  color: var(--so-brand);
+}
+
+.forum .forum-description p {
+  margin: 3px 0 0;
+  color: var(--so-ink-3);
+  font-size: 12.5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* روابط الأقسام الفرعية */
+.forum .forum-description a:not(h3 a) {
+  color: var(--so-ink-2);
+  font-size: 12px;
+}
+
+.forum .forum-description a:not(h3 a):hover {
+  color: var(--so-brand);
+}
+
+/* الإحصاءات — أرقام بهوية العناوين */
+.forum .forum-statistics span {
+  color: var(--so-ink-2);
+}
+
+.forum .forum-statistics span > span {
+  color: var(--so-ink-3);
+  font-size: 11px;
+}
+
+/* آخر مشاركة */
+.forum .forum-lastpost .topic-title {
+  color: var(--so-brand);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.forum .forum-lastpost .topic-title:hover {
+  color: var(--so-brand-hover);
+}
+
+.forum .forum-lastpost-author,
+.forum .forum-lastpost-time,
+.forum .forum-lastpost-location {
+  color: var(--so-ink-3);
+  font-size: 11.5px;
+}
+
+.forum .forum-lastpost-author .material-symbols-outlined,
+.forum .forum-lastpost-time .material-symbols-outlined,
+.forum .forum-lastpost-location .material-symbols-outlined {
+  font-size: 13px;
+}
+
+.forum .avatar-default {
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--so-line-strong);
+}
+
+.forum .avatar-default img {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ---------- أشرطة الأدوات العلوية/السفلية ---------- */
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  margin-block: 12px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 12px;
+  box-shadow: var(--so-shadow-1);
+}
+
+.action-bar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 8px;
+  color: var(--so-ink-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: background var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+.action-bar a:hover {
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.action-bar .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ---------- قائمة المواضيع (topics_list_box) ---------- */
+.posts {
+  margin-block-end: 22px;
+  overflow: hidden;
+}
+
+.posts .posts-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: linear-gradient(180deg, var(--so-surface-dim), transparent);
+  border-block-end: 1px solid var(--so-line);
+}
+
+.posts .posts-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--so-ink);
+}
+
+.posts .posts-title::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--so-brand);
+  box-shadow: 0 0 0 3px var(--so-brand-wash);
+}
+
+.posts-statistics-header,
+.posts-lastpost-header {
+  color: var(--so-ink-3);
+  font-size: 11.5px;
+}
+
+/* فاصل المثبتات — شريط ذهبي هادئ */
+.posts .sticky-separator {
+  height: 30px;
+  background: var(--so-gold-wash);
+  border-block: 1px solid rgba(184, 134, 11, .25);
+}
+
+/* صف الموضوع — نفس لغة الخيط */
+.posts .posts-section {
+  position: relative;
+  padding: 14px 18px;
+  padding-inline-start: 68px;
+  border-block-start: 1px solid var(--so-line);
+  transition: background var(--so-t-fast) var(--so-ease);
+}
+
+.posts .posts-section:first-of-type {
+  border-block-start: 0;
+}
+
+.posts .posts-section:hover {
+  background: var(--so-surface-dim);
+}
+
+.posts .posts-section::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 31px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--so-thread);
+  pointer-events: none;
+}
+
+.posts .posts-header + .posts-section::before,
+.posts .sticky-separator + .posts-section::before {
+  top: 50%;
+}
+
+.posts .posts-section:last-of-type::before {
+  bottom: 50%;
+}
+
+/* عقدة الموضوع — الحالة على الأيقونة نفسها */
+.posts .posts-icon {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--so-surface);
+  border: 2px solid var(--so-line-strong);
+  color: var(--so-ink-3);
+  box-shadow: 0 0 0 4px var(--so-bg);
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+.posts .posts-icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.posts .posts-section:hover .posts-icon {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+}
+
+/* حالات العقد: جديد / مثبت-إعلان / مقفل / ساخن */
+.posts .posts-icon.folder_new {
+  border-color: var(--so-brand);
+  background: var(--so-brand-wash);
+  color: var(--so-brand);
+}
+
+.posts .posts-icon[class*='sticky'],
+.posts .posts-icon[class*='announce'] {
+  border-color: var(--so-gold-strong);
+  background: var(--so-gold-wash);
+  color: var(--so-gold);
+}
+
+.posts .posts-icon[class*='locked'] {
+  background: var(--so-surface-dim);
+  color: var(--so-ink-3);
+}
+
+.posts .posts-icon[class*='hot'] {
+  border-color: var(--so-danger);
+  color: var(--so-danger);
+}
+
+/* العنوان والوصف */
+.posts .posts-description {
+  min-width: 0;
+}
+
+.posts .topic-title,
+.posts .posts-description h3 a {
+  color: var(--so-ink);
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.posts .topic-title:hover,
+.posts .posts-description h3 a:hover {
+  color: var(--so-brand);
+}
+
+.posts .topic-description,
+.posts .posts-description > span {
+  color: var(--so-ink-3);
+  font-size: 12.5px;
+}
+
+/* إحصاءات وآخر مشاركة */
+.posts-statistics span,
+.posts-lastpost {
+  color: var(--so-ink-2);
+}
+
+.posts-statistics span > span,
+.posts-lastpost span > span {
+  color: var(--so-ink-3);
+  font-size: 11px;
+}
+
+.posts .posts-lastpost a {
+  color: var(--so-brand);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.posts .avatar-default {
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--so-line-strong);
+}
+
+.posts .avatar-default img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ترقيم الصفحات */
+.pagination {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination a,
+.pagination span,
+.pagination b {
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: var(--so-ink-2);
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+.pagination a:hover {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+  background: var(--so-brand-wash);
+}
+
+/* الروابط داخل البطاقات: نهاية العصر الأزرق الافتراضي */
+.forum a,
+.posts a {
+  color: var(--so-ink-2);
+}
+
+.forum a:hover,
+.posts a:hover {
+  color: var(--so-brand);
+}
+
+.forum .forum-description h3 a,
+.posts .topic-title,
+.posts .posts-description h3 a {
+  color: var(--so-ink);
+}
+
+/* ---------- إحصاءات المنتدى السفلية (من الفوتر الحي) ---------- */
+footer #forum-statistics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 26px;
+  padding: 18px 16px;
+  margin: 18px auto 0;
+  max-width: 1180px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: var(--so-r-card);
+  box-shadow: var(--so-shadow-1);
+  text-align: center;
+}
+
+footer #forum-statistics > div > div {
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  color: var(--so-ink-2);
+  font-size: 13.5px;
+}
+
+footer #forum-statistics strong,
+footer #forum-statistics b {
+  font-size: 17px;
+  color: var(--so-brand);
+}
+
+/* =============================================================================
+   نهاية طبقة P2 — سُطور
+   ============================================================================= */
