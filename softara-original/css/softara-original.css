@@ -2730,3 +2730,335 @@ form#post .block,
 }
 
 /* ---------- نهاية طبقة P3 — سُطور ---------- */
+
+/* =============================================================================
+   طبقة P3-HOTFIX — إصلاحات العرض الميدانية (جولة التحقق الشاملة)
+   -----------------------------------------------------------------------------
+   مكتشفات بالقياس الحي: فتات الخبز يرث خلفية #263238 — مربع الاتصال يرث #626E74 —
+   أزرار بقيم أيقونية انكسر خطها (send/visibility/save) — الأكوان الزرقاء
+   forum-hideable — حقول وقوائم بلا تلوين داكن — قائمة أدوات الموضوع بيضاء —
+   إطار المحرر يظهر خلف جسم غير مالئ — صفوف المحرر القديمة خام.
+   © 2026 Softara — https://softara.yoo7.com
+   ============================================================================= */
+
+/* ---------- H1 فتات الخبز — من البقية الداكنة إلى رقاقة سُطور ---------- */
+#breadcrumbs {
+  background: var(--so-surface-dim);
+  border: 1px solid var(--so-line);
+  border-radius: 10px;
+  padding: 6px 12px;
+  color: var(--so-ink-3);
+}
+
+#breadcrumbs .material-symbols-outlined {
+  color: var(--so-ink-3);
+}
+
+#breadcrumbs a {
+  background: transparent;
+}
+
+/* ---------- H2 مربع الاتصال الرمادي الموروث في العمود الجانبي ---------- */
+.post-author-contact.dropdown {
+  background: transparent !important;
+}
+
+.post-author-contact.dropdown > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--so-line-strong);
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+.post-author-contact.dropdown:hover > .material-symbols-outlined {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+  background: var(--so-brand-wash);
+}
+
+/* ---------- H3 أزرار القيم الأيقونية + إعادة تمركز أدوات الرد السريع ---------- */
+.quick-reply-side-btns {
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin-block-start: 12px;
+}
+
+.quick-reply-side-btns input.quick-reply-btn,
+button.btn-post,
+input.so-icon-btn {
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-size: 20px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+.quick-reply-side-btns input.quick-reply-btn {
+  inline-size: 52px;
+  block-size: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--so-r-field);
+  cursor: pointer;
+  transition: background var(--so-t-fast) var(--so-ease), transform var(--so-t-fast) var(--so-ease),
+              border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+.quick-reply-side-btns input.quick-reply-send {
+  background: var(--so-brand);
+  color: #fff;
+  box-shadow: 0 2px 10px var(--so-brand-glow);
+}
+
+.quick-reply-side-btns input.quick-reply-send:hover {
+  background: var(--so-brand-hover);
+  transform: translateY(-1px);
+}
+
+.quick-reply-side-btns input.quick-reply-preview {
+  background: var(--so-surface-dim);
+  color: var(--so-ink-2);
+  border: 1px solid var(--so-line-strong);
+  box-shadow: none;
+}
+
+.quick-reply-side-btns input.quick-reply-preview:hover {
+  color: var(--so-brand);
+  border-color: var(--so-brand);
+  background: var(--so-brand-wash);
+}
+
+form .quick-reply-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line-strong);
+  border-radius: var(--so-r-field);
+  color: var(--so-ink-2);
+  font-size: 12.5px;
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+form .quick-reply-upload:hover {
+  border-color: var(--so-brand);
+  color: var(--so-brand);
+  background: var(--so-brand-wash);
+}
+
+/* زر حفظ المسودة في المحرر الكامل — أيقونة رقائقية */
+button.btn-post {
+  inline-size: 46px;
+  block-size: 40px;
+  padding: 0;
+  border-radius: var(--so-r-field);
+}
+
+/* ---------- H4 توافق الأفاتار مع حاوية المحرر (لا تراكب) ---------- */
+.quick-reply-textarea-wrap > .sceditor-container {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+/* ---------- H5 إطارات المحرر — الشفافية أولاً ثم الوضعان ---------- */
+.sceditor-container iframe,
+.sceditor-container textarea {
+  background: transparent !important;
+}
+
+.sceditor-container.sourceMode textarea {
+  background: #131218 !important;
+  color: #e6e3f2 !important;
+}
+
+html[data-so-theme='dark'] .sceditor-container,
+html[data-so-theme='dark'] .sceditor-container iframe,
+html[data-so-theme='dark'] .sceditor-container textarea {
+  background: #1a1824 !important;
+}
+
+html[data-so-theme='dark'] .sceditor-container.sourceMode textarea {
+  background: #131218 !important;
+}
+
+/* ---------- H6 الأكوان المطبوعة الزرقاء — إرفاق ملف / خيارات ---------- */
+.block-header.forum-hideable {
+  background: var(--so-surface-dim) !important;
+  color: var(--so-ink) !important;
+  border: 1px solid var(--so-line);
+  border-radius: 12px;
+  font-family: var(--so-font-display);
+  font-weight: 600;
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease);
+}
+
+.block-header.forum-hideable:hover {
+  border-color: var(--so-brand);
+  color: var(--so-brand) !important;
+}
+
+html[data-so-theme='dark'] .block-header.forum-hideable {
+  background: rgba(160, 139, 255, .05) !important;
+}
+
+/* زر العودة إلى الأعلى — عقدة بنفسجية */
+a[href='#top'] {
+  background: var(--so-brand) !important;
+  color: #fff !important;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px var(--so-brand-glow);
+}
+
+/* ---------- H7 النماذج والقوائم — انتظام + داكن صحيح ---------- */
+select,
+form select,
+.inputbox,
+input:not([type]),
+form input:not([type]) {
+  background: var(--so-surface);
+  border: 1.5px solid var(--so-line-strong);
+  border-radius: var(--so-r-field);
+  color: var(--so-ink);
+  font-family: var(--so-font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+html[data-so-theme='dark'] select,
+html[data-so-theme='dark'] form select,
+html[data-so-theme='dark'] .inputbox,
+html[data-so-theme='dark'] input:not([type]),
+html[data-so-theme='dark'] input[type='text'],
+html[data-so-theme='dark'] form input[type='text'] {
+  background-color: var(--so-surface) !important;
+  color: var(--so-ink) !important;
+  border-color: var(--so-line) !important;
+}
+
+html[data-so-theme='dark'] select option {
+  background: #1a1824;
+  color: #eceaf4;
+}
+
+/* المعاينة تبقى زرًا شبحيًا حتى لو كانت input[type=submit] */
+input[type='submit'].btn-flat,
+input[type='submit'].btn-neutral,
+input[type='submit'].quick-reply-preview {
+  background: var(--so-surface-dim);
+  color: var(--so-ink-2);
+  border: 1px solid var(--so-line-strong);
+  box-shadow: none;
+}
+
+/* ---------- H8 قائمة أدوات الموضوع (plus_menu) والقوائم المنبثقة ---------- */
+html[data-so-theme='dark'] .overview,
+html[data-so-theme='dark'] #plus_menu {
+  background: var(--so-surface) !important;
+  color: var(--so-ink);
+}
+
+html[data-so-theme='dark'] .overview a,
+html[data-so-theme='dark'] #plus_menu a {
+  color: var(--so-brand);
+}
+
+#plus_menu a,
+.overview a {
+  border-radius: 8px;
+}
+
+/* ---------- H9 صفوف المحرر القديمة — روابط رقائقية بلا مساس بالمحرر ---------- */
+#postingbox .block-content > div:not(.select) > a {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  margin: 2px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-line);
+  border-radius: 8px;
+  color: var(--so-ink-2);
+  font-size: 12px;
+  transition: border-color var(--so-t-fast) var(--so-ease), color var(--so-t-fast) var(--so-ease), background var(--so-t-fast) var(--so-ease);
+}
+
+#postingbox .block-content > div:not(.select) > a:hover {
+  color: var(--so-brand);
+  border-color: var(--so-brand);
+  background: var(--so-brand-wash);
+}
+
+#postingbox .block-content > div.select {
+  max-inline-size: 280px;
+  max-block-size: 140px;
+  overflow: auto;
+  padding: 8px 12px;
+  background: var(--so-surface-dim);
+  border: 1px dashed var(--so-line);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--so-ink-3);
+}
+
+/* ---------- H10 لوحات SCEditor المنسدلة (ألوان/وجوه/روابط) ---------- */
+.sceditor-dropdown,
+.sceditor-emoticons,
+.sceditor-scroll,
+.sceditor-color-picker {
+  background: var(--so-surface) !important;
+  border: 1px solid var(--so-line) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--so-shadow-2) !important;
+  color: var(--so-ink);
+}
+
+.sceditor-dropdown a,
+.sceditor-dropdown .sceditor-color-option {
+  border-radius: 6px;
+}
+
+html[data-so-theme='dark'] .sceditor-dropdown,
+html[data-so-theme='dark'] .sceditor-emoticons {
+  background: #1a1824 !important;
+}
+
+/* ---------- H11 جوال — أدوات المحرر بأحجام معقولة ---------- */
+@media (max-width: 640px) {
+  .sceditor-button {
+    inline-size: 26px !important;
+    block-size: 26px !important;
+  }
+
+  .sceditor-group {
+    padding: 2px !important;
+    margin: 1px !important;
+  }
+
+  .sceditor-toolbar {
+    padding: 4px 6px !important;
+  }
+
+  .quick-reply-side-btns {
+    flex-wrap: wrap;
+  }
+
+  a[href='#top'] {
+    inline-size: 44px;
+    block-size: 44px;
+  }
+}
+
+/* ---------- نهاية طبقة P3-HOTFIX — سُطور ---------- */
