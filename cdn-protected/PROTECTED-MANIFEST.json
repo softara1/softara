@@ -1,0 +1,88 @@
+{
+ "project": "softara-cdn protected layer (SEC-1010)",
+ "note": "Obfuscated/minified copies only. Readable sources are NOT in this repo. Served by softara-cdn worker with guard. Unauthorized reuse outside softara domains is blocked at network level.",
+ "license": "All rights reserved (c) Softara (softara.yoo7.com). No permission to copy, reuse, or modify.",
+ "built": "2026-10-06 14:03:42",
+ "files": {
+  "cdn-protected/Library2/script.js": {
+   "bytes": 134453,
+   "sha256": "109ed4332b43"
+  },
+  "cdn-protected/Library2/style.css": {
+   "bytes": 51237,
+   "sha256": "829edbc3a9ae"
+  },
+  "cdn-protected/Library/script.js": {
+   "bytes": 411366,
+   "sha256": "b0849c9cce6b"
+  },
+  "cdn-protected/Library/style.css": {
+   "bytes": 73378,
+   "sha256": "7a20ba745601"
+  },
+  "cdn-protected/up/a7la-7ekaya.js": {
+   "bytes": 33714,
+   "sha256": "6dd6b45e01af"
+  },
+  "cdn-protected/up/a7la-Sections.js": {
+   "bytes": 31633,
+   "sha256": "5281720f7e6a"
+  },
+  "cdn-protected/up/a7la-Topics.js": {
+   "bytes": 103913,
+   "sha256": "403fe88ec212"
+  },
+  "cdn-protected/up/a7la2026.js": {
+   "bytes": 123029,
+   "sha256": "055da72cca21"
+  },
+  "cdn-protected/up/mergebody.css": {
+   "bytes": 12892,
+   "sha256": "14b908dd7a99"
+  },
+  "cdn-protected/up/postingbody.css": {
+   "bytes": 22126,
+   "sha256": "52c493fd1315"
+  },
+  "cdn-protected/up/profileaddbody.css": {
+   "bytes": 16959,
+   "sha256": "81a474ea4531"
+  },
+  "cdn-protected/up/softara-honors-badges.js": {
+   "bytes": 34816,
+   "sha256": "a1fd0aa88930"
+  },
+  "cdn-protected/up/softara-internal-links-v1.js": {
+   "bytes": 54786,
+   "sha256": "eda7eb71a9f8"
+  },
+  "cdn-protected/up/softara-member-cards-hover.js": {
+   "bytes": 96142,
+   "sha256": "3104b92f6db2"
+  },
+  "cdn-protected/up/softara-points-awards-v4.js": {
+   "bytes": 106588,
+   "sha256": "720b61848a3b"
+  },
+  "cdn-protected/up/softara-quran.js": {
+   "bytes": 64290,
+   "sha256": "4c90118f84a0"
+  },
+  "cdn-protected/up/softara-theme-core-a7la.js": {
+   "bytes": 222992,
+   "sha256": "84bedfdb8430"
+  },
+  "cdn-protected/up/softara-theme-merged-v2.css": {
+   "bytes": 165473,
+   "sha256": "9b2ab50ea973"
+  },
+  "cdn-protected/up/softara-ui-v11-core.js": {
+   "bytes": 291707,
+   "sha256": "83a9f5f8ce71"
+  },
+  "cdn-protected/up/softara-wall-messenger-v1.js": {
+   "bytes": 81837,
+   "sha256": "6ea80be09469"
+  }
+ }
+}
