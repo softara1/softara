@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دليل نظام تنسيق مقالات سوفتارا — softara-article-styling-guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --violet:#7c3aed; --violet-d:#5b21b6; --ink:#1e293b; --muted:#64748b;
+  --bg:#f4f5fb; --card:#ffffff; --line:#e2e8f0;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.95}
+.wrap{max-width:920px;margin:0 auto;padding:18px 16px 60px}
+header.hero{background:linear-gradient(135deg,#6d28d9,#7c3aed 55%,#8b5cf6);color:#fff;border-radius:0 0 22px 22px;padding:34px 22px 28px;text-align:center}
+header.hero h1{margin:.2em 0;font-size:1.7em;font-weight:800}
+header.hero p{margin:.3em auto;max-width:640px;opacity:.94;font-size:.98em}
+.badge{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 14px;font-size:.82em;margin-bottom:10px}
+nav.toc{background:var(--card);border:1px solid var(--line);border-right:5px solid var(--violet);border-radius:14px;padding:14px 18px;margin:22px 0}
+nav.toc b{color:var(--violet-d);display:block;margin-bottom:6px}
+nav.toc a{display:inline-block;background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6;text-decoration:none;border-radius:999px;padding:2px 12px;font-size:.88em;margin:3px 2px;transition:.15s}
+nav.toc a:hover{background:#ede9fe}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+section h2{font-size:1.3em;font-weight:800;color:var(--ink);margin:0 0 .4em;padding-right:.6em;border-right:5px solid var(--violet);scroll-margin-top:20px}
+section h3{font-size:1.08em;color:var(--violet-d);margin:1.3em 0 .3em}
+section p{margin:.4em 0 .8em}
+.hint{background:#f0f9ff;border-right:4px solid #0284c7;color:#0c4a6e;border-radius:8px;padding:9px 14px;font-size:.93em;margin:.8em 0}
+.warn{background:#fffbeb;border-right:4px solid #d97706;color:#78350f;border-radius:8px;padding:9px 14px;font-size:.93em;margin:.8em 0}
+.snippet{position:relative;margin:.7em 0}
+.snippet pre{direction:ltr;text-align:left;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:.86em;line-height:1.8;margin:0;font-family:Consolas,Monaco,'Courier New',monospace;white-space:pre}
+.snippet .cp{position:absolute;top:8px;left:8px;background:#7c3aed;color:#fff;border:0;border-radius:7px;padding:5px 14px;font-family:inherit;font-size:.8em;cursor:pointer;min-height:30px}
+.snippet .cp:hover{background:#6d28d9}
+.snippet .cp.ok{background:#16a34a}
+.demo{border:1px dashed #c4b5fd;border-radius:10px;padding:12px 14px;margin:.5em 0 .9em;background:#fafafa}
+table{width:100%;border-collapse:collapse;font-size:.92em;margin:.8em 0;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:right}
+th{background:#f1f5f9}
+code.chip{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:1px 6px;direction:ltr;unicode-bidi:embed;color:#be185d;font-size:.88em;font-family:Consolas,Monaco,monospace}
+ul.clean{padding-right:1.6em;margin:.3em 0 .9em}
+ul.clean li{margin-bottom:.35em}
+footer{text-align:center;color:var(--muted);font-size:.85em;margin-top:26px}
+@media(max-width:520px){
+  .wrap{padding:12px 10px 44px}
+  section{padding:16px 14px}
+  header.hero h1{font-size:1.35em}
+  .snippet pre{font-size:.78em}
+}
+</style>
+
+<style>
+/* العرض الحي لقسم العناوين — منسوخ حرفيًا من الملف المعتمد v1.1.0 */
+/* ------------------------------------------------------------------
+   2) العناوين — سلم بصري من أربعة مستويات بخلفيات متدرجة
+   ------------------------------------------------------------------
+   فلسفة التصميم (أصلية بهوية سوفتارا البنفسجية):
+   - كل مستوى أخفض صوتًا من الذي قبله: تدرج يقرأه العين فورًا.
+   - خلفيات h2 وh3 تدرج لوني يبدأ من اليمين (بداية القراءة RTL) ويذوب
+     نحو الشفافية يسارًا — إبراز بلا إثقال.
+   - حد أيمن متدرج السُمك (h2 الأعرض ثم h3 ثم h4 الأرفع) يوحّد العائلة.
+   - h1 شريط كامل متدرج داكن بنص أبيض في المنتصف: بداية المقال الرسمية.
+   - h4 وما دونها بلا خلفية عمدًا: درجات هادئة تمنع التشويش.
+   - تباين نص/خلفية مرتفع في كل المستويات (فوق معايير WCAG للنص الكبير).
+
+   الاستخدام:
+   <h1>عنوان المقال الرئيسي (للمقالات الطويلة والدلائل)</h1>
+   <h2>عنوان قسم كبير</h2>  <h3>قسم فرعي</h3>  <h4>تفصيل دقيق</h4>
+   ------------------------------------------------------------------ */
+
+/* 2-أ) العنوان الرئيسي h1 — شريط متدرج داكن بنص أبيض:
+   أقوى عنصر بصري في المقال، شكل فخم يفترق عن كل ما تحته */
+.sa-article h1 {
+    font-size: 1.62em;
+    font-weight: 800;
+    color: #ffffff;
+    text-align: center;
+    line-height: 1.7;
+    background: linear-gradient(135deg, #4c1d95, #6d28d9 55%, #7c3aed);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin: 1.2em 0 .9em;
+    box-shadow: 0 4px 14px rgba(76, 29, 149, .22), inset 0 1px 0 rgba(255, 255, 255, .16);
+    scroll-margin-top: 90px; /* حتى لا يختفي العنوان تحت الشريط عند القفز للمرساة */
+    overflow-wrap: break-word;
+}
+
+/* 2-ب) عنوان القسم h2 — شريط فاتح يذوب من اليمين + حد بنفسجي عريض:
+   أعلى صوت بعد h1، يميز الأقسام الكبرى للمقال بوضوح تام */
+.sa-article h2 {
+    font-size: 1.4em;
+    font-weight: 800;
+    color: #4c1d95;
+    line-height: 1.65;
+    background: linear-gradient(to left, #ece7ff, rgba(236, 231, 255, 0));
+    border-right: 4px solid #7c3aed;
+    border-radius: 8px;
+    padding: 9px 16px;
+    margin: 1.6em 0 .7em;
+    box-shadow: 0 1px 3px rgba(124, 58, 237, .07);
+    scroll-margin-top: 90px;
+    overflow-wrap: break-word;
+}
+
+/* 2-ج) العنوان الفرعي h3 — شريط أخف وأهدأ مع بقاء الوضوح:
+   خلفية بالكاد محسوسة ولون نص بنفسجي متوسط يفترقه عن النص العادي */
+.sa-article h3 {
+    font-size: 1.22em;
+    font-weight: 700;
+    color: #5b21b6;
+    line-height: 1.6;
+    background: linear-gradient(to left, #f4f1ff, rgba(244, 241, 255, 0));
+    border-right: 3px solid #a78bfa;
+    border-radius: 6px;
+    padding: 6px 14px;
+    margin: 1.35em 0 .6em;
+    scroll-margin-top: 90px;
+    overflow-wrap: break-word;
+}
+
+/* 2-د) العناوين الدقيقة h4 — بلا خلفية عمدًا:
+   درجة هادئة + تمييز جانبي رفيع بالغ الفتوح يُكمل إيقاع الحد الأيمن
+   دون ازدحام — التفصيل الدقيق لا يحتاج صوتًا أعلى */
+.sa-article h4 {
+    font-size: 1.06em;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.6;
+    border-right: 3px solid #ddd6fe;
+    padding-right: .6em;
+    margin: 1.15em 0 .5em;
+    scroll-margin-top: 90px;
+}
+
+/* 2-هـ) h5 وh6 — درجة صامتة موحدة لإكمال السلم دون لفت النظر */
+.sa-article h5, .sa-article h6 {
+    font-size: 1em;
+    font-weight: 700;
+    color: #475569;
+    margin: 1.1em 0 .5em;
+    scroll-margin-top: 90px;
+}
+
+/* تحييد زخارف الثيم عن كل عناوين المقال (رموز/شرطات يضيفها الثيم القديم) */
+.sa-article h1::before, .sa-article h2::before,
+.sa-article h3::before, .sa-article h4::before { content: none; }
+.sa-article h1::after, .sa-article h2::after,
+.sa-article h3::after, .sa-article h4::after { content: none; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="badge">نسخة 1.1.0 — 2026-10-19 — نظام خلفيات العناوين المتدرجة</div>
+  <h1>دليل نظام تنسيق مقالات سوفتارا</h1>
+  <p>كل ما تحتاجه لكتابة مقال منسّق داخل المنتدى: صيغ جاهزة للنسخ، مطابقة حرفيًا لما اختُبر فعليًا في المنتدى، وبلا أي أكواد معقدة. في هذا الإصدار: سلم عناوين من أربعة مستويات بخلفيات متدرجة مميزة لكل مستوى.</p>
+</header>
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <b>محتويات الدليل</b>
+  <a href="#s1">ابدأ في دقيقة</a>
+  <a href="#s2">قواعد المحرر الثلاث</a>
+  <a href="#s3">الغلاف والفهرس</a>
+  <a href="#s4">سلم العناوين H1–H4</a>
+  <a href="#s5">القوائم والاقتباس</a>
+  <a href="#s6">الصناديق الأربعة</a>
+  <a href="#s7">الأكواد البرمجية</a>
+  <a href="#s8">الجداول</a>
+  <a href="#s9">الصور والتعليقات</a>
+  <a href="#s10">الروابط الثلاثة والزر</a>
+  <a href="#s11">عناصر إضافية</a>
+  <a href="#s12">سلوك المنصة الموثق</a>
+  <a href="#s13">سجل النسخ واختبار الهواتف</a>
+</nav>
+
+<section id="s1">
+  <h2>1) ابدأ في دقيقة</h2>
+  <p>النظام بأكمله يعتمد على فكرة واحدة: ضع كل محتوى مقالك داخل غلاف واحد، ثم استخدم صنفًا جاهزًا لكل مكوّن. لا تلمس أي إعدادات، ولا تحتاج أي معرفة بـ CSS. انسخ الصيغة، والصقها في موضوعك، وعدّل النص العربي فقط.</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;div class="sa-article"&gt;
+  كل محتوى المقال هنا
+&lt;/div&gt;</pre></div>
+  <div class="hint">مكان الكتابة: عند إنشاء أو تعديل أي موضوع، انقر زر «المصدر / الأقواس» في شريط المحرر قبل لصق الصيغ، ثم عاين قبل النشر. هذا يضمن بقاء الأوسمة كما كتبتها بالضبط.</div>
+</section>
+
+<section id="s2">
+  <h2>2) قواعد المحرر الثلاث — اقرأها مرة واحدة</h2>
+  <ul class="clean">
+    <li><b>اكتب كل مكوّن في سطر واحد.</b> المنتدى يحوّل كل سطر جديد إلى فاصل أسطر؛ لذلك الصيغ الجاهزة في هذا الدليل مرتبة بحيث يكون كل عنصر سطرًا مستقلًا، وداخل الصندوق الواحد لا تكسر السطر.</li>
+    <li><b>لا تنسخ من معالج النصوص.</b> انسخ من هذا الدليل مباشرة (زر «نسخ» في كل مثال) حتى لا تنتقل تنسيقات خفية.</li>
+    <li><b>عاين قبل النشر.</b> زر المعاينة يعرض المقال كما سيُخزن فعلًا — اختبرنا ذلك وسجّلنا مطابقته.</li>
+  </ul>
+  <div class="warn">تحذير واحد فقط: لا تضع وسم <code class="chip">script</code> أو أكواد JavaScript داخل المقال — المنصة تحذفها لأسباب أمنية، ولا حاجة لها أصلًا؛ كل المكونات تعمل بلا JavaScript.</div>
+</section>
+
+<section id="s3">
+  <h2>3) الغلاف والفهرس</h2>
+  <p>الغلاف <code class="chip">sa-article</code> هو مفتاح كل شيء: كل التنسيقات محصورة داخله، ولن يتغير شكل أي موضوع آخر في المنتدى ما لم يستخدمه. الفهرس بطاقة روابط تقفز إلى أقسام المقال عبر المراسي.</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;div class="sa-toc"&gt;&lt;span class="sa-toc-title"&gt;فهرس المحتويات&lt;/span&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="#sa-sec1"&gt;عنوان القسم الأول&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="#sa-sec2"&gt;عنوان القسم الثاني&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</pre></div>
+  <p>ولكل قسم في المقال عنوان بمعرّف مطابق، مثل <code class="chip">&lt;h2 id="sa-sec1"&gt;</code>. اخترنا البادئة <code class="chip">sa-sec</code> لضمان عدم التعارض مع معرفات المنتدى.</p>
+</section>
+
+<section id="s4">
+  <h2>4) سلم العناوين H1–H4 — الخلفيات المتدرجة</h2>
+  <p>أربعة مستويات، ولكل مستوى خلفيته وشكله، فتقرأ العين التدرج فورًا دون قراءة النص: <code class="chip">h1</code> العنوان الرئيسي للمقال بشريط بنفسجي داكن ونص أبيض في المنتصف (للمقالات الطويلة والدلائل؛ وللمقالات القصيرة ابدأ مباشرة بـh2)، و<code class="chip">h2</code> للأقسام الكبرى بشريط فاتح يذوب من اليمين مع حد بنفسجي عريض، و<code class="chip">h3</code> للأقسام الفرعية بخلفية أخف وحد أنحف، و<code class="chip">h4</code> للتفصيل الدقيق بدرجة هادئة وتمييز جانبي رفيع بلا خلفية عمدًا كي لا يزدحم المقال.</p>
+
+  <h3>العرض الحي — هذا شكل العناوين الفعلي داخل المنتدى</h3>
+  <div class="sa-article" style="border:1px dashed #c4b5fd;border-radius:12px;padding:14px 16px;background:#fff">
+    <h1>عنوان المقال الرئيسي (h1)</h1>
+    <p>فقرة عادية تحت العنوان الرئيسي لتقارن الإيقاع البصري بين العناوين والنص.</p>
+    <h2>عنوان قسم كبير (h2)</h2>
+    <p>الخلفية تبدأ من اليمين حيث تبدأ القراءة العربية وتذوب نحو اليسار، مع حد بنفسجي عريض على الحد الأيمن.</p>
+    <h3>عنوان فرعي (h3)</h3>
+    <p>خلفية أخف وأهدأ مع بقاء الوضوح عن النص العادي بلون الحد وأنحفه.</p>
+    <h4>تفصيل دقيق (h4)</h4>
+    <p>أهدأ مستوى: بلا خلفية، بحد جانبي رفيع بالغ الفتوح يُكمل إيقاع العائلة.</p>
+  </div>
+
+  <h3>الصيغة الجاهزة للنسخ</h3>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;h1&gt;عنوان المقال الرئيسي — للمقالات الطويلة والدلائل&lt;/h1&gt;
+&lt;h2 id="sa-sec1"&gt;عنوان القسم الكبير&lt;/h2&gt;
+&lt;p&gt;فقرة عادية، اكتبها دون وسم وسيضبط النظام المسافات تلقائيًا.&lt;/p&gt;
+&lt;h3&gt;عنوان فرعي تحت القسم&lt;/h3&gt;
+&lt;h4&gt;تفصيل دقيق&lt;/h4&gt;</pre></div>
+
+  <h3>مكان الكود وتركيبه</h3>
+  <p>كل ما تراه أعلاه هو قسم «2) العناوين» من الملف المعتمد <code class="chip">softara-article-styling-v1.1.0.css</code> — الملف كامل يُرفع إلى المستودع <code class="chip">softara1/softara</code> في المسار <code class="chip">up/</code> ثم يُحمَّل على كل الصفحات بسطر واحد داخل قالب overall_header قبل وسم إغلاق الرأس:</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;link href="https://cdn.jsdelivr.net/gh/softara1/softara@main/up/softara-article-styling-v1.1.0.css" rel="stylesheet" /&gt;</pre></div>
+
+  <h3>الألوان القابلة للتعديل مستقبلًا</h3>
+  <p>عدّل هذه القيم داخل قسم العناوين فقط، ولا تمس بقية الأقسام — كل قيمة محصورة في قاعدة واحدة:</p>
+  <table style="width:100%;border-collapse:collapse;font-size:.9em">
+    <tr style="background:#f5f3ff"><th style="border:1px solid #ddd6fe;padding:7px 10px;text-align:right">أين</th><th style="border:1px solid #ddd6fe;padding:7px 10px;text-align:right">القيمة الحالية</th><th style="border:1px solid #ddd6fe;padding:7px 10px;text-align:right">أثر التعديل</th></tr>
+    <tr><td style="border:1px solid #e2e8f0;padding:7px 10px">خلفية h1 المتدرجة</td><td style="border:1px solid #e2e8f0;padding:7px 10px">4c1d95 → 6d28d9 → 7c3aed</td><td style="border:1px solid #e2e8f0;padding:7px 10px">لون الشريط الرئيسي وثقله البصري</td></tr>
+    <tr><td style="border:1px solid #e2e8f0;padding:7px 10px">تدرج h2 الفاتح</td><td style="border:1px solid #e2e8f0;padding:7px 10px">#ece7ff</td><td style="border:1px solid #e2e8f0;padding:7px 10px">درجة شريط الأقسام الكبرى</td></tr>
+    <tr><td style="border:1px solid #e2e8f0;padding:7px 10px">حد h2 الأيمن</td><td style="border:1px solid #e2e8f0;padding:7px 10px">#7c3aed بعرض 4px</td><td style="border:1px solid #e2e8f0;padding:7px 10px">قوة الإبراز الأيمن للعائلة كلها</td></tr>
+    <tr><td style="border:1px solid #e2e8f0;padding:7px 10px">تدرج h3 وحدّه</td><td style="border:1px solid #e2e8f0;padding:7px 10px">#f4f1ff / #a78bfa بعرض 3px</td><td style="border:1px solid #e2e8f0;padding:7px 10px">صوت المستوى الفرعي</td></tr>
+    <tr><td style="border:1px solid #e2e8f0;padding:7px 10px">حد h4</td><td style="border:1px solid #e2e8f0;padding:7px 10px">#ddd6fe بعرض 3px</td><td style="border:1px solid #e2e8f0;padding:7px 10px">هامش التفصيل الدقيق</td></tr>
+  </table>
+  <p>قواعد الوضع الداكن للعناوين في قسم «13) الوضع الداكن» من الملف نفسه، وتُعدّل بقيمها المناظرة.</p>
+
+  <h3>تجنب التعارض — القواعد الصارمة</h3>
+  <p>كل قواعد العناوين تبدأ بـ<code class="chip">.sa-article</code> فلا تلمس إلا عناوين داخل الغلاف، ولا تظهر على عناوين الأقسام والمنتديات والقوائم والنوافذ والنماذج — وهذا مثبت بالقياس الحي: عنوان ودجت الإحصائيات خارج الغلاف بقي بلا أي خلفية بعد التفعيل. التزم أنت أيضًا: لا تكتب قواعد <code class="chip">h2 {..}</code> عارية في أي ملف إضافي، وإن احتجت استثناءً داخل مقال فاجعله تحت <code class="chip">.sa-article</code> نفسه. ولا تعتمد JavaScript لإضافة تنسيق العناوين إطلاقًا — CSS وحده أثبت أسرع وأثبت.</p>
+</section>
+
+<section id="s5">
+  <h2>5) القوائم والاقتباس</h2>
+  <p>القائمة النقطية للتعداد الحر، والمرقمة للخطوات المتتابعة، والاقتباس لنقل كلام حرفي. الصيغ أدناه مكتوبة بسطر واحد كامل جاهز للصق:</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;ul&gt;&lt;li&gt;عنصر أول&lt;/li&gt;&lt;li&gt;عنصر ثانٍ&lt;/li&gt;&lt;/ul&gt;
+&lt;ol&gt;&lt;li&gt;الخطوة الأولى&lt;/li&gt;&lt;li&gt;الخطوة الثانية&lt;/li&gt;&lt;/ol&gt;</pre></div>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;blockquote&gt;النص المقتبس هنا&lt;/blockquote&gt;</pre></div>
+  <div class="hint">اقتباس بديل من صيغ المنتدى نفسها: <code class="chip">[quote]النص[/quote]</code> — يعمل أيضًا ويخرج بنفس الشكل تقريبًا.</div>
+</section>
+
+<section id="s6">
+  <h2>6) الصناديق الأربعة</h2>
+  <p>أربعة أصناف لكل غرض: <code class="chip">sa-info</code> معلومة زرقاء، و<code class="chip">sa-warn</code> تنبيه كهرماني، و<code class="chip">sa-ok</code> نجاح أخضر، و<code class="chip">sa-summary</code> خلاصة بنفسجية. العنوان الداخلي اختياري عبر <code class="chip">sa-box-title</code>.</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;div class="sa-info"&gt;&lt;strong class="sa-box-title"&gt;معلومة&lt;/strong&gt;نص الملاحظة هنا.&lt;/div&gt;
+&lt;div class="sa-warn"&gt;&lt;strong class="sa-box-title"&gt;تنبيه&lt;/strong&gt;نص التحذير هنا.&lt;/div&gt;
+&lt;div class="sa-ok"&gt;&lt;strong class="sa-box-title"&gt;نجاح&lt;/strong&gt;نص التأكيد هنا.&lt;/div&gt;
+&lt;div class="sa-summary"&gt;&lt;strong class="sa-box-title"&gt;خلاصة&lt;/strong&gt;نص الخلاصة هنا.&lt;/div&gt;</pre></div>
+  <div class="demo">
+    <b>شكلها الحي:</b>
+    <div style="background:#f0f9ff;border-right:5px solid #0284c7;border-radius:8px;padding:8px 14px;color:#0c4a6e;margin:6px 0"><strong>معلومة:</strong> هكذا يظهر الصندوق الأزرق فعليًا.</div>
+    <div style="background:#fffbeb;border-right:5px solid #d97706;border-radius:8px;padding:8px 14px;color:#78350f;margin:6px 0"><strong>تنبيه:</strong> وهكذا الكهرماني.</div>
+  </div>
+</section>
+
+<section id="s7">
+  <h2>7) الأكواد البرمجية</h2>
+  <p>للكود السطري داخل جملة وسم <code class="chip">&lt;code&gt;</code> مباشرة. وللكتل الكاملة استخدم صيغ المنتدى <code class="chip">[code][/code]</code> — تخرج صندوقًا باتجاه LTR يحفظ الأسطر، ويعمل معه زر النسخ الموجود في المنتدى أصلًا:</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>[code].sa-info {
+  background: #f0f9ff;
+  border-right: 5px solid #0284c7;
+}[/code]</pre></div>
+  <div class="hint">صندوق الكود يتعامل تلقائيًا مع الأسطر الطويلة بتمرير أفقي على الهاتف، ويبقى مقروءًا في الوضع الداكن والفاتح.</div>
+</section>
+
+<section id="s8">
+  <h2>8) الجداول</h2>
+  <p>اكتب الجدول في سطر واحد كامل. على الهاتف يتحول تلقائيًا إلى تمرير أفقي بدل كسر الصفحة:</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;table&gt;&lt;tr&gt;&lt;th&gt;العمود الأول&lt;/th&gt;&lt;th&gt;العمود الثاني&lt;/th&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;قيمة&lt;/td&gt;&lt;td&gt;قيمة&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre></div>
+  <div class="hint">بديل من صيغ المنتدى: <code class="chip">[table border="1"]…[/table]</code> — يعمل أيضًا (اختبرناه)، لكن صيغة HTML تعطي رؤوسًا ملونة وشكلًا أنظف.</div>
+</section>
+
+<section id="s9">
+  <h2>9) الصور والتعليقات التوضيحية</h2>
+  <p>الصورة وحدها تُدرج بوسم الصورة. وحين تريد تعليقًا تحتها استخدم ثنائي <code class="chip">figure</code> و<code class="chip">figcaption</code> فتظهر داخل بطاقة أنيقة بتعليق مركزي:</p>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;figure&gt;&lt;img src="ضع رابط الصورة هنا" alt="وصف الصورة" /&gt;&lt;figcaption&gt;صورة 1: وصف موجز لما تعرضه&lt;/figcaption&gt;&lt;/figure&gt;</pre></div>
+  <div class="warn">ملاحظة موثقة: المنصة تُغلّف أي صورة برابط عرض داخلي تلقائيًا (سلوك ثابت لا يمكن منعه ولا يؤثر على الشكل) — وإن استخدمت صيغة <code class="chip">[img][/img]</code> فستفقد خاصية alt وتحصل على عنوان الموضوع بديلًا عنها؛ لذلك ننصح بوسم الصورة مباشرة.</div>
+</section>
+
+<section id="s10">
+  <h2>10) الروابط الثلاثة وزر التحميل</h2>
+  <p>ثلاثة أنواع من الروابط ولكل نوع شكل لا يختلط بغيره — القاعدة تعمل تلقائيًا، فلا تحتاج أصناف للروابط العادية:</p>
+  <table><tr><th>النوع</th><th>الشكل</th><th>متى</th></tr>
+  <tr><td>داخلي (يبدأ بـ /)</td><td>بنفسجي بخط متقطع</td><td>روابط مواضيع وأقسام سوفتارا</td></tr>
+  <tr><td>خارجي (يبدأ بـ http)</td><td>أزرق + سهم ↗</td><td>مواقع أخرى</td></tr>
+  <tr><td>زر تحميل</td><td>بنفسجي متدرج بزر فقعي</td><td>روابط التنزيل حصرًا</td></tr></table>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;a href="/t927-topic"&gt;رابط داخلي إلى موضوع في سوفتارا&lt;/a&gt;
+&lt;a href="https://example.com/page" target="_blank" rel="noopener"&gt;رابط خارجي&lt;/a&gt;
+&lt;a class="sa-btn" href="ضع رابط التحميل هنا"&gt;تحميل الملف&lt;/a&gt;</pre></div>
+  <p>الرابط الخارجي العادي <b>لا يتحول زرًا أبدًا</b> — الزر يحصل على شكله فقط عندما تضيف له صنف <code class="chip">sa-btn</code> بنفسك. والزر جاهز للهاتف (بعرض كامل) ولوحة المفاتيح (إطار تركيز واضح).</p>
+</section>
+
+<section id="s11">
+  <h2>11) عناصر إضافية</h2>
+  <h3>الأكورديون details</h3>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;details&gt;&lt;summary&gt;عنوان قابل للفتح&lt;/summary&gt;المحتوى المطوي هنا.&lt;/details&gt;</pre></div>
+  <h3>التمييز والفواصل</h3>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;mark&gt;نص مميز بخلفية صفراء&lt;/mark&gt;
+&lt;hr /&gt;</pre></div>
+  <h3>مقطع إنجليزي LTR</h3>
+  <div class="snippet"><button class="cp">نسخ</button><pre>&lt;p dir="ltr" style="text-align:left;"&gt;English paragraph here.&lt;/p&gt;</pre></div>
+</section>
+
+<section id="s12">
+  <h2>12) سلوك المنصة الموثق (من الاختبار الحي)</h2>
+  <p>اختبرنا 18 مجموعة وسوم عبر ثلاث مراحل (ما أُرسل ← ما ظهر في المعاينة ← ما خُزن فعليًا في الصفحة المنشورة). النتيجة: كل وسوم النظام تُحفظ كما هي. هذه أهم الملاحظات المسجلة:</p>
+  <table><tr><th>السلوك</th><th>التفصيل</th></tr>
+  <tr><td>الأسطر الجديدة</td><td>تتحول إلى فواصل أسطر — لذلك تُكتب كل كتلة في سطر واحد</td></tr>
+  <tr><td>الكود [code]</td><td>يتحول إلى صندوق كود المنصة مع زر نسخ وحفظ الأسطر</td></tr>
+  <tr><td>الاقتباس [quote]</td><td>يتحول إلى هيكل اقتباس المنصة بنفس الشكل</td></tr>
+  <tr><td>الصور</td><td>تُغلَّف برابط عرض داخلي تلقائيًا — شكلها لا يتغير</td></tr>
+  <tr><td>[b] و[url] و[table]</td><td>تتحول إلى وسوم HTML مكافئة تلقائيًا</td></tr>
+  <tr><td>المراسي #</td><td>تعمل داخل المقال ويقفز إليها الفهرس بدقة</td></tr>
+  </table>
+  <div class="hint">المرجع الحي: موضوع «مصفوفة اختبار الوسوم» (t926) و«العرض التجريبي الكامل» (t927) داخل ورشة الإدارة المخفية — يحملان كل ما ورد في هذا الدليل كما اختُبر حرفيًا.</div>
+</section>
+
+
+<section id="s13">
+  <h2>13) سجل النسخ واختبار الهواتف</h2>
+  <h3>سجل النسخ</h3>
+  <p><b>v1.1.0 — 2026-10-19 (النسخة المعتمدة للعرض):</b> أُعيد بناء قسم العناوين كليًا بخلفيات متدرجة لكل مستوى (h1 شريط داكن بنص أبيض، h2 شريط فاتح يذوب من اليمين، h3 أخف، h4 تمييز جانبي بلا خلفية) + قواعد داكن وهاتف جديدة للعناوين + h5/h6 بدرجة صامتة. <b>ما عُدّل:</b> سطر تحميل القالب من v1.0.0 إلى v1.1.0 (نُشر وتحقق حيًا). <b>ما لم يُلمس:</b> ورقة CSS الأساسية للمنتدى (صفر بايت)، وبقية مكونات النظام (صناديق/أكواد/جداول/صور/روابط/فهرس) كما هي حرفيًا. <b>ما تم التحقق منه حيًا:</b> ظهور الخلفيات فعليًا في موضوع المنشور (قياس getComputedStyle داخل الصفحة)، وعزل كامل عن بقية الصفحات، وصفر فيض أفقي على 5 صفحات × جهازين.</p>
+  <p><b>v1.0.0 — 2026-10 (نسخة الأساس):</b> بناء النظام: الغلاف والفهرس والصناديق والأكواد والجداول والصور والروابط الثلاثة والزر، بحدود جانبية للعناوين بلا خلفيات.</p>
+
+  <h3>ما يجب أن تعرف عن سبب التغيير</h3>
+  <p>نسخة 1.0.0 اعتمدت حدودًا جانبية فقط للعناوين، فبدا السلم غير واضح عند التصفح السريع. المشكلة لم تكن تعارضًا من المنصة (فحصنا كل أوراق CSS المحمّلة في صفحة الموضوع: لا توجد أي قاعدة تنافس على h1..h4 داخل حاوية المشاركة)، بل كانت ببساطة أن قواعد الخلفيات لم تكن مكتوبة. في 1.1.0 كُتبت القواعد داخل الملف الخارجي نفسه دون أي لمسة للورقة الأساسية، ولهذا لم تكن هناك حاجة لأي حذف أو تراجع.</p>
+
+  <h3>تعليمات اختبار التوافق مع الهواتف والشاشات</h3>
+  <p>قبل أي تعديل مستقبلي على النظام، مرّ بهذه القائمة (جرّبها على متصفح الهاتف الحقيقي لا المحاكي فقط):</p>
+  <p>1) افتح موضوع عرض النظام على شاشة هاتف صغيرة (≤390px): تأكد أن h1 وh2 يلتفان على سطرين طبيعيًا دون كسر الكلمات العربية. 2) اسحب يمينًا ويسارًا في أعلى الصفحة: يجب ألا يظهر تمرير أفقي في أي موضع (النتيجة المرجعية: صفر بكسل). 3) تأكد أن خلفيات العناوين تلاحق عرض الشاشة (الشريط يمتد كامل العرض المتاح). 4) افتح الرئيسية وقسمًا وصفحة أعضاء: يجب ألا يتغير شكل عناوينها إطلاقًا — القواعد لا تخرج من الغلاف. 5) في وضع الموقع الداكن: أعد فحص العناوين الأربعة (لكل مستوى قاعدة داكنة خاصة). 6) جرّب التنقل بلوحة مفاتيح خارجية: زر التحميل والروابط تُظهر إطار تركيز برتقالي واضح.</p>
+</section>
+
+<footer>
+  سوفتارا | نظام تنسيق المقالات v1.1.0 — ملف الشرح المرافق لملف CSS المنشور على المستودع المعتمد<br>
+  أُنشئ بالاعتماد على اختبار حي موثق داخل المنتدى — بانتظار اعتماد المالك قبل التعميم
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.cp').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var pre = b.parentElement.querySelector('pre');
+    var txt = pre.innerText;
+    function done() {
+      b.textContent = 'تم النسخ ✓';
+      b.classList.add('ok');
+      setTimeout(function () { b.textContent = 'نسخ'; b.classList.remove('ok'); }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done).catch(function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+});
+</script>
+</body>
+</html>
