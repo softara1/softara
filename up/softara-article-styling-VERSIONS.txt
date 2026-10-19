@@ -1,14 +1,14 @@
 # سريان نسخ نظام تنسيق المقالات (softara-article-styling)
-# آخر تحديث: 2026-10-19
+# آخر تحديث: 2026-10-19 (بعد تصحيح موضوع t928 وأمر المالك بتثبيت بوابات الصور والسيو)
 
 المعتمد حاليًا (يشير إليه قالب overall_header):
+  softara-article-styling-v1.1.1.css
+  Softara-Article-Styling-v1.1.1.zip
+
+نسخ مرجعية مجمدة (لا يشير إليها أي صفحة — محفوظة للأرشيف والتراجع الطارئ):
   softara-article-styling-v1.1.0.css
-  Softara-Article-Styling-v1.1.0.zip
-  softara-article-styling-guide-v1.1.0.html
-
-نسخة مرجعية مجمدة (لا يشير إليها أي صفحة — محفوظة للأرشيف والتراجع الطارئ):
-  softara-article-styling-v1.0.0.css
   Softara-Article-Styling-v1.0.0.zip
+  softara-article-styling-v1.0.0.css
 
-رابط التحميل المعتمد للدليل:
+دليل الاستخدام (مرجع عام — يعمل مع v1.1.0 وv1.1.1):
   https://cdn.jsdelivr.net/gh/softara1/softara@main/up/softara-article-styling-guide-v1.1.0.html
