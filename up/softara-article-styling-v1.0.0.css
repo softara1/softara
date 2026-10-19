@@ -144,6 +144,14 @@
 .sa-article .codebox code:not(.hljs) { background: transparent; border: 0; padding: 12px 14px; color: #0f172a; border-radius: 0; }
 /* عند تفعيل تلوين highlight.js نترك ألوانه تتصدر بلا منازع */
 .sa-article .codebox code.hljs { background: transparent; border: 0; padding: 12px 14px; }
+/* الكود السطري: إن أضاف المنصة له hljs (خلفية داكنة افتراضية) نعيده لشكل الرقاقة الموحدة */
+.sa-article code.hljs {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #be185d;
+    padding: 1px 6px;
+    border-radius: 5px;
+}
 /* block الخام إن استُخدم مباشرة — التخطيط للجميع واللون الأساسي لغير hljs */
 .sa-article pre {
     direction: ltr;
