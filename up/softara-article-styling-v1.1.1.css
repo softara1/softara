@@ -1,5 +1,5 @@
 /* =====================================================================
-   سوفتارا — نظام تنسيق المقالات | Softara Article Styling v1.1.0
+   سوفتارا — نظام تنسيق المقالات | Softara Article Styling v1.1.1
    ---------------------------------------------------------------------
    سجل النسخة v1.1.1 (2026-10-19):
    - قاعدة جديدة تعالج أكبر مشكلة إيقاع: المنصة تحول كل سطر جديد في المحرر
@@ -9,6 +9,9 @@
    - ضغط الإيقاع الرأسي بنحو 20%: line-height وهوامش العناوين والفقرات
      والصناديق والصور والفهرس — مسافات مريحة بلا مبالغة (طلب المالك
      بعد مراجعة أول موضوع منشور بالنظام).
+   - دعم حاويات الصور التعليمية .sa-fig و .sa-fig-cap: المنصة تسقط وسوم
+     <figure>/<figcaption> عند الحفظ، فتعوضهما الحاوية بأسلوب بطاقة الصورة
+     نفسه (إطار، زوايا، تعليق مركزي صغير خافت) مع نسخة للوضع الداكن.
    ---------------------------------------------------------------------
    سجل النسخة v1.1.0 (2026-10-19):
    - إعادة بناء قسم العناوين بالكامل: خلفيات متدرجة مميزة لكل مستوى —
@@ -296,6 +299,27 @@
     max-width: 640px;
 }
 .sa-article figure img { margin: 0 auto; }
+
+/* حاويات الصور التعليمية — بديل figure/figcaption التي تسقطها المنصة:
+   <div class="sa-fig"><a..><img/></a><div class="sa-fig-cap">التعليق</div></div> */
+.sa-article .sa-fig {
+    margin: .95em auto 1.05em;
+    padding: 8px 8px 2px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    max-width: 740px;
+}
+.sa-article .sa-fig img { margin: 0 auto; }
+.sa-article .sa-fig-cap {
+    text-align: center;
+    font-size: .85em;
+    color: #64748b;
+    padding: 6px 12px 8px;
+    line-height: 1.75;
+}
+body.dark-theme .sa-article .sa-fig { background: #0f172a; border-color: #334155; }
+body.dark-theme .sa-article .sa-fig-cap { color: #94a3b8; }
 .sa-article figcaption {
     text-align: center;
     font-size: .86em;
