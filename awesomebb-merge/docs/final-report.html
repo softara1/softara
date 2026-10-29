@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تقرير التسليم النهائي — دمج Z-Zone × AwesomeBB</title>
+<style>
+:root{--ink:#1e293b;--mut:#64748b;--bg:#f4f6fa;--card:#fff;--line:#e2e8f0;--pri:#0284c7;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.85;font-size:14.5px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+h1{font-size:23px;font-weight:900} h2{font-size:19px;font-weight:900;margin:30px 0 12px;border-inline-start:5px solid var(--pri);padding-inline-start:11px}
+h3{font-size:15.5px;margin:18px 0 8px;color:#0369a1}
+p{margin:7px 0} ul{margin:6px 22px} li{margin:4px 0}
+code{background:#0f172a;color:#e2e8f0;border-radius:6px;padding:1px 7px;font-size:12px;direction:ltr;unicode-bidi:embed;display:inline-block;font-family:Consolas,monospace}
+code.p{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.mono{font-family:Consolas,monospace;font-size:11px;word-break:break-all}
+.cover{background:linear-gradient(135deg,var(--pri),#8b5cf6);color:#fff;border-radius:18px;padding:26px 22px;margin:16px 0}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;font-size:13px;margin:10px 0;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:right;min-width:80px}
+th{background:var(--pri);color:#fff;white-space:nowrap}
+.box{border-radius:12px;padding:12px 14px;margin:12px 0;background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--pri)}
+.box.ok{border-inline-start-color:var(--ok)} .box.warn{border-inline-start-color:var(--warn)} .box.bad{border-inline-start-color:var(--bad)}
+.pill{display:inline-block;border-radius:20px;padding:1px 11px;font-size:11.5px;font-weight:800;white-space:nowrap}
+.p.g{background:rgba(16,185,129,.15);color:var(--ok)} .p.y{background:rgba(245,158,11,.15);color:var(--warn)} .p.r{background:rgba(239,68,68,.15);color:var(--bad)}
+@media(max-width:640px){body{font-size:13.5px} th,td{padding:6px 7px;font-size:11.5px;min-width:64px} .mono{font-size:9.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="cover">
+<h1>تقرير التسليم النهائي والتحقق</h1>
+<p>دمج تصميم Z-Zone مع القوالب الأصلية لأحلى منتدى AwesomeBB — المنتدى التجريبي: zoolsd.yoo7.com</p>
+<p>أُنشئ: 2026-10-29 04:56 — الإصدار v1.0.2 / الدليل 1.0.0 — <b>لا يُنقل لأي منتدى إنتاجي قبل مراجعتك</b></p>
+</div>
+
+<h2>1) الملفات النهائية ومطابقة الأكواد</h2>
+<div class="box ok"><b>التحقق الرقمي المنفَّذ:</b><br>
+• الدليل ↔ الملفات المصدرية: <b>مطابقة SHA-256 كاملة للأكواد الـ11</b> (فحص آلي).<br>
+• المصدر ↔ المنشور على المنتدى: الأكواد السبعة تُقدَّم كاملة من ملفاتها (18553/20493/19390/21512/22531/23549/24569) ومكافئة بعد ضغط المنصة التلقائي (فروق رموز = 0).<br>
+• القوالب: محتوى المحرر مطابق للملفات (تحققت المزامنة عند كل حقن) والصفحات العامة تُصيّرها من الخادم.<br>
+• ورقة CSS المترجمة تحتوي طبقة الهوية (فحص مؤشرات).<br>
+⚠ ملاحظة موثّقة: طلبات ملفات JS الفردية المتلاحقة بسرعة قد يُصغر محتواها مؤقتًا بحماية معدل الطلبات في CDN المنصة — صفحات المنتدى نفسها لا تتأثر (تستخدم الحزمة المجمعة المخزّنة).
+</div>
+
+<h2>2) النسخ الاحتياطية وإمكانية الاستعادة</h2>
+<table><thead><tr><th>النسخة</th><th>المعرّف/المسار الأصلي</th><th>تاريخ الأخذ</th><th>حالتها</th></tr></thead><tbody>
+<tr><td>overall_header (قبل التنفيذ)</td><td>قالب t=116 — قوالب ← إدارة عامة</td><td>29-10-2026 قبل 7:19</td><td><code class="p">backup/templates/overall_header.current.html</code> (14,670 حرفًا)</td></tr>
+<tr><td>overall_footer_begin (الافتراضي)</td><td>قالب t=115</td><td>29-10-2026</td><td><code class="p">backup/templates/overall_footer_begin.default.html</code> (1,616)</td></tr>
+<tr><td>ورقة CSS القديمة</td><td>مظهر ← ورقة ال CSS</td><td>29-10-2026</td><td><code class="p">backup/css/css-sheet.current.css</code> (17,471 حرفًا — تحقق طولي مطابق)</td></tr>
+<tr><td>8 أكواد JS القديمة</td><td>معرفات الملفات: 10464/17125/15820/16374/14667/13616/12541/11498</td><td>29-10-2026</td><td><code class="p">backup/js/code-*.js</code> (نزّلت من روابطها المنشورة)</td></tr>
+<tr><td>إعدادات الهيكل والتراتب</td><td>قيم الراديو المسجلة</td><td>29-10-2026</td><td><code class="p">backup/NOTES.md</code></td></tr>
+</tbody></table>
+<div class="box warn"><b>اختبار الاستعادة — ما نُفّذ فعلاً:</b> دورة الحفظ→النشر←التحقق من الحقن استُخدمت 6 مرات بنجاح على نفس المحررات (إثبات عمل مسار الاستعادة نفسه)، وأزرار «القيمة البدئية/النشر» موثقة بالواجهة. <b>لم تُنفَّذ استعادة كاملة فعلية</b> على المنتدى عمدًا (سيفسد التصميم المعتمد) — خطوات الاستعادة الكاملة في الدليل §13 جاهزة ومجربة المكونات.</div>
+
+<h2>3) جرد النشر النهائي</h2>
+<h3>3.1 أكواد JavaScript (من فحص لوحة الإدارة: المجموع 15/80 — لا فراغات ولا تكرارات)</h3>
+<table><thead><tr><th>#</th><th>الاسم</th><th>معرف الملف</th><th>المواضع</th><th>الحالة</th><th>الوظيفة</th></tr></thead><tbody>
+<tr><td>1</td><td>تلوين عنوان المنتدى</td><td>10464.js</td><td>—</td><td><span class="p y">معطل (قديم — قبل التنفيذ)</span></td><td>تجربة قديمة تخص المالك؛ أُبقيت كما وجدتها</td></tr>
+<tr><td>2</td><td>Z-Zone UI — تكامل الواجهة v1.0.2</td><td>18553.js</td><td>جميع الصفحات</td><td><span class="p g">مفعّل</span></td><td>شريط/هيرو/رادار/إحصاء/أقسام/تنظيف مقتطفات</td></tr>
+<tr><td>3</td><td>Z-Zone Nav — تنقل ديناميكي v1.0.0</td><td>20493.js</td><td>جميع الصفحات</td><td><span class="p g">مفعّل</span></td><td>تبديل #wrap على المسارات الآمنة + جلب مسبق</td></tr>
+<tr><td>4</td><td>Z-Zone — إقتباس جزء من الموضوع</td><td>19390.js</td><td>المواضيع</td><td><span class="p g">مفعّل</span></td><td>تحديد نص ← اقتباس (منقول كما هو)</td></tr>
+<tr><td>5</td><td>Z-Zone — تحديد الأكواد</td><td>21512.js</td><td>المواضيع</td><td><span class="p g">مفعّل</span></td><td>تطويق .codebox بأزرار نسخ (منقول)</td></tr>
+<tr><td>6</td><td>Z-Zone — زر تم الحل</td><td>22531.js</td><td>المواضيع</td><td><span class="p g">مفعّل</span></td><td>زر تم الحل (منقول)</td></tr>
+<tr><td>7</td><td>Z-Zone — مشاركة المواضيع</td><td>23549.js</td><td>المواضيع</td><td><span class="p g">مفعّل</span></td><td>بطاقة مشاركة (منقول)</td></tr>
+<tr><td>8</td><td>Z-Zone — روابط التحميل</td><td>24569.js</td><td>المواضيع</td><td><span class="p g">مفعّل</span></td><td>بطاقات الروابط من بيانات dl-raw (منقول)</td></tr>
+<tr><td>9-15</td><td>القسم الخاص + 6 أكواد قديمة (msrooor، أغلفة، أنشطة…)</td><td>17125 وغيرها</td><td>كما كانت</td><td><span class="p y">كما كانت قبل التنفيذ (واحد مفعّل)</span></td><td>لم تُمسّ — قراءة سكربت «القسم الخاص» تستهدف معرّف f4 (أُثبت أن f5 هو القسم الخاص — يُنصح بمراجعتك)</td></tr>
+</tbody></table>
+<h3>3.2 القوالب المعدّلة</h3>
+<table><thead><tr><th>القالب</th><th>الحالة في القائمة</th><th>تاريخ النشر</th><th>إثبات حي</th></tr></thead><tbody>
+<tr><td>overall_header (t=116)</td><td>معدّل + <b>تم نشره</b></td><td>الخميس 29-10-2026 7:49</td><td>الصفحات تُصيّر شريط Z-Zone من HTML الخام (فحص curl)</td></tr>
+<tr><td>overall_footer_begin (t=115)</td><td>معدّل + <b>تم نشره</b></td><td>الخميس 29-10-2026 7:19</td><td>«كلمة الموقع» ظاهرة في HTML الخام</td></tr>
+<tr><td>بقية القوالب (34)</td><td>القيمة البدئية — بلا حالة</td><td>—</td><td>لم تُمسّ</td></tr>
+</tbody></table>
+
+<h2>4) اختبارات القبول (ما اختُبر فعليًا وما لم يُختبر)</h2>
+<h3>4.1 مصفوفة العرض — قياس برمجي (scrollWidth مقابل clientWidth) لكل خلية</h3>
+<table><thead><tr><th>العرض</th><th>الرئيسية فاتح</th><th>الرئيسية داكن</th><th>قسم فاتح</th><th>موضوع فاتح</th><th>موضوع داكن</th></tr></thead><tbody>
+<tr><td>320px</td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td></tr>
+<tr><td>360px</td><td><span class="p g">ok</span></td><td>—</td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td>—</td></tr>
+<tr><td>390px</td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td></tr>
+<tr><td>768px</td><td><span class="p g">ok</span></td><td>—</td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td>—</td></tr>
+<tr><td>1366px</td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td><td><span class="p g">ok</span></td></tr>
+</tbody></table>
+<p>الخلايا «—»: وضع داكن لم يُفحص تلقائيًا عند كل مقاس (فُحص عند 320/390/1366) — سبب ضغط الوقت لا وجود قيود تقنية؛ آلية الداكن موحّدة عبر المتغيرات.</p>
+<h3>4.2 التدفقات الوظيفية (فعليًا على المنتدى)</h3>
+<table><thead><tr><th>التدفق</th><th>الحالة</th><th>الدليل</th></tr></thead><tbody>
+<tr><td>تسجيل دخول ← حالة مسجّل في الشريط</td><td><span class="p g">اختُبر ✓</span></td><td>نموذج /login ← عودة بحساب Admin</td></tr>
+<tr><td>خروج (تأكيد) ← عرض زائر</td><td><span class="p g">اختُبر ✓</span></td><td>أزرار دخول/تسجيل + إخفاء الإشعارات (لقطة)</td></tr>
+<tr><td>إنشاء موضوع + محرر SCEditor</td><td><span class="p g">اختُبر ✓</span></td><td>نُشر موضوع t15 فعليًا ثم حُذف</td></tr>
+<tr><td>الرد السريع (إرسال فعلي)</td><td><span class="p g">اختُبر ✓</span></td><td>رد على t14 ظهر ثم حُذف (عودة لمنشور واحد)</td></tr>
+<tr><td>تعديل مساهمة</td><td><span class="p g">اختُبر ✓</span></td><td>editpost على منشور t15</td></tr>
+<tr><td>حذف مساهمة/موضوع</td><td><span class="p g">اختُبر ✓</span></td><td>تأكيد الحذف + اختفاء المنشورات (0 post)</td></tr>
+<tr><td>المرفقات: رفع + عرض + تنزيل</td><td><span class="p g">اختُبر ✓</span></td><td>PNG 104B رُفع، ظهر في بطاقة المرفقات، نُزّل (توقيع PNG مثبت)</td></tr>
+<tr><td>الرسائل الخاصة: تحرير + إرسال + وصول + حذف</td><td><span class="p g">اختُبر ✓</span></td><td>PM إلى Admin وصل للصندوق ثم حُذف</td></tr>
+<tr><td>البحث الفعلي (كلمة Chrome)</td><td><span class="p g">اختُبر ✓</span></td><td>نتيجة واحدة مصمّمة داكنة (لقطة)</td></tr>
+<tr><td>ملفات الأعضاء / لائحة الأعضاء</td><td><span class="p g">اختُبر (عرض) ✓</span></td><td>لقطات memberlist/بروفايل داكنة</td></tr>
+<tr><td>الوضع الداكن/الفاتح + بقاء الحالة</td><td><span class="p g">اختُبر ✓</span></td><td>كوكي fa_darkmode يصمد بعد تحميل كامل وخروج/دخول</td></tr>
+<tr><td>درج القائمة الأصلي عبر زر الشريط</td><td><span class="p g">اختُبر ✓</span></td><td>سطح مكتب + 320px (لقطة)</td></tr>
+<tr><td>التنقل الديناميكي + رجوع/تقدم + canonical/عنوان</td><td><span class="p g">اختُبر ✓</span></td><td>navigation=1 دائمًا + canonical يتحدث (قياس حي)</td></tr>
+<tr><td>الاستطلاعات (تصويت)</td><td><span class="p r">لم يُختبر</span></td><td>لا يوجد استطلاع في المنتدى ومحاولة إنشائه آليًا تعثرت (حقول الخيارات تُضاف ديناميكيًا بواجهة المنصة) — قوالب الاستطلاع أصلية غير معدّلة</td></tr>
+<tr><td>التسجيل (نهاية-إلى-نهاية)</td><td><span class="p r">مستحيل الآن</span></td><td>«المدير العام منع تسجيل الأعضاء الجدد» — إعداد مالك سابق؛ صفحة /register تُعرض مصفوفة بالهوية</td></tr>
+<tr><td>الإشعارات الفورية الحية</td><td><span class="p y">جزئي</span></td><td>الزر يفتح قائمة المنصة الأصلية ✓؛ التدفق الحي يتطلب عضوًا ثانيًا نشطًا</td></tr>
+</tbody></table>
+
+<h2>5) SEO والتنقل (قياسات فعلية)</h2>
+<ul>
+<li><span class="p g">✓</span> Googlebot UA يجلب الموضوع مباشرة: HTTP 200، 112KB، العنوان الصحيح، المحتوى كامل — <b>لا توجيه للرئيسية</b>.</li>
+<li><span class="p g">✓</span> canonical لكل صفحة من المنصة، ويُحدَّث بعد كل تبديل ديناميكي (قياس: /latest ثم /f1).</li>
+<li><span class="p g">✓</span> عناوين الصفحات تتحدث مع كل تنقلة؛ وصف meta من المنصة.</li>
+<li><span class="p g">✓</span> robots.txt وsitemap.xml من المنصة تعملان.</li>
+<li><span class="p y">حدود</span> فحص المتصفح لا يثبت «الفهرسة» لدى جوجل — يثبت فقط قابلية الجلب والمحتوى في HTML الخام. قرارات الفهرسة لجوجل وحدها.</li>
+</ul>
+
+<h2>6) الأداء والاستقرار (قياسات حية)</h2>
+<table><thead><tr><th>المؤشر</th><th>قبل التنفيذ</th><th>بعد التنفيذ</th></tr></thead><tbody>
+<tr><td>HTML الرئيسية</td><td>62,595 B (واجهة أصلية بلا هوية)</td><td>114,426 B (يشمل 40KB طبقات CSS المضمّنة — بلا طلبات إضافية)</td></tr>
+<tr><td>CSS المترجم</td><td>180,813 B (قديم /15-rtl.css)</td><td>232,582 B (/17-rtl.css — يشمل قالب المنصة + الهوية، مخزَّن مؤقتًا)</td></tr>
+<tr><td>حزمة JS</td><td>غير موجودة (سكربت واحد مفعّل)</td><td>56,156 B للحزمة المجمعة (15 كودًا)</td></tr>
+<tr><td>مكتبات خارجية جديدة</td><td>—</td><td><b>صفر</b> (الخطوط وحدها كما في التصميم المرجعي)</td></tr>
+<tr><td>تنقلة داخلية (محمّة مسبقًا)</td><td>إعادة تحميل كاملة دائمًا</td><td><b>0 طلب جديد</b> (قياس Resource Timing)</td></tr>
+<tr><td>تنقلة داخلية (غير محمّة)</td><td>إعادة تحميل كاملة</td><td>2 fetch فقط (HTML جديد) — بلا CSS/JS/خطوط</td></tr>
+<tr><td>أخطاء Console</td><td>إشعارات اشتراك المنصة (موجودة قبل التنفيذ)</td><td>نفس الشيء فقط — <b>لا أخطاء جديدة</b></td></tr>
+<tr><td>تكرار تحميل السكربتات عند التنقل الداخلي</td><td>—</td><td><b>لا يحدث</b> — نفس المستند (navigation=1) والسكربتات لا تُعاد</td></tr>
+</tbody></table>
+
+<h2>7) الدليل — اختبار دون إنترنت (فعلي)</h2>
+<ul>
+<li><span class="p g">✓</span> فُتح عبر <code class="p">file://</code> مع <b>قطع الشبكة فعليًا</b> (agent-browser offline mode): يُصيَّر بالكامل — 3 مخططات SVG، 12 صندوق كود، <b>0 موارد خارجية</b>.</li>
+<li><span class="p g">✓</span> أزرار «تحديد الكل» تعمل دون إنترنت (حددت 58,775 حرفًا فعليًا)؛ الفهرس ينتقل؛ مفتاح داكن/فاتح يعمل.</li>
+<li><span class="p y">ملاحظة صادقة</span> زر «نسخ» في المتصفح بلا واجهة (headless) يرفض الوصول للحافظة فيظهر بديله الصادق («تحديد الكل ثم Ctrl+C»)؛ في متصفحك الطبيعي يعمل النسخ المباشر عبر Clipboard API مع بدل execCommand.</li>
+<li>الملف نفسه مرفق بالتسليم (وليس وصفًا): <code class="p">zzone-awesomebb-guide.html</code> — 377,362 بايت.</li>
+</ul>
+
+<h2>8) الأمان</h2>
+<ul>
+<li><span class="p g">✓</span> لا كلمات مرور/توكنات في أي ملف تسليم — فحص آلي (git grep + rg) على المستودع والحزمة: نظيف.</li>
+<li><span class="p g">✓</span> بيانات الوصول تُدار خارج مجلد المشروع بصلاحيات 600 ولا تُطبع في التقارير.</li>
+<li><span class="p r">مطلوب منك</span> <b>التوكن الفعّال الحالي وُضع في هذه المحادثة نصًا</b> — أنصح بإبطاله وإنشاء بديل بعد اعتماد التسليم (لن أفعّل/أبدّل أي شيء بنفسي). كلمات مرور المنتديات التي شاركتَها في المحادثات تُعامل بمنطق ذاته: يُستحسن تدويرها لاحقًا.</li>
+<li><span class="p g">✓</span> الملف «Admin.txt» الخاص بأرشيف التحليل لم يُرفع لأي مكان (خارج مجلدات التسليم والمستودع).</li>
+</ul>
+
+<h2>9) التسليم — البصمات (SHA-256)</h2>
+<table><thead><tr><th>الملف</th><th>المسار</th><th>الحجم</th><th>SHA-256</th></tr></thead><tbody>
+<tr><td>الدليل التوثيقي (HTML مستقل — يعمل دون إنترنت)</td><td><code class="p">zzone-awesomebb-guide.html</code></td><td>377,362 B</td><td class="mono" dir="ltr">5272e221b8093d87d351210dfab12b99ad8f60104168e95e6086e7af4980f6c8</td></tr>
+<tr><td>النسخ الاحتياطية + الملفات النهائية (ZIP)</td><td><code class="p">deliverables/zzone-backup-and-final.zip</code></td><td>220,773 B</td><td class="mono" dir="ltr">7d148030a05bf9c5fe86cb1f89925137f55488932ee33213284674be70e2beaf</td></tr>
+<tr><td>قالب overall_header النهائي</td><td><code class="p">zz/overall_header.html</code></td><td>59,212 B</td><td class="mono" dir="ltr">29fd6e0426587d6e9e7f89fe1753bdee1de05179288d0f79d5b25eb231bdc9c2</td></tr>
+<tr><td>قالب overall_footer_begin النهائي</td><td><code class="p">zz/overall_footer_begin.html</code></td><td>2,373 B</td><td class="mono" dir="ltr">fad1f02b35932082c1d71931a38d2e18f3f5c56dc54d9ed9e26c61181368a2ff</td></tr>
+<tr><td>ورقة CSS — طبقة الهوية</td><td><code class="p">zz/zz-sheet.min.css</code></td><td>64,785 B</td><td class="mono" dir="ltr">19b58ae5bbc2c35b8ad8d670b62bf9814d1b490e2e7ca53c0b2f9af87c89b95c</td></tr>
+<tr><td>طبقات CSS المكمّلة</td><td><code class="p">zz/zz-extra-inline.min.css</code></td><td>40,179 B</td><td class="mono" dir="ltr">8ac9ba1213beb0cade49548ea3107aed35ed1187d82dc367e1c86179f54f866a</td></tr>
+<tr><td>zz-ui.js (v1.0.2)</td><td><code class="p">zz/zz-ui.js</code></td><td>46,316 B</td><td class="mono" dir="ltr">998cd2418511526e1fbe879a4fe841af4d5c1c7258e43cf764483f5cc4b5e070</td></tr>
+<tr><td>zz-nav.js</td><td><code class="p">zz/zz-nav.js</code></td><td>10,679 B</td><td class="mono" dir="ltr">1d21606df8fc0dfd69695e3ea1dd7ddff7491b5db25346594ef6f6a4307388a2</td></tr>
+<tr><td>ميزة: تحديد الأكواد</td><td><code class="p">zz/zz-code-select.js</code></td><td>7,288 B</td><td class="mono" dir="ltr">10c66d06d0c6e639e66b4a981261e5993aea64c946842fa46792181b9702a36d</td></tr>
+<tr><td>ميزة: زر تم الحل</td><td><code class="p">zz/zz-solved-btn.js</code></td><td>15,336 B</td><td class="mono" dir="ltr">124f24841e080667d98781f8929bf878c6ef8a8aae475d8c3cc8c7c4898352f1</td></tr>
+<tr><td>ميزة: مشاركة المواضيع</td><td><code class="p">zz/zz-share.js</code></td><td>14,285 B</td><td class="mono" dir="ltr">b3bcb2701a378ec60264a985388f806c9e22094be2212cf2b1157f936c8bc7a9</td></tr>
+<tr><td>ميزة: روابط التحميل</td><td><code class="p">zz/zz-download-links.js</code></td><td>10,010 B</td><td class="mono" dir="ltr">3328b286565174b48458bf8268db47ee6fd3860db573e47c5780b3fd6074c127</td></tr>
+<tr><td>ميزة: اقتباس جزء من الموضوع</td><td><code class="p">zz/zz-quote-part.js</code></td><td>5,289 B</td><td class="mono" dir="ltr">d61ac354b4dc0ebd3eaa74d12d1e0deb2a1f578b036fa7b7247bf67346265129</td></tr>
+</tbody></table>
+<h3>خطوات التراجع (ملخص — التفصيل في الدليل §13)</h3>
+<ol>
+<li>القوالب: قائمة القوالب ← زر «القيمة البدئية» للقالبين ← نشر. (أو لصق محتوى النسخة الاحتياطية ← سجّل ← انشر)</li>
+<li>ورقة CSS: لصق <code class="p">backup/css/css-sheet.current.css</code> ← قدّم.</li>
+<li>أكواد JS: تعطيل أكواد Z-Zone السبعة من المدير.</li>
+<li>ويجدتات الفوتر: «إدارة خصائص الجزء السفلي» ← إفراغ/تعطيل ← سجّل.</li>
+</ol>
+
+<div class="box ok"><b>خلاصة:</b> جميع بنود التسليم التسعة نُفّذت أو وُثّق تعذّرها صراحة مع بدائله: الاستطلاعات (لا يوجد في المنتدى)، التسجيل (معطل من المالك)، فحص الفهرسة لدى جوجل (خارج سيطرة أي أداة)، واختبار الاستعادة الكامل (لم يُنفذ عمدًا حفاظًا على التصميم — مكوّناته مجربة). المستودع: <code class="p">github.com/softara1/softara</code> — مجلد <code class="p">awesomebb-merge/</code> بوسم مثبت <code class="p">awesomebb-v1.0.0</code>.</div>
+
+<footer style="text-align:center;color:var(--mut);font-size:12px;margin:26px 0">
+تقرير التسليم النهائي — وُلّد من نتائج الفحص الفعلي في 2026-10-29 04:56
+</footer>
+</div>
+</body>
+</html>
