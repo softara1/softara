@@ -1,0 +1,445 @@
+<!DOCTYPE HTML>
+<html lang="{L_LANG_HTML}">
+<head>
+    <script type="text/javascript">
+    //<![CDATA[
+    /* المظهر الداكن: قراءة كوكي أحلى منتدى الأصلي fa_darkmode وتطبيق الكلاس قبل تحميل الأنماط لمنع الوميض */
+    (function () {
+        try {
+            if (document.cookie.indexOf("fa_darkmode=1") > -1) {
+                document.documentElement.className += " fa_darkmode";
+            }
+        } catch (e) { }
+    })();
+    //]]>
+    </script>
+    <meta charset="{S_CONTENT_ENCODING}" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset={S_CONTENT_ENCODING}" />
+
+    <!-- BEGIN switch_canonical_url -->
+    <link rel="canonical" href="{switch_canonical_url.CANONICAL_URL}" />
+    <!-- END switch_canonical_url -->
+
+    {META_FAVICO}
+    {META}
+    {META_FB_LIKE}
+
+    <title>{SITENAME_TITLE}{PAGE_TITLE}</title>
+
+    {T_HEAD_STYLESHEET}
+    {CSS}
+
+    <meta name="theme-color" content="{GG_THEME_COLOR}" />
+
+    <link rel="search" type="application/opensearchdescription+xml" href="/improvedsearch.xml" title="{SITENAME}" />
+    <link rel="search" type="application/opensearchdescription+xml" href="{URL_BOARD_DIRECTORY}/search/improvedsearch.xml" title="{SEARCH_FORUMS}" />
+
+    <!-- خط Alexandria: خط هوية Z-Zone (تحميل مسبق مُحسَّن) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
+
+
+    <!-- [C-F] طبقات CSS المكمّلة لهوية Z-Zone (مضمّنة: داكن/فاتح + تغطية الصفحات + التوافق) -->
+    <style id="zz-extra-css">
+:root{--mobi_bgcolor:#282a2f;--mobi_joinbtn_bgcolor:#3793FF;--mobi_forumcat_bgcolor:#0598E4;--mobi_body_text:#536482;--dark_grey:#d4d4d4;--fa_black_alpha025:rgba(255,255,255,0.25);--fa_black_alpha005:rgba(255,255,255,0.05);--fa_black_alpha05:rgba(255,255,255,0.5);--fa_white_alpha05:rgba(0,0,0,0.5);--fa_color_black:#FFFFFF;--fa_color_grey:#cbcbcb;--light_grey1:#6b6b6b;--light_grey2:#464646;--light_grey3:#2b2b2b;--fa_white1:#101010;--bg_light:#1f1f1f;--bg_light2:#232323;--fa_coral:#d63a3a;--invert:invert(1) hue-rotate(180deg)}.switch-button-knobs,.switch-button-layer{position:absolute;top:0;right:0;bottom:0;left:0}.switch-button{display:inline-block !important;user-select:none;position:relative;width:38px;height:22px;margin:0 10px 0 0;padding:0 0 0 8px;overflow:hidden;flex-shrink:0}.switch-button.r,.switch-button.r .switch-button-layer{border-radius:100px}.switch-button-knobs{z-index:2}.switch-button-layer{width:100%;background-color:#aaaaaa;transition:0.3s ease all;z-index:1}.switch-button-knobs::before{cursor:pointer;content:'';position:absolute;top:2px;left:2px;width:20px;height:10px;padding:9px 4px;background-color:#0598E4;border-radius:50%;transition:0.3s cubic-bezier(0.18,0.89,0.35,1.15) all}.switch-button.checked .switch-button-knobs::before{left:16px;background-color:#ffffff}#main-menu #fa_darkmode_toggle{display:flex;align-items:center;justify-content:flex-start}#main-menu #fa_darkmode_toggle i{flex-shrink:0}#main-menu #fa_darkmode_toggle .switch-button{margin-inline-start:auto;top:0}html.fa_darkmode,html.fa_darkmode body{background-color:var(--mobi_bgcolor) !important;color:var(--dark_grey)}html.fa_darkmode body{color:var(--dark_grey)}html.fa_darkmode a{color:var(--dark_grey)}html.fa_darkmode a:hover{color:#3793FF}html.fa_darkmode .block-post .content a,html.fa_darkmode .post-content a{color:#0598E4}html.fa_darkmode .block-post .content a:hover,html.fa_darkmode .post-content a:hover{color:#3793FF}html.fa_darkmode header a,html.fa_darkmode #header-banner a,html.fa_darkmode #main-menu a,html.fa_darkmode #main-user-menu a,html.fa_darkmode #notif-menu a,html.fa_darkmode #page-footer a,html.fa_darkmode #fa_toolbar a,html.fa_darkmode .block .block-header a,html.fa_darkmode .forum-statistics-header a{color:#FFFFFF}html.fa_darkmode header a:hover,html.fa_darkmode #main-menu a:hover,html.fa_darkmode #page-footer a:hover{color:#3793FF}html.fa_darkmode .block,html.fa_darkmode .block .block-content,html.fa_darkmode .block-subtle,html.fa_darkmode .forum-section,html.fa_darkmode .posts-section,html.fa_darkmode .block-post,html.fa_darkmode .post{background-color:var(--bg_light);color:var(--dark_grey);box-shadow:0 1px 3px rgba(0,0,0,0.45),0 0 2px rgba(0,0,0,0.45)}html.fa_darkmode .block .block-secondary-content,html.fa_darkmode .block .block-footer,html.fa_darkmode .block .sub-head{background-color:var(--bg_light2);color:var(--dark_grey);border-color:var(--light_grey2)}html.fa_darkmode .block .block-header{color:#FFFFFF}html.fa_darkmode .module{background-color:var(--bg_light2);box-shadow:none;color:var(--dark_grey)}html.fa_darkmode .module .h3,html.fa_darkmode .module h3{background-color:var(--mobi_forumcat_bgcolor);color:#FFF}html.fa_darkmode .forum-icon,html.fa_darkmode .posts-icon,html.fa_darkmode .block-topics .block-content .block-topics-icon{background-color:var(--light_grey3);color:var(--font_light)}html.fa_darkmode .forum_new .forum-icon,html.fa_darkmode .posts_new .forum-icon,html.fa_darkmode .post_new{background-color:var(--mobi_forumcat_bgcolor);color:#FFF}html.fa_darkmode .forum-section:hover .forum-icon,html.fa_darkmode .forum-section:hover .posts-icon{background-color:var(--mobi_forumcat_bgcolor);color:#FFF}html.fa_darkmode h2,html.fa_darkmode h3,html.fa_darkmode h4,html.fa_darkmode .h3,html.fa_darkmode .topic-title,html.fa_darkmode .posts-description h3{color:var(--dark_grey)}html.fa_darkmode .forum-lastpost,html.fa_darkmode .posts-lastpost,html.fa_darkmode .forum-lastpost-author,html.fa_darkmode .forum-lastpost-time,html.fa_darkmode .forum-lastpost-location{color:var(--fa_color_grey)}html.fa_darkmode .forum-lastpost,html.fa_darkmode .posts-lastpost{background-color:transparent;border-color:var(--light_grey2)}html.fa_darkmode .block .block-content .divider,html.fa_darkmode .divider{border-color:var(--light_grey2)}html.fa_darkmode .block hr,html.fa_darkmode hr{border-color:var(--light_grey2);background-color:var(--light_grey2);color:var(--light_grey2)}html.fa_darkmode th{background-color:var(--light_grey3) !important;color:var(--dark_grey) !important}html.fa_darkmode .table th,html.fa_darkmode .block th{background-color:var(--light_grey3) !important}html.fa_darkmode td{border-color:var(--light_grey2);color:var(--dark_grey);background-color:transparent}html.fa_darkmode .forum-statistics-header,html.fa_darkmode .forum-statistics-header th{background-color:var(--mobi_forumcat_bgcolor) !important;color:#FFFFFF !important}html.fa_darkmode .forum-statistics{background-color:var(--bg_light2) !important;color:var(--fa_color_grey) !important;border-color:var(--light_grey2)}html.fa_darkmode .input{background-color:transparent;border-color:var(--fa_black_alpha025);color:var(--dark_grey)}html.fa_darkmode .input:focus{border-color:var(--mobi_forumcat_bgcolor)}html.fa_darkmode input[type="text"],html.fa_darkmode input[type="password"],html.fa_darkmode input[type="email"],html.fa_darkmode input[type="url"],html.fa_darkmode input[type="number"],html.fa_darkmode input[type="search"],html.fa_darkmode input[type="date"]{background-color:var(--bg_light);color:var(--dark_grey);border-color:var(--fa_black_alpha025)}html.fa_darkmode select,html.fa_darkmode .jumpbox-wrap select,html.fa_darkmode .quickmod-wrap select{background-color:var(--light_grey3);color:var(--dark_grey);border-color:var(--light_grey2)}html.fa_darkmode textarea{background-color:var(--bg_light);color:var(--dark_grey);border-color:var(--light_grey2)}html.fa_darkmode label,html.fa_darkmode .label{color:var(--fa_color_grey)}html.fa_darkmode .checkbox,html.fa_darkmode .radio{border-color:var(--fa_black_alpha025)}html.fa_darkmode::placeholder{color:var(--fa_color_grey);opacity:1}html.fa_darkmode .btn-flat{background-color:rgba(255,255,255,0.08);color:var(--dark_grey)}html.fa_darkmode .btn-flat:hover{background-color:rgba(255,255,255,0.14)}html.fa_darkmode .btn-default:disabled{background-color:var(--light_grey3);border-bottom-color:var(--light_grey1);color:var(--fa_color_grey)}html.fa_darkmode .rep-button{background-color:var(--light_grey3);color:#FFF}html.fa_darkmode .rep-button:hover{background-color:var(--light_grey2)}html.fa_darkmode blockquote{background-color:var(--fa_black_alpha005);border-color:var(--fa_black_alpha025);color:var(--dark_grey)}html.fa_darkmode blockquote cite{border-bottom-color:var(--fa_black_alpha025);color:var(--fa_color_grey)}html.fa_darkmode .codebox{background-color:var(--fa_white1);border-color:var(--light_grey2);color:var(--dark_grey)}html.fa_darkmode .spoiler{background-color:var(--fa_black_alpha005);border-color:var(--fa_black_alpha025);color:var(--dark_grey)}html.fa_darkmode .spoiler_content{color:var(--dark_grey)}html.fa_darkmode .sceditor-container{border-color:var(--light_grey2) !important;background-color:var(--bg_light) !important;box-shadow:0 1px 6px rgba(0,0,0,0.4) !important}html.fa_darkmode .sceditor-toolbar{background-color:var(--bg_light2) !important}html.fa_darkmode .sceditor-group{background-color:var(--light_grey3);border-color:var(--light_grey2)}html.fa_darkmode .sceditor-button{filter:invert(0.9) hue-rotate(180deg)}html.fa_darkmode .sceditor-button:hover,html.fa_darkmode .sceditor-button.active{background-color:var(--light_grey2)}html.fa_darkmode .sceditor-container textarea{background-color:var(--bg_light) !important;color:var(--dark_grey) !important}html.fa_darkmode .sceditor-container iframe{background-color:var(--bg_light) !important}html.fa_darkmode .sceditor-grip{filter:invert(0.9)}html.fa_darkmode #main-menu,html.fa_darkmode #main-user-menu,html.fa_darkmode #notif-menu{background-color:var(--bg_light2)}html.fa_darkmode #main-menu a,html.fa_darkmode #main-menu .main-menu-headline{color:#FFFFFF}html.fa_darkmode #login_popup,html.fa_darkmode #like_popup,html.fa_darkmode #inactive_popup{background-color:var(--bg_light2)}html.fa_darkmode #fa_toolbar{background-color:var(--bg_light2);color:var(--dark_grey)}html.fa_darkmode #fa_toolbar a{color:var(--dark_grey)}html.fa_darkmode::-webkit-scrollbar{width:10px;height:10px;background:var(--mobi_bgcolor)}html.fa_darkmode::-webkit-scrollbar-thumb{background:var(--light_grey2);border-radius:6px}html.fa_darkmode::-webkit-scrollbar-thumb:hover{background:var(--light_grey1)}html.fa_darkmode::-webkit-scrollbar-track{background:var(--mobi_bgcolor)}html.fa_darkmode *{scrollbar-color:var(--light_grey2) var(--mobi_bgcolor);scrollbar-width:thin}html.fa_darkmode::selection{background-color:var(--mobi_forumcat_bgcolor);color:#FFFFFF}html.fa_darkmode .block .block-footer .stats-row,html.fa_darkmode .stats-row{border-top-color:var(--light_grey2)}html.fa_darkmode .block-login,html.fa_darkmode .login-panel,html.fa_darkmode .panel{background-color:var(--bg_light);color:var(--dark_grey)}html.fa_darkmode .login-tabbed .login-tabs{background-color:var(--fa_black_alpha005)}html.fa_darkmode .login-tabbed .login-tab{color:var(--fa_color_grey)}html.fa_darkmode .login-tabbed .login-tab[aria-selected="true"]{background-color:var(--bg_light);color:var(--dark_grey)}html.fa_darkmode .profile-icons i,html.fa_darkmode .post-icons i{color:var(--fa_color_grey)}html.fa_darkmode .profile-icons i:hover,html.fa_darkmode .post-icons i:hover{color:#3793FF}html.fa_darkmode .navbar,html.fa_darkmode .nav-links,html.fa_darkmode .sub-header{background-color:var(--bg_light2);color:var(--dark_grey)}html.fa_darkmode .navbar a,html.fa_darkmode .nav-links a{color:var(--dark_grey)}html.fa_darkmode .pagination a,html.fa_darkmode .pagination span{color:var(--dark_grey)}html.fa_darkmode .pagination a:hover{color:#3793FF}html.fa_darkmode .avatar-big,html.fa_darkmode .avatar-mini{background-color:var(--light_grey3)}html.fa_darkmode img{max-width:100%}html.fa_darkmode .block-subtle.block-modal,html.fa_darkmode .block-modal{background-color:var(--bg_light);color:var(--dark_grey)}html.fa_darkmode .forum-description h3:after,html.fa_darkmode .posts-description h3:after{box-shadow:0 0 11px 11px var(--bg_light)}html.fa_darkmode #comments_scroll_div:after{box-shadow:0 0 16px 9px var(--bg_light) inset}html.fa_darkmode .mod-news{background-color:var(--bg_light);color:var(--dark_grey);box-shadow:0 1px 3px rgba(0,0,0,0.45),0 0 2px rgba(0,0,0,0.45)}html.fa_darkmode #fa_menulist{background-color:var(--bg_light2);color:var(--dark_grey)}html.fa_darkmode #fa_menulist:link,html.fa_darkmode #fa_menulist:visited{color:var(--dark_grey) !important}html.fa_darkmode .block-login .login-tab{color:var(--fa_color_grey)}html.fa_darkmode .block-login .login-tab[aria-selected="true"]{background-color:var(--bg_light);color:var(--dark_grey);box-shadow:0 1px 3px rgba(0,0,0,0.45)}html.fa_darkmode .block-login .login-hint{color:var(--fa_color_grey)}html.fa_darkmode .box,html.fa_darkmode .box .box-body,html.fa_darkmode .cp-sidebar,html.fa_darkmode .box-header{background-color:var(--bg_light);color:var(--dark_grey);box-shadow:0 1px 3px rgba(0,0,0,0.45),0 0 2px rgba(0,0,0,0.45)}html.fa_darkmode .box a{color:var(--dark_grey)}html.fa_darkmode .box a:hover{color:#3793FF}html.fa_darkmode .profile-advanced-stats dt span,html.fa_darkmode dl.profile-advanced-stats span{color:var(--fa_color_grey) !important}html.fa_darkmode .avatar-default{background-color:var(--light_grey3)}html.fa_darkmode .member-block,html.fa_darkmode .members-block{background-color:var(--bg_light);color:var(--dark_grey);box-shadow:0 1px 3px rgba(0,0,0,0.45),0 0 2px rgba(0,0,0,0.45)}html.fa_darkmode .member-details{color:var(--fa_color_grey)}html.fa_darkmode .member-details i{color:var(--fa_color_grey)}html.fa_darkmode .cp-sidebar .tabs ul,html.fa_darkmode #tabs ul,html.fa_darkmode .tabs ul{background-color:var(--bg_light) !important}html.fa_darkmode .cp-sidebar .tabs a,html.fa_darkmode #tabs li a,html.fa_darkmode .tabs a{color:var(--dark_grey) !important}html.fa_darkmode .cp-sidebar .tabs .activetab a,html.fa_darkmode .tabs .activetab a{color:#3793FF !important}html.fa_darkmode .usr_grp_clr{filter:brightness(1.75)}html.fa_darkmode .calendar-cell{background-color:var(--bg_light);color:var(--dark_grey);border-color:var(--light_grey2)}html.fa_darkmode .calendar-header,html.fa_darkmode .calendar-week{background-color:var(--bg_light2);color:var(--dark_grey)}html.fa_darkmode .calendar-day-date{background-color:var(--light_grey3) !important;color:var(--dark_grey) !important}html.fa_darkmode .container-imgs-list{background-color:var(--mobi_bgcolor)}html.fa_darkmode .container-imgs-list .text_overlay{background-color:rgba(0,0,0,0.7);color:#FFF}html.fa_darkmode .quick-reply .textarea,html.fa_darkmode .quick-reply textarea{background-color:var(--bg_light);color:var(--dark_grey);border-color:var(--light_grey2)}
+html.fa_darkmode{--tz-base:#070b14;--tz-card:#111827;--tz-surface:#1a233a;--tz-surface-hover:#22304d;--tz-card-hover:#1a233a;--tz-ceiling:rgba(13,19,32,0.92);--tz-primary:#00e5ff;--tz-primary-dark:#00b8d4;--tz-accent:#3b82f6;--tz-success:#10b981;--tz-danger:#ef4444;--tz-text-main:#e2e8f0;--tz-text-muted:#8b9bb4;--tz-border:#1e293b;--tz-border-glow:rgba(0,229,255,0.18)}html.fa_darkmode{--mobi_bgcolor:#070b14;--bg_light:#111827;--bg_light2:#1a233a;--light_grey3:#1e293b;--light_grey2:#2b3a55;--light_grey1:#8b9bb4;--fa_color_grey:#8b9bb4;--fa_black_alpha025:rgba(255,255,255,0.14);--fa_black_alpha005:rgba(255,255,255,0.04);--dark_grey:#e2e8f0;--fa_coral:#ef4444}html.fa_darkmode body{background-image:radial-gradient(circle at 50% 0,rgba(0,229,255,0.05) 0,transparent 70%) !important}html.fa_darkmode .tz-ceiling-bar{border-bottom-color:rgba(0,229,255,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.5);background:var(--tz-ceiling)}html.fa_darkmode .tz-sov-item:hover{box-shadow:0 4px 10px rgba(0,0,0,0.35);background:var(--tz-surface)}html.fa_darkmode .tz-btn-account img{border-color:#1e293b}html.fa_darkmode [data-tooltip],html.fa_darkmode .tooltip{background-color:#1a233a;color:#e2e8f0}html.fa_darkmode::-webkit-scrollbar-track{background:#070b14}html.fa_darkmode::-webkit-scrollbar-thumb{background:#2b3a55}html.fa_darkmode::-webkit-scrollbar-thumb:hover{background:#00b8d4}html.fa_darkmode .post-content hr,html.fa_darkmode .content hr{border-color:#1e293b}.btn,.btn-default,.btn-flat,.button1,.button2,input[type="submit"].btn,#main-menu a,.topic-actions .btn{font-family:Alexandria,Tajawal,sans-serif !important;font-size:13px !important;font-weight:700 !important;border-radius:12px !important;transition:all 0.25s cubic-bezier(0.4,0,0.2,1) !important}.btn-default,input[type="submit"].btn-default{background:var(--tz-primary) !important;color:#ffffff !important;border:none !important;padding:10px 22px !important;box-shadow:0 4px 14px var(--tz-border-glow) !important}.btn-default:hover,input[type="submit"].btn-default:hover{background:var(--tz-primary-dark) !important;transform:translateY(-1px);box-shadow:0 6px 18px var(--tz-border-glow) !important}.btn-flat,.btn:not(.btn-default){background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important}.btn-flat:hover,.btn:not(.btn-default):hover{background:var(--tz-card-hover) !important;border-color:var(--tz-primary) !important;color:var(--tz-primary) !important}.button1,.button2,input.button1,input.button2{background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important;border-radius:10px !important;padding:8px 16px !important}.button1:hover,.button2:hover{border-color:var(--tz-primary) !important;color:var(--tz-primary) !important}a.button1:link,a.button1:visited,a.button2:link,a.button2:visited{color:var(--tz-text-main) !important}.action-bar{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:14px !important;padding:6px 10px !important;margin:0 0 18px 0 !important;box-shadow:0 2px 10px rgba(0,0,0,0.03) !important}.action-bar li a{color:var(--tz-text-muted) !important;font-size:12px !important;font-weight:600 !important;border-radius:9px !important;padding:7px 12px !important;display:flex !important;align-items:center !important;gap:6px !important;transition:all 0.25s ease !important}.action-bar li a:hover{background:var(--tz-card-hover) !important;color:var(--tz-primary) !important}.action-bar li a i{font-size:16px !important}.page-header h1,.page-header h1 a{color:var(--tz-text-main) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:0 !important}#breadcrumbs,.breadcrumbs-topic{color:var(--tz-text-muted) !important;font-size:12px !important;font-weight:600 !important}#breadcrumbs a,.breadcrumbs-topic a{color:var(--tz-text-muted) !important;display:inline-flex !important;align-items:center !important;gap:4px !important;transition:color 0.2s ease !important}#breadcrumbs a:hover,.breadcrumbs-topic a:hover{color:var(--tz-primary) !important}#breadcrumbs i,.breadcrumbs-topic i{font-size:14px !important}.pagination{display:flex !important;flex-wrap:wrap !important;gap:6px !important;align-items:center !important}.pagination a,.pagination span,.pagination strong,.pagination b{background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important;border-radius:9px !important;font-size:12px !important;font-weight:700 !important;min-width:30px !important;height:30px !important;padding:0 8px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;text-decoration:none !important;transition:all 0.2s ease !important}.pagination a:hover{border-color:var(--tz-primary) !important;color:var(--tz-primary) !important;transform:translateY(-1px)}.pagination .pag-img,.pagination img{background:transparent !important;border:none !important;box-shadow:none !important;min-width:0 !important;height:auto !important}.pagination strong,.pagination b:not(.tz-n-badge),.pagination span:empty + strong{background:var(--tz-primary) !important;color:#ffffff !important;border-color:var(--tz-primary) !important}.jumpbox,.jumpbox-wrap,.quickmod-wrap{margin:16px 0 !important}.jumpbox select,.jumpbox-wrap select,.quickmod-wrap select,select,.inputbox{background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important;border-radius:10px !important;font-family:Alexandria,Tajawal,sans-serif !important;font-size:13px !important;padding:8px 12px !important;transition:border-color 0.2s ease !important}select:focus,.inputbox:focus{border-color:var(--tz-primary) !important;outline:none !important}.codebox{background:#0f172a !important;border:1px solid rgba(2,132,199,0.25) !important;border-radius:14px !important;margin:16px 0 !important;overflow:hidden !important;box-shadow:0 12px 30px rgba(2,6,23,0.25) !important;direction:ltr !important;text-align:left !important}.codebox dt,.codebox dt span,.codebox p{background:rgba(255,255,255,0.04) !important;color:#7dd3fc !important;font-size:11px !important;font-weight:800 !important;padding:9px 14px !important;border-bottom:1px solid rgba(255,255,255,0.07) !important;direction:rtl !important;text-align:right !important}.codebox dd{background:transparent !important;margin:0 !important;padding:14px 16px !important}.codebox code,.codebox pre,.cont_code{color:#e2e8f0 !important;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;font-size:12.5px !important;line-height:1.75 !important;white-space:pre !important;overflow-x:auto !important;display:block !important;max-width:100% !important}blockquote{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-inline-start:4px solid var(--tz-primary) !important;border-radius:12px !important;margin:14px 0 !important;padding:12px 16px !important;color:var(--tz-text-main) !important}blockquote cite{color:var(--tz-text-muted) !important;font-size:12px !important;font-weight:800 !important;border-bottom:1px dashed var(--tz-border) !important;padding-bottom:6px !important;margin-bottom:8px !important;display:block !important}.spoiler{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:12px !important;padding:10px 14px !important}.spoiler_content{color:var(--tz-text-main) !important}.attachbox{background:var(--tz-card) !important;border:1px dashed var(--tz-border) !important;border-radius:12px !important;padding:10px 14px !important;margin:14px 0 !important}.attachbox dt{color:var(--tz-text-muted) !important;font-weight:800 !important;font-size:12px !important}.attachbox dd{color:var(--tz-text-main) !important}.attachbox a{color:var(--tz-primary) !important}.post-content img{max-width:100% !important;height:auto !important;border-radius:10px !important}.post-content table{border-collapse:collapse !important;width:100% !important;margin:12px 0 !important;background:var(--tz-card) !important;border-radius:10px !important;overflow-x:auto !important;display:block !important}.post-content table td,.post-content table th{border:1px solid var(--tz-border) !important;padding:8px 12px !important;font-size:13px !important;color:var(--tz-text-main) !important}.post-content table th{background:rgba(2,132,199,0.08) !important;font-weight:800 !important}.post-content ul,.post-content ol{padding-inline-start:22px !important;margin:10px 0 !important}.block-login,.login-panel,.panel,.fieldset-submit,#ucp,.box{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:18px !important;box-shadow:0 4px 20px rgba(0,0,0,0.04) !important}.block-login .block-header,.box-header,.panel h1,.panel h2{color:var(--tz-text-main) !important;font-weight:800 !important}.login-tabbed .login-tabs{background:var(--tz-card-hover) !important;border-radius:14px 14px 0 0 !important}.login-tabbed .login-tab{color:var(--tz-text-muted) !important;font-weight:700 !important}.login-tabbed .login-tab[aria-selected="true"]{background:var(--tz-card) !important;color:var(--tz-primary) !important}input[type="text"],input[type="password"],input[type="email"],input[type="url"],input[type="number"],input[type="search"],input[type="date"],textarea{background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important;border-radius:10px !important;font-family:Alexandria,Tajawal,sans-serif !important;font-size:13.5px !important;padding:9px 12px !important;transition:border-color 0.2s ease,box-shadow 0.2s ease !important;max-width:100% !important}input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus,textarea:focus{border-color:var(--tz-primary) !important;box-shadow:0 0 0 3px var(--tz-border-glow) !important;outline:none !important}label{color:var(--tz-text-main) !important;font-size:13px !important}fieldset{border:1px solid var(--tz-border) !important;border-radius:12px !important;padding:14px !important}legend{color:var(--tz-text-muted) !important;font-weight:800 !important;font-size:12px !important;padding:0 8px !important}dl dt label,dt span{color:var(--tz-text-main) !important}#cp-main .panel,#cp-main .box,.profile-advanced-block,.profile-view-box{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:16px !important}#tabs ul,.cp-sidebar .tabs ul,.tabs ul{background:var(--tz-card) !important;border-radius:12px !important;border:1px solid var(--tz-border) !important;overflow:hidden !important}#tabs li a,.tabs a,.cp-sidebar .tabs a{color:var(--tz-text-muted) !important;font-weight:700 !important;font-size:12.5px !important;transition:all 0.2s ease !important}#tabs .activetab a,.tabs .activetab a,#tabs li a:hover,.tabs a:hover{color:var(--tz-primary) !important;background:var(--tz-card-hover) !important}.profile-advanced-stats dt span,dl.profile-advanced-stats span{color:var(--tz-text-muted) !important}.members-block .member-block{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:16px !important;transition:all 0.25s ease !important}.members-block .member-block:hover{border-color:var(--tz-border-glow) !important;box-shadow:0 8px 24px rgba(2,132,199,0.08) !important;transform:translateY(-2px)}.member-header a[href^="/u"]{color:var(--tz-text-main) !important;font-weight:800 !important}.member-details,.member-details i{color:var(--tz-text-muted) !important}.search-results .post,.search-results .block,.block.pmlist,.pm-list .block,#pm-list .block{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:14px !important}.search-results .post .post-header h3,.search-results h3 a{color:var(--tz-text-main) !important}#posting,form[name="post"],.form-post{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:16px !important;padding:18px !important}#posting h1,.posting-header h1{color:var(--tz-text-main) !important;font-weight:800 !important}.sceditor-container{border:1px solid var(--tz-border) !important;border-radius:14px !important;background:var(--tz-card) !important}.sceditor-toolbar{background:var(--tz-card-hover) !important;border-bottom:1px solid var(--tz-border) !important}.sceditor-group{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:8px !important}.sceditor-container iframe,.sceditor-container textarea{background:#ffffff !important;color:#0f172a !important}#smiley-box,.smiley-container{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:12px !important}#page-footer .navbar{background:transparent !important}#page-footer .navbar a{color:var(--tz-text-muted) !important;font-size:12px !important;font-weight:600 !important;transition:color 0.2s ease !important}#page-footer .navbar a:hover{color:var(--tz-primary) !important}#page-footer .copyright{color:var(--tz-text-muted) !important;font-size:11px !important}footer#page-footer,footer .wrap{color:var(--tz-text-muted) !important}#forum-statistics>div>div{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:14px !important;color:var(--tz-text-main) !important}#notif-menu{position:fixed !important;top:64px !important;left:18px !important;width:min(360px,calc(100vw - 36px)) !important;max-height:min(480px,calc(100vh - 90px)) !important;overflow-y:auto !important;background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:16px !important;box-shadow:0 24px 60px rgba(2,6,23,0.25) !important;z-index:1000 !important}#main-menu,#main-user-menu{z-index:1001 !important}#live_notif{position:fixed !important;bottom:18px !important;left:18px !important;z-index:1002 !important}#live_notif .notification{background:var(--tz-card) !important;color:var(--tz-text-main) !important;border:1px solid var(--tz-border) !important;border-radius:14px !important;box-shadow:0 18px 44px rgba(2,6,23,0.3) !important}#login_popup,#like_popup,#inactive_popup{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:18px !important;box-shadow:0 30px 80px rgba(2,6,23,0.35) !important}#login_popup .headline,#like_popup .headline,#inactive_popup .headline{color:var(--tz-text-main) !important}#dimmer{background:rgba(2,6,23,0.55) !important}#main-user-menu{display:none !important}html.fa_darkmode .codebox{background:#0b1120 !important;border-color:rgba(0,229,255,0.2) !important;box-shadow:0 12px 30px rgba(0,0,0,0.5) !important}html.fa_darkmode .codebox dt,html.fa_darkmode .codebox p{background:rgba(0,229,255,0.05) !important;color:#67e8f9 !important;border-bottom-color:rgba(0,229,255,0.1) !important}html.fa_darkmode .codebox code,html.fa_darkmode .codebox pre,html.fa_darkmode .cont_code{color:#cbd5e1 !important}html.fa_darkmode .sceditor-container iframe,html.fa_darkmode .sceditor-container textarea{background:#1f1f1f !important;color:#d4d4d4 !important}html.fa_darkmode .sceditor-button{filter:invert(0.9) hue-rotate(180deg)}html.fa_darkmode .post-content table th{background:rgba(0,229,255,0.06) !important}html.fa_darkmode #forum-statistics>div>div{background:#111827 !important;border-color:#1e293b !important}html.fa_darkmode .action-bar{box-shadow:0 2px 10px rgba(0,0,0,0.4) !important}html.fa_darkmode blockquote{background:rgba(255,255,255,0.04) !important;border-inline-start-color:#00e5ff !important}.Luffy-code-wrapper{max-width:100% !important;overflow:hidden !important}.Luffy-code-wrapper .Luffy-code-header button,.Luffy-code-wrapper button{font-family:Alexandria,Tajawal,sans-serif !important}html.fa_darkmode .Luffy-radar-box{background:rgba(16,185,129,0.08) !important;border-color:rgba(16,185,129,0.35) !important;color:#d1fae5 !important;box-shadow:0 4px 15px rgba(0,0,0,0.4) !important}html.fa_darkmode .Luffy-hub-card{background:#111827 !important;border-color:#1e293b !important;color:#e2e8f0 !important;box-shadow:0 12px 35px rgba(0,0,0,0.45) !important}html.fa_darkmode .Luffy-hub-container .Luffy-hub-title,html.fa_darkmode .Luffy-hub-container h3,html.fa_darkmode .Luffy-hub-container h4{color:#e2e8f0 !important}html.fa_darkmode .Luffy-dl-card{background:#111827 !important;border-color:#1e293b !important;box-shadow:0 4px 20px rgba(0,0,0,0.4) !important}html.fa_darkmode .Luffy-dl-card a,html.fa_darkmode .Luffy-dl-card .Luffy-dl-btn{color:#00e5ff !important}#L-quote-pill{font-family:Alexandria,Tajawal,sans-serif !important}.tz-siteword-box{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:18px !important;padding:24px 22px !important;margin:26px 0 14px 0 !important}.tz-siteword-title{color:var(--tz-primary) !important;font-weight:900 !important;font-size:14px !important;display:flex !important;align-items:center !important;gap:8px !important;margin-bottom:12px !important}.tz-siteword-title i{font-size:18px !important}.tz-siteword-content p{color:var(--tz-text-muted) !important;font-size:12.5px !important;line-height:1.9 !important;margin:0 !important}.tz-footer-cols{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:18px !important;margin:14px 0 8px 0 !important}.tz-footer-col{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:18px !important;padding:18px 16px !important;min-width:0 !important}.tz-footer-col-title{color:var(--tz-text-main) !important;font-size:13px !important;font-weight:900 !important;display:flex !important;align-items:center !important;gap:7px !important;margin:0 0 12px 0 !important;padding-bottom:10px !important;border-bottom:1px dashed var(--tz-border) !important}.tz-footer-col-title i{color:var(--tz-primary) !important;font-size:17px !important}.tz-footer-col-body{display:flex !important;flex-direction:column !important;gap:9px !important;max-height:230px !important;overflow-y:auto !important;scrollbar-width:thin !important}.tz-footer-item{display:flex !important;align-items:center !important;gap:9px !important;font-size:12px !important;color:var(--tz-text-muted) !important;text-decoration:none !important;padding:5px 7px !important;border-radius:9px !important;transition:all 0.2s ease !important;overflow:hidden !important}.tz-footer-item:hover{background:var(--tz-card-hover) !important;color:var(--tz-primary) !important}.tz-footer-item img{width:26px !important;height:26px !important;border-radius:50% !important;object-fit:cover !important;flex-shrink:0 !important;border:1px solid var(--tz-border) !important}.tz-footer-item .tz-fi-icon{width:26px !important;height:26px !important;border-radius:8px !important;background:var(--tz-border-glow) !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important}.tz-footer-item .tz-fi-icon i{font-size:14px !important;color:var(--tz-primary) !important}.tz-footer-item .tz-fi-text{flex:1 1 auto !important;min-width:0 !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important}.tz-footer-item .tz-fi-meta{font-size:10.5px !important;color:var(--tz-text-muted) !important;flex-shrink:0 !important}.tz-footer-empty{color:var(--tz-text-muted) !important;font-size:12px !important;text-align:center !important;padding:14px 0 !important}.tz-footer-sig{text-align:center !important;color:var(--tz-text-muted) !important;font-size:11px !important;font-weight:800 !important;letter-spacing:0.6px !important;margin-top:18px !important}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--tz-primary) !important;outline-offset:2px !important;border-radius:6px !important}.skip-link{position:absolute !important;right:-9999px !important;top:0 !important;background:var(--tz-primary) !important;color:#ffffff !important;padding:10px 18px !important;border-radius:0 0 10px 10px !important;z-index:100000 !important;font-weight:800 !important;font-size:13px !important}.skip-link:focus{right:12px !important}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}}.tz-btn-menu{display:inline-flex !important;color:var(--tz-primary) !important}@media (max-width:360px){html.fa_darkmode .tz-ceiling-bar,.tz-ceiling-bar{padding:0 6px !important}.tz-sov-item span{font-size:10px !important}.tz-sov-item i{font-size:16px !important}.tz-footer-cols{grid-template-columns:1fr !important}.tz-hero-title{font-size:19px !important}.tz-hero-desc{font-size:12px !important}.tz-dash-grid{grid-template-columns:repeat(2,1fr) !important}.tz-stat-card{padding:13px 12px !important}.pagination a,.pagination span{min-width:27px !important;height:27px !important;font-size:11px !important}.codebox dd{padding:10px 8px !important}.codebox code,.codebox pre{font-size:11.5px !important}#notif-menu{left:8px !important;width:calc(100vw - 16px) !important}}@media (max-width:480px){body{overflow-x:hidden !important}.post-content img,.post-content video,.post-content iframe{max-width:100% !important}.post-content pre,.codebox{max-width:100% !important}.tz-slide-text{white-space:normal !important;display:block !important}}@media print{.tz-ceiling-bar,#page-footer,.scroll-actions,#tzFooterCols,.tz-admin-notice{display:none !important}#wrap{padding:0 !important;max-width:100% !important}body{background:#ffffff !important;color:#000000 !important}}html.fa_darkmode .type-table-forum,html.fa_darkmode .topic-header,html.fa_darkmode .tz-virgin-portal,html.fa_darkmode .tz-slider-box,html.fa_darkmode .tz-stat-card,html.fa_darkmode .tz-dash-counter-card,html.fa_darkmode .tz-legend-wrapper,html.fa_darkmode .tz-perm-block,html.fa_darkmode .tz-mod-block,html.fa_darkmode .post-signature,html.fa_darkmode .introduction,html.fa_darkmode .rules-table,html.fa_darkmode .posts-header,html.fa_darkmode .block-content{background:#111827 !important;background-image:none !important;border-color:#1e293b !important;box-shadow:0 10px 40px rgba(0,0,0,0.4) !important;color:#e2e8f0 !important}html.fa_darkmode .tz-dash-counter-card.card-total,html.fa_darkmode .tz-dash-counter-card.card-members,html.fa_darkmode .tz-dash-counter-card.card-hidden,html.fa_darkmode .tz-dash-counter-card.card-guests{background:linear-gradient(135deg,#111827 0,#1a233a 100%) !important;border:1px solid #1e293b !important}html.fa_darkmode .forum-header{background:linear-gradient(135deg,rgba(0,229,255,0.08) 0,rgba(0,229,255,0.01) 100%) !important}html.fa_darkmode .tz-subforum-item{background:rgba(255,255,255,0.03) !important;border-color:#1e293b !important}html.fa_darkmode .tz-admin-notice{background:linear-gradient(90deg,#111827 0,#0b1120 100%) !important}html.fa_darkmode .tz-btn-secondary,html.fa_darkmode .btn,html.fa_darkmode .quick-reply-send,html.fa_darkmode .submit-button{background:#1a233a !important;background-image:none !important;color:#e2e8f0 !important;border-color:#1e293b !important}html.fa_darkmode .tz-btn-primary{background:#00e5ff !important;color:#000000 !important}html.fa_darkmode .forum-icon,html.fa_darkmode .posts-icon,html.fa_darkmode .avatar-default{background:#1e293b !important;color:#8b9bb4 !important}html.fa_darkmode .tz-sig-badge,html.fa_darkmode .tz-forum-badge{background:rgba(0,229,255,0.06) !important;color:#8b9bb4 !important}html.fa_darkmode .rank-1,html.fa_darkmode .rank-7,html.fa_darkmode .rank-founder{background:#1a233a !important;border-color:#1e293b !important}html.fa_darkmode .tz-slide-text{color:#e2e8f0 !important}html.fa_darkmode .tz-slide-meta,html.fa_darkmode .tz-slide-author{color:#8b9bb4 !important}html.fa_darkmode footer,html.fa_darkmode #page-footer,html.fa_darkmode #tzFooterCols,html.fa_darkmode .footer-widgets,html.fa_darkmode #emptyidcc,html.fa_darkmode #site-desc,html.fa_darkmode #fa_footer{background-color:transparent !important;background-image:none !important}html.fa_darkmode #page-footer .navbar a,html.fa_darkmode footer .gensmall{color:#8b9bb4 !important}html.fa_darkmode #page-footer .navbar a:hover{color:#00e5ff !important}html.fa_darkmode .forum-description p,html.fa_darkmode .posts-description p{background-color:transparent !important}html.fa_darkmode .forum-statistics span,html.fa_darkmode .posts-lastpost,html.fa_darkmode .forum-lastpost-inner{background-color:#1a233a !important;color:#e2e8f0 !important;border-color:#1e293b !important}html.fa_darkmode .post-aside,html.fa_darkmode .post-author-details,html.fa_darkmode .post-author-info{background-color:#111827 !important;color:#e2e8f0 !important;border-color:#1e293b !important}html.fa_darkmode .post-aside .label,html.fa_darkmode .post-author-details span,html.fa_darkmode .post-aside i{color:#8b9bb4 !important}html.fa_darkmode .post-author-avatar img,html.fa_darkmode .avatar-big,html.fa_darkmode .avatar-mini img{border-color:#1e293b !important;background-color:#1e293b !important}html.fa_darkmode .post-header{background:linear-gradient(135deg,rgba(0,229,255,0.07) 0%,rgba(0,229,255,0.01) 100%) !important;background-image:linear-gradient(135deg,rgba(0,229,255,0.07) 0%,rgba(0,229,255,0.01) 100%) !important;border-color:#1e293b !important;color:#e2e8f0 !important;box-shadow:none !important}html.fa_darkmode .post-header h2,html.fa_darkmode .post-header h2 a,html.fa_darkmode .post-header .post-date{color:#e2e8f0 !important}html.fa_darkmode .post-header .post-buttons a,html.fa_darkmode .post-header .post-buttons li,html.fa_darkmode .post-header .post-buttons i{background-color:rgba(0,229,255,0.08) !important;color:#67e8f9 !important}.footer_widgets .widget{background:var(--tz-card) !important;border:1px solid var(--tz-border) !important;border-radius:18px !important;padding:16px !important;margin:0 !important;box-shadow:0 4px 20px rgba(0,0,0,0.04) !important;min-width:0 !important}.footer_widgets .widget .h3,.footer_widgets .widget h3{color:var(--tz-text-main) !important;font-size:13px !important;font-weight:900 !important;background:transparent !important;border-bottom:1px dashed var(--tz-border) !important;padding-bottom:10px !important;margin-bottom:12px !important;display:flex !important;align-items:center !important;gap:7px !important}.footer_widgets .widget a{color:var(--tz-text-main) !important;font-size:12px !important}.footer_widgets .widget a:hover{color:var(--tz-primary) !important}.footer_widgets{margin:18px 0 8px 0 !important}html.fa_darkmode .footer_widgets .widget{background:#111827 !important;border-color:#1e293b !important;box-shadow:0 4px 20px rgba(0,0,0,0.4) !important}html.fa_darkmode .footer_widgets .widget .h3,html.fa_darkmode .footer_widgets .widget h3{color:#e2e8f0 !important;border-bottom-color:#1e293b !important}html.fa_darkmode .footer_widgets .widget a{color:#cbd5e1 !important}html.fa_darkmode #dimmer.visible,html.fa_darkmode #dimmer{background:rgba(2,6,23,0.62) !important}
+    </style>
+
+    <script src="{JQUERY_PATH}" type="text/javascript"></script>
+    <!-- BEGIN switch_recent_jquery -->
+    <script src="{JS_DIR}jquery1.9/jquery-migrate-1.4.1.js" type="text/javascript"></script>
+    <script src="{JQUERY_DIR}browser/v1.0/jquery.browser.min.js" type="text/javascript"></script>
+    <script src="{JQUERY_DIR}support/jquery.support.js" type="text/javascript"></script>
+    <!-- END switch_recent_jquery -->
+
+    <script src="{JS_DIR}{L_LANG}.js" type="text/javascript"></script>
+
+    <!-- BEGIN switch_fb_login -->
+    <script src="{switch_fb_login.JS_FB_LOGIN}" type="text/javascript"></script>
+    <!-- END switch_fb_login -->
+
+    <!-- BEGIN switch_ticker -->
+    <link type="text/css" rel="stylesheet" href="{JS_DIR}jquery/ticker/ticker.css" />
+    <script src="{JS_DIR}jquery/ticker/ticker.js" type="text/javascript"></script>
+    <!-- END switch_ticker -->
+
+    <!-- BEGIN switch_ticker -->
+    <script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function () {
+            Ticker.start({
+                height : {switch_ticker.HEIGHT},
+                spacing : {switch_ticker.SPACING},
+                speed : {switch_ticker.SPEED},
+                direction : '{switch_ticker.DIRECTION}',
+                pause : {switch_ticker.STOP_TIME},
+                max_height: {switch_ticker.HEIGHT},
+            });
+        });
+        //]]>
+    </script>
+    <!-- END switch_ticker -->
+    <script type="text/javascript">
+        $(document).scroll(function() {
+            var y = $(this).scrollTop();
+            if (y > 164) {
+                if($('.btn-fixed').find('.btn-fixed-txt').length !== 0){
+                    $('.btn-fixed').addClass('btn-scrolled');
+                }
+            } else {
+                if($('.btn-fixed').find('.btn-fixed-txt').length !== 0) {
+                    $('.btn-fixed').removeClass('btn-scrolled');
+                }
+            }
+        });
+    </script>
+    <!-- BEGIN switch_report_popup -->
+    <script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function () {
+            report = window.open('{switch_report_popup.U_REPORT_POPUP}', '_phpbbreport', 'HEIGHT={switch_report_popup.S_HEIGHT},resizable=yes,scrollbars=no,WIDTH={switch_report_popup.S_WIDTH}');
+            if (report != null) {
+                report.focus();
+            }
+        });//]]>
+    </script>
+    <!-- END switch_report_popup -->
+    <!-- BEGIN switch_enable_pm_popup -->
+    <script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function () {
+            pm = window.open('{U_PRIVATEMSGS_POPUP}', '_faprivmsg', 'HEIGHT=225,resizable=yes,WIDTH=400');
+            if (pm != null) {
+                pm.focus();
+            }
+        });
+        //]]>
+    </script>
+    <!-- END switch_enable_pm_popup -->
+    <!-- BEGIN switch_login_popup -->
+    <script type="text/javascript">
+        //<![CDATA[
+    var logInPopUpLeft, logInPopUpTop, logInPopUpWidth = {LOGIN_POPUP_WIDTH},
+    logInPopUpHeight = {LOGIN_POPUP_HEIGHT}, logInBackgroundResize = true, logInBackgroundClass = false;
+
+    $(document).ready(function () {
+        $(window).resize(function () {
+            var windowWidth = document.documentElement.clientWidth;
+            var popupWidth = $("#login_popup").width();
+            var mypopup = $("#login_popup");
+
+            $("#login_popup").css({
+                "left": windowWidth / 2 - popupWidth / 2
+            });
+        });
+    });
+        //]]>
+    </script>
+    <!-- END switch_login_popup -->
+
+    {RICH_SNIPPET_GOOGLE}
+    {HOSTING_JS}
+
+    <!-- BEGIN google_analytics_code -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={G_ANALYTICS_ID}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{G_ANALYTICS_ID}', {'anonymize_ip': true, 'store_gac': false, 'cookie_expires': 13 * 30 * 24 * 60 * 60});
+        <!-- BEGIN google_analytics_code_bis -->
+        gtag('config', '{G_ANALYTICS_ID_BIS}', {'anonymize_ip': true, 'store_gac': false, 'cookie_expires': 13 * 30 * 24 * 60 * 60});
+        <!-- END google_analytics_code_bis -->
+    </script>
+    <!-- END google_analytics_code -->
+
+    <style>
+        #logo-text {
+            max-width: calc(100% - 150px);
+        }
+
+        .forum-description img {
+            max-width: calc(100% - 15px);
+        }
+    </style>
+</head>
+
+<body id="top">
+<a class="skip-link" href="#wrap">تخطَّ إلى المحتوى</a>
+<!-- BEGIN switch_login_popup -->
+<div id="login_popup" class="block-subtle" style="z-index: 10001 !important;">
+    <div class="headline">
+        {SITENAME}
+        <button title="{L_LOGIN_CLOSE}" id="login_popup_close"><i class="material-symbols-outlined">close</i></button>
+    </div>
+    <div id="login_popup_content">
+        <div id="login_popup_message">
+            {LOGIN_POPUP_MSG}
+        </div>
+        <br />
+        <div id="login_popup_buttons">
+            <!-- BEGIN switch_quick_login -->
+                        <div class="mt10">
+                                <div class="social_btn">
+                                        <!-- BEGIN fb_quick_connect -->
+                                        <div class="fb-login-button"></div>
+                                        <!-- END fb_quick_connect -->
+                                        &nbsp;
+                                        <!-- BEGIN topicit_quick_connect -->
+                                        <div class="ti-connect"></div>
+                                        <!-- END topicit_quick_connect -->
+                                </div>
+                        </div>
+            <br/>
+            <!-- END switch_quick_login -->
+            <form action="{S_LOGIN_ACTION}" method="get">
+                <input type="submit" value="{L_LOGIN}" class="btn btn-default" />
+                <input type="button" value="{L_REGISTER}" onclick="parent.location='{U_REGISTER}';" class="btn btn-default" />
+            </form>
+        </div>
+    </div>
+</div>
+<!-- END switch_login_popup -->
+
+{GREETING_POPUP}
+
+<!-- BEGIN inactive_users_modal -->
+<div id="inactive_popup" class="block-subtle" style="z-index: 10000 !important;">
+    <div class="headline">
+        {inactive_users_modal.L_MODAL_TITLE}
+        <button title="{inactive_users_modal.L_CLOSE}" id="inactive_popup_close"><i class="material-symbols-outlined">close</i></button>
+    </div>
+    <div id="inactive_popup_message">
+        {inactive_users_modal.L_MODAL_BODY}
+    </div>
+    <br />
+    <div id="inactive_popup_buttons">
+        <button id="inactive_popup_url" class="button1">{inactive_users_modal.L_MODAL_BUTTON}</button>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#inactive_popup #inactive_popup_close').on('mouseup', function () {
+        document.cookie = "modal_require_activation_closed=1; max-age=86400*15; path=/;";
+        $('#inactive_popup').hide(50);
+    });
+    $('#inactive_popup #inactive_popup_url').on('mouseup', function () {
+        document.cookie = "modal_require_activation_closed=1; max-age=86400*15; path=/;";
+        location.href = '{inactive_users_modal.U_MODAL}'
+    })
+</script>
+<!-- END inactive_users_modal -->
+
+<!-- BEGIN switch_like_popup -->
+<div id="like_popup" class="block-subtle" style="z-index: 10001 !important;">
+    <div class="headline">
+        {SITENAME}
+        <button title="{L_LIKE_CLOSE}" id="like_popup_close"><i class="material-symbols-outlined">close</i></button>
+    </div>
+    <div id="like_popup_message">
+        {LIKE_POPUP_MSG}
+    </div>
+    <br />
+    <div id="like_popup_buttons">
+        <form action="{S_LOGIN_ACTION}" method="get">
+            <input type="submit" value="{L_LOGIN}" class="btn btn-default" />
+            <input type="button" value="{L_REGISTER}" onclick="parent.location='{U_REGISTER}';" class="btn btn-default" />
+        </form>
+    </div>
+</div>
+<!-- END switch_like_popup -->
+
+<!-- شريط Z-Zone العلوي (يعرض أصليًا من القالب دون انتظار جافاسكربت) -->
+<nav id="tzCeilingBar" class="tz-ceiling-bar" aria-label="التنقل الرئيسي">
+    <ul class="tz-sov-list">
+        <li>
+            <button type="button" id="tzMenuBtn" class="tz-sov-item tz-btn-menu" aria-haspopup="true" aria-expanded="false">
+                <i class="material-symbols-outlined">menu</i><span>القائمة</span>
+            </button>
+        </li>
+        <li><a href="{U_INDEX}" class="tz-sov-item"><i class="material-symbols-outlined">space_dashboard</i><span>الرئيسية</span></a></li>
+        <li><a href="/latest" class="tz-sov-item"><i class="material-symbols-outlined">local_fire_department</i><span>أحدث المواضيع</span></a></li>
+        <li><a href="/faq" class="tz-sov-item"><i class="material-symbols-outlined">menu_book</i><span>الأنظمة والدعم</span></a></li>
+        <li><a href="/search" class="tz-sov-item"><i class="material-symbols-outlined">search</i><span>البحث المتقدم</span></a></li>
+        <li class="tz-action-sep" role="separator" aria-hidden="true"></li>
+        <li>
+            <button type="button" id="tzCustomNotifBtn" class="tz-sov-item tz-btn-notif">
+                <i class="material-symbols-outlined">notifications</i><span>الإشعارات</span><b class="tz-n-badge" hidden></b>
+            </button>
+        </li>
+        <li>
+            <button type="button" id="tzDarkToggle" class="tz-sov-item" aria-pressed="false" title="المظهر الداكن/الفاتح">
+                <i class="material-symbols-outlined">brightness_6</i><span>المظهر</span>
+            </button>
+        </li>
+        <!-- BEGIN switch_user_logged_in -->
+        <li>
+            <a href="/profile?mode=editprofile" class="tz-sov-item tz-btn-account" title="حسابي">
+                <span class="tz-avatar-slot" aria-hidden="true"><i class="material-symbols-outlined">person</i></span><span class="tz-live-dot" aria-hidden="true"></span><span class="tz-acc-name">حسابي</span>
+            </a>
+        </li>
+        <li>
+            <a href="/login?logout=1" class="tz-sov-item tz-btn-logout" title="تسجيل الخروج">
+                <i class="material-symbols-outlined">logout</i><span>خروج</span>
+            </a>
+        </li>
+        <!-- END switch_user_logged_in -->
+        <!-- BEGIN switch_user_logged_out -->
+        <li>
+            <a href="{S_LOGIN_ACTION}" class="tz-sov-item tz-btn-account" title="تسجيل الدخول">
+                <span class="tz-avatar-slot" aria-hidden="true"><i class="material-symbols-outlined">person</i></span><span class="tz-acc-name">دخول</span>
+            </a>
+        </li>
+        <li>
+            <a href="/register" class="tz-sov-item tz-btn-logout" title="حساب جديد">
+                <i class="material-symbols-outlined">person_add</i><span>تسجيل</span>
+            </a>
+        </li>
+        <!-- END switch_user_logged_out -->
+    </ul>
+</nav>
+
+<header>
+    <div id="main-menu-btn">
+        <i class="material-symbols-outlined">menu</i>
+    </div>
+    <a id="logo-link" href="{U_INDEX}">
+        <div id="logo">
+            <!-- BEGIN switch_logo_mob -->
+            <img src="{switch_logo_mob.LOGO_MOB}" alt="{L_INDEX}" loading="lazy" />
+            <!-- END switch_logo_mob -->
+        </div>
+        <!-- BEGIN switch_h1 -->
+        <span id="logo-text">{switch_h1.MAIN_SITENAME}</span>
+        <!-- END switch_h1 -->
+    </a>
+    <!-- BEGIN switch_user_logged_out -->
+    <a href="{S_LOGIN_ACTION}" class="button">{L_LOGIN}</a>
+    <!-- END switch_user_logged_out -->
+    <!-- BEGIN switch_user_logged_in -->
+    <a href="javascript:void(0)" id="header-user"></a>
+    <a href="javascript:void(0)" id="header-notif"><i class="material-symbols-outlined">notifications</i></a>
+    <!-- END switch_user_logged_in -->
+    <form method="get" action="{ACTION_SEARCH}" id="search-main">
+        <input type="text" name="search_keywords" maxlength="128" placeholder="{L_SEARCH}" />
+        <button type="submit"><i class="material-symbols-outlined">search</i></button>
+    </form>
+    <ul id="header-navigation">
+        <li><a id="navigation-home" href="{NAVIGATION_HOME}"><i class="material-symbols-outlined">apps</i>{L_FORUM}</a></li>
+        <li><a id="navigation-recent" href="/latest"><i class="material-symbols-outlined">comment</i>{L_TOPICS}</a></li>
+        <!-- BEGIN discover_active -->
+        <li><a id="navigation-discover" href="/discover"><i class="material-symbols-outlined">history</i>{L_TOPICS}</a></li>
+        <!-- END discover_active -->
+    </ul>
+</header>
+
+<div id="main-menu" class="hidden">
+    <div class="main-menu-headline">{SITENAME}</div>
+    <ul>
+        <li>
+            <a href="javascript:void(0)" id="fa_darkmode_toggle" title="المظهر الداكن">
+                <i class="material-symbols-outlined">brightness_6</i>
+                <span>المظهر الداكن</span>
+                <div class="switch-button r" id="button-dm">
+                    <div class="switch-button-knobs"></div>
+                    <div class="switch-button-layer"></div>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+/* المظهر الداكن: ربط زر التبديل بنفس آلية أحلى منتدى الأصلية (كوكي fa_darkmode) */
+(function () {
+    function dmApply(on) {
+        var h = document.documentElement, b = document.body;
+        if (on) { h.classList.add("fa_darkmode"); if (b) b.classList.add("fa_darkmode"); }
+        else { h.classList.remove("fa_darkmode"); if (b) b.classList.remove("fa_darkmode"); }
+        var sw = document.getElementById("button-dm");
+        if (sw) { if (on) sw.classList.add("checked"); else sw.classList.remove("checked"); }
+        var tz = document.getElementById("tzDarkToggle");
+        if (tz) { tz.setAttribute("aria-pressed", on ? "true" : "false"); }
+    }
+    function dmDarkEditor() {
+        if (document.cookie.indexOf("fa_darkmode=1") < 0) return;
+        var iframes = document.querySelectorAll(".sceditor-container iframe");
+        for (var i = 0; i < iframes.length; i++) {
+            try {
+                var d = iframes[i].contentDocument;
+                if (d && d.body && !d.getElementById("fa-dm-style")) {
+                    var s = d.createElement("style");
+                    s.id = "fa-dm-style";
+                    s.textContent = "html,body{background:#1f1f1f !important;color:#d4d4d4 !important}";
+                    d.head.appendChild(s);
+                }
+            } catch (e) { }
+        }
+    }
+    function dmInit() {
+        var on = document.documentElement.classList.contains("fa_darkmode") || document.cookie.indexOf("fa_darkmode=1") > -1;
+        dmApply(on);
+        var btn = document.getElementById("fa_darkmode_toggle");
+        if (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                var nowOn = !document.documentElement.classList.contains("fa_darkmode");
+                dmApply(nowOn);
+                document.cookie = "fa_darkmode=" + (nowOn ? "1" : "0") + ";path=/;max-age=31536000";
+                if (nowOn) { setTimeout(dmDarkEditor, 300); }
+            });
+        }
+        if (on) { setTimeout(dmDarkEditor, 800); setTimeout(dmDarkEditor, 2500); }
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", dmInit); }
+    else { dmInit(); }
+})();
+//]]>
+</script>
+<div id="main-user-menu" class="hidden">
+</div>
+
+<div id="notif-menu" class="hidden">
+    <div class="main-menu-headline" data-text="_lang['Notifications']"></div>
+    <ul id="notif_list">
+        <li id="notif-view-all"><a href="/profile?mode=editprofile&page_profil=notifications" data-text="_lang['Notif_see_all']"></a></li>
+    </ul>
+</div>
+<div id="live_notif">
+</div>
+
+<div id="header-banner">
+    <div class="wrap">
+        <!-- BEGIN switch_desc -->
+        <h2 style="transition: none !important; opacity: 0;">{switch_desc.SITE_DESCRIPTION}</h2>
+        <!-- END switch_desc -->
+    </div>
+</div>
+<div id="wrap">
+
+    <!-- BEGIN switch_ticker -->
+    <div id="fa_ticker_block">
+        <div class="module">
+            <div class="inner">
+                <div id="fa_ticker_container">
+                    <div id="fa_ticker" style="height:{switch_ticker.HEIGHT}px;">
+                        <div class="fa_ticker_content">
+                            <!-- BEGIN ticker_row -->
+                            <div>{switch_ticker.ticker_row.ELEMENT}</div>
+                            <!-- END ticker_row -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END switch_ticker -->
+
+    <!-- BEGIN html_validation -->
+</div><!-- <div id="wrap" /> -->
+</body>
+</html>
+<!-- END html_validation -->
