@@ -1,10 +1,10 @@
-/* soft-2026-core v1.0 — نواة المظهر (2026-11-01)
+/* soft-2026-core v1.0.1 — نواة المظهر (2026-11-01)
    المصدر: a7la2026.js (النسخة الحية نفسها، تحقق jsDelivr sha مطابق)
    التغيير الوحيد عن المصدر: إزالة كتلة «إنفاذ حقوق المصمم» (checkDesignerRights
    + المسح الكامل للصفحة + setInterval كل ثانيتين) — ضمن اعتماد المالك
    في المراجعة الأمنية الشاملة audit-1101: الحقوق تبقى نصاً عادياً في الفوتر،
    ولا تبقى أي آلية برمجية تراقبها أو تعاقب على تغييرها.
-   كل الوظائف الأخرى كما هي حرفياً. */
+   رقعة 1.0.1: دمج مزامنة aria داخل toggleSubBoards (لأن التحميل صار defer). كل الوظائف الأخرى كما هي حرفياً. */
 
 
 const root = document.documentElement;
@@ -224,6 +224,13 @@ function toggleSubBoards(btn) {
         container.style.display = 'block';
         icon.style.transform = 'rotate(180deg)';
     }
+    /* audit-1101: مزامنة خصائص الوصول كانت في غلاف index_box؛ دُمجت هنا لأن تحميل
+       هذا الملف صار defer — فلا يبقى فرق في السلوك بين المسارين */
+    try {
+        var isOpenNow = (container.style.display === 'block');
+        btn.setAttribute('aria-expanded', isOpenNow ? 'true' : 'false');
+        container.setAttribute('aria-hidden', isOpenNow ? 'false' : 'true');
+    } catch (eAria) {}
 }
 
 function initUserDataAndNotifications() {
