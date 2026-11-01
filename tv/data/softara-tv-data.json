@@ -1,0 +1,199 @@
+{
+  "version": 2,
+  "updated": "2026-11-01",
+  "news": [
+    "مرحبًا بكم في سوفتارا TV — منصة التلفزيون والترفيه الرسمية لمجتمع سوفتارا",
+    "النسخة التجريبية تعمل بمحتوى مرخّص ومصادر عامة رسمية (قنوات ناشئة + أفلام مفتوحة المصدر)",
+    "لإضافة قنوات أو أفلام جديدة: عدّل قسم البيانات في أعلى الصفحة — دون لمس أي كود آخر",
+    "واجهة الهاتف أُعيد بناؤها بالكامل: قائمة القنوات أسفل المشغل وملء الشاشة يعمل على كل المتصفحات",
+    "الأقسام الحالية: البث المباشر · الأفلام · المسلسلات · البرامج · المصارعة · المفضلة"
+  ],
+  "items": [
+    {
+      "id": "ch-aj",
+      "kind": "channel",
+      "name": "الجزيرة",
+      "cat": "أخبار",
+      "country": "قطر",
+      "type": "hls",
+      "src": "https://live-hls-web-aja.getaj.net/AJA/index.m3u8",
+      "hd": true,
+      "featured": true,
+      "desc": "القناة الإخبارية الرئيسية"
+    },
+    {
+      "id": "ch-f24",
+      "kind": "channel",
+      "name": "فرانس 24 عربية",
+      "cat": "أخبار",
+      "country": "فرنسا",
+      "type": "hls",
+      "src": "https://static.france24.com/live/F24_AR_HI_HLS/live_web.m3u8",
+      "hd": true,
+      "desc": "القناة الإخبارية الفرنسية بالعربية"
+    },
+    {
+      "id": "ch-dw",
+      "kind": "channel",
+      "name": "DW عربية",
+      "cat": "أخبار",
+      "country": "ألمانيا",
+      "type": "hls",
+      "src": "https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8",
+      "hd": true,
+      "desc": "إذاعة DW الألمانية بالعربية"
+    },
+    {
+      "id": "ch-trt",
+      "kind": "channel",
+      "name": "TRT عربي",
+      "cat": "عامة",
+      "country": "تركيا",
+      "type": "hls",
+      "src": "https://tv-trtarabi.medya.trt.com.tr/master.m3u8",
+      "hd": true,
+      "desc": "برامج متنوعة وثقافية"
+    },
+    {
+      "id": "ch-sna",
+      "kind": "channel",
+      "name": "سكاي نيوز عربية",
+      "cat": "أخبار",
+      "country": "الإمارات",
+      "type": "hls",
+      "src": "https://stream.skynewsarabia.com/hls/sna.m3u8",
+      "hd": true,
+      "desc": "القناة الإخبارية السعودية"
+    },
+    {
+      "id": "ch-alarabiya",
+      "kind": "channel",
+      "name": "العربية",
+      "cat": "أخبار",
+      "country": "السعودية",
+      "type": "hls",
+      "src": "https://av.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8",
+      "hd": true,
+      "desc": "قناة العربية الإخبارية"
+    },
+    {
+      "id": "ch-rbtv",
+      "kind": "channel",
+      "name": "Red Bull TV",
+      "cat": "رياضة",
+      "country": "النمسا",
+      "type": "hls",
+      "src": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+      "hd": true,
+      "desc": "رياضات قتالية وأحداث عالمية"
+    },
+    {
+      "id": "mv-bbb",
+      "kind": "movie",
+      "name": "الأرنب الكبير — Big Buck Bunny",
+      "cat": "أنيميشن",
+      "year": 2008,
+      "type": "hls",
+      "src": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "demo": true,
+      "qualityMenu": true,
+      "desc": "فيلم مفتوح المصدر بجودات متعددة — مثال حي لتبديل الجودة"
+    },
+    {
+      "id": "mv-tos",
+      "kind": "movie",
+      "name": "دموع الفولاذ — Tears of Steel",
+      "cat": "خيال علمي",
+      "year": 2012,
+      "type": "hls",
+      "src": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+      "demo": true,
+      "desc": "فيلم قصير مفتوح المصدر من بلندر"
+    },
+    {
+      "id": "mv-sintel",
+      "kind": "movie",
+      "name": "سينتل — Sintel",
+      "cat": "فانتازيا",
+      "year": 2010,
+      "type": "mp4",
+      "src": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+      "demo": true,
+      "desc": "الإعلان الرسمي لفيلم سينتل — مثال mp4 مباشر"
+    },
+    {
+      "id": "sr-b-1",
+      "kind": "series",
+      "group": "sr-blender",
+      "name": "سلسلة بلندر المفتوحة",
+      "ep": "الحلقة 1",
+      "cat": "أنيميشن",
+      "type": "hls",
+      "src": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "demo": true,
+      "desc": "الموسم الأول"
+    },
+    {
+      "id": "sr-b-2",
+      "kind": "series",
+      "group": "sr-blender",
+      "name": "سلسلة بلندر المفتوحة",
+      "ep": "الحلقة 2",
+      "cat": "أنيميشن",
+      "type": "hls",
+      "src": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+      "demo": true,
+      "desc": "الموسم الأول"
+    },
+    {
+      "id": "sr-b-3",
+      "kind": "series",
+      "group": "sr-blender",
+      "name": "سلسلة بلندر المفتوحة",
+      "ep": "الحلقة 3",
+      "cat": "أنيميشن",
+      "type": "mp4",
+      "src": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+      "demo": true,
+      "desc": "الموسم الأول"
+    },
+    {
+      "id": "pr-nasa",
+      "kind": "program",
+      "name": "ناسا لايف — البث الرسمي",
+      "cat": "برامج وثائقية",
+      "type": "youtube",
+      "src": "21X5lGlDOfg",
+      "demo": true,
+      "desc": "قناة ناسا الرسمية على يوتيوب"
+    },
+    {
+      "id": "pr-bbb4k",
+      "kind": "program",
+      "name": "بلندر: الأرنب الكبير 4K",
+      "cat": "أفلام قصيرة",
+      "type": "youtube",
+      "src": "aqz-KE-bpKQ",
+      "demo": true,
+      "desc": "النسخة الرسمية بدقة 4K على يوتيوب"
+    },
+    {
+      "id": "pr-sintel",
+      "kind": "program",
+      "name": "بلندر: سينتل كامل",
+      "cat": "أفلام قصيرة",
+      "type": "youtube",
+      "src": "eRsGyueVLvQ",
+      "demo": true,
+      "desc": "الفيلم الكامل على القناة الرسمية"
+    },
+    {
+      "id": "wr-soon",
+      "kind": "wrestling",
+      "name": "العروض العالمية — قريبًا",
+      "cat": "عروض",
+      "soon": true,
+      "desc": "سيُزوَّد القسم بعروض مرخّصة رسميًا بعد اعتماد المصادر القانونية"
+    }
+  ]
+}
