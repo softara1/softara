@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  سوفتارا TV — Softara TV · v2.1.1 (نسخة المنتدى الخفيفة)
+  هذه الصفحة تحتوي الهيكل فقط؛ كل الأنماط والمنطق والبيانات مستضافة خارجيًا:
+    • الأنماط   : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/css/softara-tv.css
+    • البيانات  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-data.js   (أضف المحتوى هنا)
+    • المنطق    : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-app.js
+  ★ للتحديث: عدّل الملف المطلوب على GitHub → أنشئ وسم إصدار جديد → استبدل
+    الرقم @v2.1.1 في الروابط أدناه بالوسم الجديد. لا حاجة لتعديل أي شيء آخر.
+  ★ في منتدى أحلى منتدى: الصق هذا الكود في «صفحات HTML» بوضع المصدر
+    (Source) دون التبديل إلى المحرر المرئي، واختر: بدون أعلى وأسفل المنتدى.
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0f0d" id="stvMetaTheme">
+<meta name="description" content="سوفتارا TV — بث مباشر، أفلام، مسلسلات وبرامج بمنصة عربية سريعة متوافقة مع الهاتف">
+<title>سوفتارا TV — مركز التلفزيون والترفيه</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/css/softara-tv.css">
+</head>
+<body>
+
+
+<!-- ═══ مكتبة الأيقونات SVG (بديل جذري عن الإيموجي) ═══ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4.5" height="16" rx="1.5" fill="currentColor" stroke="none"/><rect x="13.5" y="4" width="4.5" height="16" rx="1.5" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 5.4a9.4 9.4 0 0 1 0 13.2"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="m16.5 9 5 6"/><path d="m21.5 9-5 6"/></symbol>
+  <symbol id="i-max" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/></symbol>
+  <symbol id="i-min" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.6-1.6 2.1-3.1 2.1-4.6A4.6 4.6 0 0 0 16.5 4.8c-1.8 0-3.1.9-4.5 2.6-1.4-1.7-2.7-2.6-4.5-2.6A4.6 4.6 0 0 0 2.9 9.4c0 1.5.5 3 2.1 4.6l7 7Z"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18"/><path d="M17 3v18"/><path d="M2 9h5"/><path d="M2 15h5"/><path d="M17 9h5"/><path d="M17 15h5"/></symbol>
+  <symbol id="i-series" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M10 7.2l4.5 2.8-4.5 2.8Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-clap" viewBox="0 0 24 24"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.4Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.3 17.7-1.4 1.4"/><path d="m19.1 4.9-1.4 1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m10.3 3.9-8.5 14.2a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-pip" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="12" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21 7 14.2 2 9.3l6.9-1Z"/></symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10.5 10.2a2.3 2.3 0 0 0-4 .8 2.5 2.5 0 0 0 0 2 2.3 2.3 0 0 0 4 .8"/><path d="M17.5 10.2a2.3 2.3 0 0 0-4 .8 2.5 2.5 0 0 0 0 2 2.3 2.3 0 0 0 4 .8"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></symbol>
+  <symbol id="i-kid" viewBox="0 0 24 24"><path d="M12 21a8 8 0 1 1 8-8c0 4-3.6 5-8 5"/><circle cx="9" cy="11" r=".6" fill="currentColor"/><circle cx="15" cy="11" r=".6" fill="currentColor"/><path d="M9.5 15c1.5 1 3.5 1 5 0"/><path d="M12 2V0.5"/></symbol>
+</svg>
+
+<!-- ═══ المقدمة الافتتاحية (مرة كل جلسة · قابلة للتخطي · بديل ثابت مضمون لأنها SVG/CSS بلا تحميل) ═══ -->
+<div class="stv-intro" id="stvIntro" role="dialog" aria-label="مقدمة سوفتارا TV" aria-hidden="true">
+  <div class="stv-intro-bg" aria-hidden="true"></div>
+  <div class="stv-intro-in">
+    <svg class="stv-intro-logo" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><linearGradient id="stvIntroG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs>
+      <rect class="il-frame" x="12" y="30" width="96" height="66" rx="13" fill="none" stroke="url(#stvIntroG)" stroke-width="5"/>
+      <path class="il-ant" d="M47 30 60 12l13 18" fill="none" stroke="url(#stvIntroG)" stroke-width="5" stroke-linecap="round"/>
+      <path class="il-play" d="M52 48v30l26-15Z" fill="url(#stvIntroG)"/>
+    </svg>
+    <div class="stv-intro-word">سوفتارا <b>TV</b></div>
+    <div class="stv-intro-sub">قنوات مباشرة · أفلام · مسلسلات · برامج · وثائقيات</div>
+  </div>
+  <button class="stv-intro-skip" id="stvIntroSkip">تخطي المقدمة <svg class="ic" style="width:15px;height:15px"><use href="#i-chev-l"/></svg></button>
+</div>
+
+<div class="stv-app">
+
+  <!-- ═══ الترويسة ═══ -->
+  <header class="stv-header">
+    <div class="stv-container stv-header-in">
+      <div class="stv-brand">
+        <svg class="stv-brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <defs><linearGradient id="stvG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+          <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG)"/>
+          <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+          <circle cx="36.5" cy="11.5" r="4.4" fill="#04241b"/><path d="M35 11.6l2.2 1.4V10.2Z" fill="#2dd4bf"/>
+        </svg>
+        <div class="stv-brand-txt">
+          <b>سوفتارا<i> TV</i></b>
+          <span>مركز التلفزيون والترفيه — منتدى سوفتارا</span>
+        </div>
+      </div>
+      <div class="stv-header-tools">
+        <button class="stv-icon-btn" id="stvSearchBtn" aria-label="بحث" aria-expanded="false"><svg class="ic"><use href="#i-search"/></svg></button>
+        <button class="stv-icon-btn" id="stvThemeBtn" aria-label="تبديل الوضع الليلي/النهاري"><svg class="ic" id="stvThemeIc"><use href="#i-sun"/></svg></button>
+      </div>
+    </div>
+    <div class="stv-searchwrap" id="stvSearchWrap">
+      <div class="stv-container stv-search-in">
+        <div class="stv-search-box">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <input type="search" id="stvSearch" placeholder="ابحث عن قناة أو فيلم أو مسلسل أو برنامج…" aria-label="بحث في المحتوى">
+          <button class="stv-icon-btn" id="stvSearchClear" aria-label="مسح البحث" style="width:38px;height:38px"><svg class="ic" style="width:17px;height:17px"><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ المحتوى ═══ -->
+  <main class="stv-main">
+    <div class="stv-container">
+
+      <div class="stv-stage">
+        <div class="stv-stage-col">
+
+          <!-- المشغل -->
+          <section class="stv-shell stv-ui" id="stvShell" aria-label="مشغل سوفتارا TV">
+            <video id="stvVideo" playsinline webkit-playsinline preload="none"></video>
+            <div class="stv-ytbox" id="stvYtBox"><div id="stvYtMount"></div></div>
+            <div class="stv-embedbox" id="stvEmbedBox"></div>
+
+            <!-- شاشة البداية المتحركة -->
+            <div class="stv-idle" id="stvIdle" aria-hidden="true">
+              <div class="stv-idle-bg"></div>
+              <div class="stv-idle-lines"></div>
+              <div class="stv-idle-beam b1"></div><div class="stv-idle-beam b2"></div>
+              <div class="stv-idle-dot" style="left:8%;width:7px;height:7px;animation-duration:11s"></div>
+              <div class="stv-idle-dot" style="left:22%;width:4px;height:4px;animation-duration:14s;animation-delay:2s"></div>
+              <div class="stv-idle-dot" style="left:47%;width:6px;height:6px;animation-duration:9s;animation-delay:1s"></div>
+              <div class="stv-idle-dot" style="left:68%;width:5px;height:5px;animation-duration:13s;animation-delay:3s"></div>
+              <div class="stv-idle-dot" style="left:86%;width:8px;height:8px;animation-duration:10s;animation-delay:5s"></div>
+              <div class="stv-idle-in">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <defs><linearGradient id="stvG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+                  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG2)"/>
+                  <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+                </svg>
+                <h1>سوفتارا <i>TV</i></h1>
+                <p>بث مباشر · أفلام · مسلسلات · برامج — اختر ما تحب من الأقسام أو اضغط للبدء بالقناة الافتراضية</p>
+                <button class="stv-btn stv-btn-primary" id="stvStartBtn">
+                  <svg class="ic ic-fill" style="width:19px;height:19px"><use href="#i-play"/></svg>
+                  ابدأ المشاهدة الآن
+                </button>
+              </div>
+            </div>
+
+            <!-- العلامة المائية (الشعار داخل منطقة الفيديو أعلى اليمين) -->
+            <div class="stv-mark" id="stvMark" title="سوفتارا TV">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <defs><linearGradient id="stvG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#5eead4"/></linearGradient></defs>
+                <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG3)"/>
+                <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+              </svg>
+              <b>سوفتارا<i>TV</i></b>
+            </div>
+
+            <!-- الشريط العلوي -->
+            <div class="stv-topbar">
+              <span class="stv-chip" id="stvNameChip"><span id="stvName">—</span></span>
+              <span class="stv-prov" id="stvProv" style="display:none">—</span>
+              <span class="stv-chip" id="stvLiveChip" style="display:none"><i class="stv-live-dot"></i><span>مباشر</span></span>
+              <span class="stv-badge-hd" id="stvHd" style="display:none" title="جودة عالية">HD</span>
+              <span class="stv-tb-spacer"></span>
+              <button class="stv-topbtn stv-qbtn" id="stvQualBtn" style="display:none" aria-haspopup="true" aria-expanded="false">جودة</button>
+              <button class="stv-topbtn" id="stvFavBtn" aria-label="إضافة إلى المفضلة"><svg class="ic"><use href="#i-heart"/></svg></button>
+              <button class="stv-topbtn" id="stvPipBtn" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
+            </div>
+            <div class="stv-qualmenu" id="stvQualMenu" role="menu"></div>
+            <div class="stv-ccmenu" id="stvCcMenu" role="menu"></div>
+
+            <!-- زر تشغيل مركزي (عند حجب التشغيل التلقائي) -->
+            <div class="stv-center-play" id="stvCenterPlay">
+              <button aria-label="تشغيل"><svg class="ic ic-fill"><use href="#i-play"/></svg></button>
+            </div>
+            <button class="stv-unmute" id="stvUnmute">
+              <svg class="ic"><use href="#i-vol"/></svg> الصوت مكتوم — اضغط لتشغيله
+            </button>
+
+            <!-- التحميل والأخطاء -->
+            <div class="stv-loader" id="stvLoader"><div class="stv-spinner"></div><span>جارٍ تحميل البث…</span></div>
+            <div class="stv-err" id="stvErr">
+              <svg class="ic"><use href="#i-alert"/></svg>
+              <h3 id="stvErrTitle">تعذّر التشغيل</h3>
+              <p id="stvErrMsg"></p>
+              <a id="stvErrLink" style="display:none" target="_blank" rel="noopener" class="stv-btn stv-btn-ghost"><svg class="ic" style="width:18px;height:18px"><use href="#i-ext"/></svg> فتح الفيديو على مصدره الأصلي</a>
+              <div class="stv-err-row">
+                <button class="stv-btn stv-btn-primary" id="stvErrRetry"><svg class="ic" style="width:18px;height:18px"><use href="#i-refresh"/></svg> إعادة المحاولة</button>
+                <button class="stv-btn stv-btn-ghost" id="stvErrOther"><svg class="ic" style="width:18px;height:18px"><use href="#i-list"/></svg> اختيار آخر</button>
+              </div>
+            </div>
+
+            <!-- شريط التحكم -->
+            <div class="stv-ctrls" id="stvCtrls">
+              <div class="stv-seekrow" id="stvSeekRow" style="display:none">
+                <time id="stvCur">00:00</time>
+                <input type="range" class="stv-seek" id="stvSeek" min="0" max="1000" value="0" aria-label="شريط التقدم">
+                <time id="stvDur">00:00</time>
+              </div>
+              <div class="stv-btnrow">
+                <button class="stv-cbtn" id="stvPlayBtn" aria-label="تشغيل / إيقاف مؤقت"><svg class="ic ic-fill"><use href="#i-play" id="stvPlayIc"/></svg></button>
+                <div class="stv-volwrap" id="stvVolWrap">
+                  <button class="stv-cbtn" id="stvMuteBtn" aria-label="كتم الصوت"><svg class="ic"><use href="#i-vol" id="stvVolIc"/></svg></button>
+                  <input type="range" class="stv-vol" id="stvVol" min="0" max="100" value="100" aria-label="مستوى الصوت">
+                </div>
+                <span class="sp"></span>
+                <button class="stv-cbtn on" id="stvCcBtn" style="display:none" aria-label="قائمة الترجمة" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-cc"/></svg></button>
+                <button class="stv-cbtn" id="stvPipBtn2" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
+                <button class="stv-cbtn" id="stvFsBtn" aria-label="ملء الشاشة"><svg class="ic"><use href="#i-max" id="stvFsIc"/></svg></button>
+              </div>
+            </div>
+          </section>
+
+          <!-- شريط التنقل بين القنوات -->
+          <div class="stv-underbar">
+            <button class="stv-navbtn" id="stvPrevBtn"><svg class="ic"><use href="#i-chev-r"/></svg> السابق</button>
+            <button class="stv-navbtn" id="stvNextBtn">التالي <svg class="ic"><use href="#i-chev-l"/></svg></button>
+            <button class="stv-navbtn" id="stvPanelBtn" aria-expanded="false" aria-controls="stvChPanel"><svg class="ic"><use href="#i-list"/></svg> قائمة القنوات</button>
+            <span class="stv-now">تشغيل الآن: <span id="stvNowName">—</span></span>
+          </div>
+
+          <!-- قائمة القنوات (الهاتف) — أسفل المشغل ولا تحجب التحكم أبدًا -->
+          <div class="stv-chpanel" id="stvChPanel">
+            <div class="stv-chpanel-in stv-scroll">
+              <div class="stv-chfilters" id="stvChFiltersM"></div>
+              <div class="stv-chlist" id="stvChListM"></div>
+            </div>
+          </div>
+
+          <!-- حلقات المسلسل الحالي -->
+          <div class="stv-eps" id="stvEps"></div>
+
+          <!-- شريط الأخبار -->
+          <div class="stv-ticker" id="stvTicker">
+            <span class="stv-ticker-label"><svg class="ic" style="width:14px;height:14px"><use href="#i-info"/></svg> أخبار سوفتارا</span>
+            <div class="stv-ticker-view"><div class="stv-ticker-track" id="stvTickerTrack"></div></div>
+          </div>
+        </div>
+
+        <!-- قائمة القنوات (الحاسب) -->
+        <aside class="stv-aside" aria-label="قائمة القنوات المباشرة">
+          <div class="stv-aside-h"><svg class="ic"><use href="#i-tv"/></svg> القنوات المباشرة</div>
+          <div class="stv-aside-b stv-scroll">
+            <div class="stv-chfilters" id="stvChFiltersD"></div>
+            <div class="stv-chlist" id="stvChListD"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- متابعة المشاهدة -->
+      <section id="stvContinueSec" style="display:none">
+        <div class="stv-sechead"><h2>متابعة المشاهدة</h2><small>أكمل من حيث توقفت</small></div>
+        <div class="stv-cont stv-scroll" id="stvContinue"></div>
+      </section>
+
+      <!-- الأقسام -->
+      <nav class="stv-tabs" id="stvTabs" role="tablist" aria-label="أقسام المحتوى"></nav>
+      <div class="stv-chfilters" id="stvTabFilters" style="margin-top:12px"></div>
+      <div class="stv-sechead" style="margin-top:14px"><h2 id="stvGridTitle">البث المباشر</h2><small id="stvGridCount"></small></div>
+      <div class="stv-grid" id="stvGrid"></div>
+
+    </div>
+  </main>
+
+  <!-- ═══ ورقة تفاصيل العنوان (موبايل: ورقة سفلية · حاسب: نافذة) ═══ -->
+  <div class="stv-detail" id="stvDetail" role="dialog" aria-modal="true" aria-label="تفاصيل العنوان" aria-hidden="true">
+    <div class="stv-detail-back" id="stvDetailBack"></div>
+    <div class="stv-detail-sheet stv-scroll" id="stvDetailSheet">
+      <button class="stv-detail-close" id="stvDetailClose" aria-label="إغلاق"><svg class="ic"><use href="#i-x"/></svg></button>
+      <div class="stv-detail-hero" id="stvDetailHero"></div>
+      <div class="stv-detail-body">
+        <div class="stv-detail-head">
+          <h3 id="stvDetailName">—</h3>
+          <div class="stv-detail-meta" id="stvDetailMeta"></div>
+          <p class="stv-detail-desc" id="stvDetailDesc"></p>
+          <div class="stv-detail-src" id="stvDetailSrc"></div>
+        </div>
+        <div class="stv-detail-actions">
+          <button class="stv-btn stv-btn-primary" id="stvDetailPlay"><svg class="ic ic-fill"><use href="#i-play"/></svg><span id="stvDetailPlayLbl">تشغيل</span></button>
+          <button class="stv-btn stv-btn-ghost" id="stvDetailFav"><svg class="ic"><use href="#i-heart"/></svg><span>المفضلة</span></button>
+        </div>
+        <div class="stv-detail-seasons" id="stvDetailSeasons"></div>
+        <div class="stv-detail-eps" id="stvDetailEps"></div>
+        <div class="stv-detail-similar" id="stvDetailSimilar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ التذييل ═══ -->
+  <footer class="stv-footer">
+    <div class="stv-container stv-footer-in">
+      <span class="stv-footer-brand">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="13" fill="#10b981"/><path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/></svg>
+        سوفتارا TV
+      </span>
+      <div class="stv-footer-links">
+        <a href="https://softara.yoo7.com/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg> منتدى سوفتارا</a>
+        <a href="https://softara1.github.io/softara/tv/softara-tv-report.html" target="_blank" rel="noopener"><svg class="ic"><use href="#i-info"/></svg> التقرير الفني الكامل</a>
+      </div>
+      <span class="stv-copy">نسخة تجريبية v2.1 · محتوى العرض التجريبي مرخّص أو مصادر عامة رسمية · © سوفتارا</span>
+    </div>
+  </footer>
+</div>
+
+<div class="stv-toasts" id="stvToasts" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-data.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-app.js"></script>
+</body>
+</html>

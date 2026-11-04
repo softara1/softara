@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  سوفتارا TV — التقرير الفني النهائي · v2.1.1 (نسخة المنتدى الخفيفة)
+  الصفحة تحمّل المحتوى الكامل خارجيًا:
+    • الأنماط  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.css
+    • المحتوى  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report-body.html
+    • السلوك   : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.js
+  ★ للتحديث: عدّل الملف المطلوب على GitHub → وسم جديد → استبدل @v2.1.1
+    في الروابط أدناه. لا حاجة لتعديل أي شيء آخر.
+  ★ في منتدى أحلى منتدى: الصق في «صفحات HTML» بوضع المصدر (Source)
+    دون التبديل للمحرر المرئي، واختر: بدون أعلى وأسفل المنتدى.
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سوفتارا TV 2.1 — التقرير الفني النهائي</title>
+<meta name="description" content="التقرير الفني النهائي لمنصة سوفتارا TV: خمسة مزوّدين، ترجمة، جودات، مكتبة محتوى، ونتائج الاختبارات">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.css">
+</head>
+<body>
+<div id="stvReportRoot">
+  <div class="wrap" style="padding:60px 16px;text-align:center;color:#5b6b63;font-weight:700">
+    جارٍ تحميل التقرير…
+    <noscript>
+      <p>الجافاسكربت معطّل — افتح النسخة الكاملة من التقرير:
+      <a href="https://softara1.github.io/softara/tv/softara-tv-report.html" target="_blank" rel="noopener">التقرير الفني الكامل</a></p>
+    </noscript>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.js"></script>
+<script>
+/* محمّل المحتوى الخارجي — حقن الجسم ثم تهيئة السلوك */
+(function(){
+'use strict';
+var BASE='https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report-body.html';
+var ROOT=document.getElementById('stvReportRoot');
+fetch(BASE).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(html){
+  ROOT.innerHTML=html;
+  if(window.stvReportInit)window.stvReportInit();
+}).catch(function(){
+  ROOT.innerHTML='<div class="wrap" style="padding:60px 16px;text-align:center">'
+   +'<p style="font-weight:800;color:#b91c1c">تعذّر تحميل التقرير من الشبكة.</p>'
+   +'<p>تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة، أو افتح '
+   +'<a href="https://softara1.github.io/softara/tv/softara-tv-report.html" target="_blank" rel="noopener">النسخة الكاملة</a>.</p></div>';
+});
+})();
+</script>
+</body>
+</html>
