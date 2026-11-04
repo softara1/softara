@@ -30,15 +30,15 @@
 1. عدّل `js/softara-tv-data.js` (كائن `STV_DATA` — نفس مخطط v3: `type` = المزوّد، `kind` = الفئة، `items`/`groups`).
    أمثلة جاهزة لكل مزوّد في القسم 8 من التقرير.
 2. ارفع التغيير إلى `main` ثم أنشئ **وسم إصدار جديد** (مثال: `v2.1.2`).
-3. في صفحة المنتدى: استبدل `@v2.1.1` بالوسم الجديد في روابط `<script>`/`<link>` (3-4 روابط فقط — الصفحة خفيفة).
+3. في صفحة المنتدى: استبدل `@v2.1.2` بالوسم الجديد في روابط `<script>`/`<link>` (3-4 روابط فقط — الصفحة خفيفة).
 
 > لماذا وسوم إصدارات؟ jsDelivr يخزّن الملفات مؤقتًا؛ الوسم يضمن حصول الزوار على النسخة الجديدة فورًا وبثبات.
 
-## الروابط الجاهزة (الوسم v2.1.1)
-- الأنماط: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/css/softara-tv.css`
-- البيانات: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-data.js`
-- المنطق: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/js/softara-tv-app.js`
-- التقرير (أنماط/محتوى/سلوك): `…/@v2.1.1/tv/report/report.css` · `report-body.html` · `report.js`
+## الروابط الجاهزة (الوسم v2.1.2)
+- الأنماط: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/css/softara-tv.css`
+- البيانات: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/js/softara-tv-data.js`
+- المنطق: `https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/js/softara-tv-app.js`
+- التقرير (أنماط/محتوى/سلوك): `…/@v2.1.2/tv/report/report.css` · `report-body.html` · `report.js`
 
 ## ما الجديد في 2.1 (سجل سابق)
 - نظام ترجمة CC موحّد: إيقاف/تشغيل محفوظ التفضيل، لغات فعلية لـ HLS/MP4، وحدود يوتيوب الرسمية معلنة بصدق

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!--
   ═══════════════════════════════════════════════════════════════════
-  سوفتارا TV — التقرير الفني النهائي · v2.1.1 (نسخة المنتدى الخفيفة)
+  سوفتارا TV — التقرير الفني النهائي · v2.1.2 (نسخة المنتدى الخفيفة)
   الصفحة تحمّل المحتوى الكامل خارجيًا:
-    • الأنماط  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.css
-    • المحتوى  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report-body.html
-    • السلوك   : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.js
-  ★ للتحديث: عدّل الملف المطلوب على GitHub → وسم جديد → استبدل @v2.1.1
+    • الأنماط  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report.css
+    • المحتوى  : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report-body.html
+    • السلوك   : https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report.js
+  ★ للتحديث: عدّل الملف المطلوب على GitHub → وسم جديد → استبدل @v2.1.2
     في الروابط أدناه. لا حاجة لتعديل أي شيء آخر.
   ★ في منتدى أحلى منتدى: الصق في «صفحات HTML» بوضع المصدر (Source)
     دون التبديل للمحرر المرئي، واختر: بدون أعلى وأسفل المنتدى.
@@ -18,7 +18,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>سوفتارا TV 2.1 — التقرير الفني النهائي</title>
 <meta name="description" content="التقرير الفني النهائي لمنصة سوفتارا TV: خمسة مزوّدين، ترجمة، جودات، مكتبة محتوى، ونتائج الاختبارات">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report.css">
 </head>
 <body>
 <div id="stvReportRoot">
@@ -26,16 +26,16 @@
     جارٍ تحميل التقرير…
     <noscript>
       <p>الجافاسكربت معطّل — افتح النسخة الكاملة من التقرير:
-      <a href="https://github.com/softara1/softara/blob/v2.1.1/tv/softara-tv-report.html" target="_blank" rel="noopener">التقرير الفني الكامل</a></p>
+      <a href="https://github.com/softara1/softara/blob/v2.1.2/tv/softara-tv-report.html" target="_blank" rel="noopener">التقرير الفني الكامل</a></p>
     </noscript>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report.js"></script>
 <script>
 /* محمّل المحتوى الخارجي — حقن الجسم ثم تهيئة السلوك */
 (function(){
 'use strict';
-var BASE='https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.1/tv/report/report-body.html';
+var BASE='https://cdn.jsdelivr.net/gh/softara1/softara@v2.1.2/tv/report/report-body.html';
 var ROOT=document.getElementById('stvReportRoot');
 fetch(BASE).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(html){
   ROOT.innerHTML=html;
@@ -44,7 +44,7 @@ fetch(BASE).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(ht
   ROOT.innerHTML='<div class="wrap" style="padding:60px 16px;text-align:center">'
    +'<p style="font-weight:800;color:#b91c1c">تعذّر تحميل التقرير من الشبكة.</p>'
    +'<p>تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة، أو افتح '
-   +'<a href="https://github.com/softara1/softara/blob/v2.1.1/tv/softara-tv-report.html" target="_blank" rel="noopener">النسخة الكاملة</a>.</p></div>';
+   +'<a href="https://github.com/softara1/softara/blob/v2.1.2/tv/softara-tv-report.html" target="_blank" rel="noopener">النسخة الكاملة</a>.</p></div>';
 });
 })();
 </script>
