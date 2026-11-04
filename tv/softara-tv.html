@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <!--
   ═══════════════════════════════════════════════════════════════════
-  سوفتارا TV — Softara TV  ·  v2.0
+  سوفتارا TV — Softara TV  ·  v2.1
   منصة تلفزيون/أفلام/مسلسلات لمجتمع سوفتارا (متوافقة مع Forumotion/AwesomeBB)
   صفحة مستقلة تمامًا: HTML + CSS + JS + بيانات في ملف واحد.
-  المكتبة الخارجية الوحيدة: hls.js (تُحمَّل كسولًا عند الحاجة فقط).
+  المكتبات الخارجية: hls.js وYouTube IFrame API (تُحمَّلان كسولًا عند الحاجة فقط).
   ───────────────────────────────────────────────────────────────────
+  • طبقة مزوّدين موحّدة: HLS (M3U8) · MP4 · YouTube · DailyMotion · OK.ru
+  • تفكيك جذري عند كل تغيير محتوى: إيقاف + تدمير + محو الأحداث والطبقات
+  • الترجمة في يوتيوب: زر CC (إيقاف/لغة) مع حفظ التفضيل — عبر IFrame API الرسمية
+  • مكتبة محتوى: ورقة تفاصيل، مواسم وحلقات بمصغرات، محتوى مشابه
+  • مقدمة افتتاحية قابلة للتخطي (مرة كل جلسة) ببديل ثابت مضمون
   • الأيقونات: SVG مضمّنة (لا إيموجي إطلاقًا — حلاً جذريًا لمشكلة «؟؟؟»)
   • قائمة القنوات على الهاتف: قسم قابل للطي أسفل المشغل (لا يحجب التحكم أبدًا)
   • ملء الشاشة: تطبيق متوافق مع Chrome/Firefox/Safari مع بديل iPhone
-  • المصادر المدعومة: m3u8 (HLS) · mp4 · YouTube · Dailymotion · OK.ru
   ═══════════════════════════════════════════════════════════════════
 -->
 <html lang="ar" dir="rtl" data-theme="dark">
@@ -165,10 +169,11 @@ img,svg{display:block}
 @keyframes stvPulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.45)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 .stv-badge-hd{font-size:9.5px;font-weight:900;background:var(--amber);color:#231602;border-radius:5px;padding:1px 5px;letter-spacing:.5px}
 .stv-topbtn{
-  pointer-events:auto;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  pointer-events:auto;position:relative;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
   background:rgba(2,10,8,.55);border:1px solid rgba(255,255,255,.14);color:#fff;flex:none;
   backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:background .15s;
 }
+.stv-topbtn::before{content:'';position:absolute;inset:-3px} /* مراجعة T7: هدف لمس ≥44px */
 .stv-topbtn:hover{background:rgba(2,10,8,.75)}
 .stv-topbtn .ic{width:19px;height:19px}
 .stv-topbtn.is-fav .ic{fill:#f43f5e;stroke:#f43f5e}
@@ -183,8 +188,8 @@ img,svg{display:block}
 }
 .stv-qualmenu.open{display:block}
 .stv-qualmenu button{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
-  padding:9px 12px;border-radius:8px;font-size:13px;font-weight:700;color:var(--text);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;height:auto;
+  padding:0 12px;border-radius:8px;font-size:13px;font-weight:700;color:var(--text);
 }
 .stv-qualmenu button:hover{background:var(--panel2)}
 .stv-qualmenu button .ic{width:16px;height:16px;color:var(--accent);visibility:hidden}
@@ -338,9 +343,10 @@ img,svg{display:block}
 .stv-chpanel-in{padding:12px;max-height:min(54vh,460px);overflow-y:auto;overscroll-behavior:contain}
 .stv-chfilters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .stv-chip-f{
-  height:34px;padding:0 13px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
+  position:relative;height:38px;padding:0 13px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
   font-size:12px;font-weight:800;color:var(--muted);transition:all .15s;white-space:nowrap;
 }
+.stv-chip-f::before{content:'';position:absolute;inset:-3px} /* مراجعة T7: هدف لمس ≥44px */
 .stv-chip-f:hover{color:var(--text);border-color:var(--line2)}
 .stv-chip-f.on{background:var(--grad);color:var(--accent-ink);border-color:transparent}
 .stv-chlist{display:flex;flex-direction:column;gap:4px}
@@ -407,6 +413,9 @@ img,svg{display:block}
 }
 .stv-card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
 .stv-card:active{transform:scale(.97)}
+.stv-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px} /* مراجعة T7: إتاحة لوحة المفاتيح */
+#stvSearchClear{position:relative}
+#stvSearchClear::before{content:'';position:absolute;inset:-3px} /* مراجعة T7: هدف لمس ≥44px */
 .stv-card-media{position:relative;aspect-ratio:16/9;background:var(--panel2);overflow:hidden}
 .stv-card.poster .stv-card-media{aspect-ratio:2/3}
 .stv-card-media img{width:100%;height:100%;object-fit:cover}
@@ -426,6 +435,7 @@ img,svg{display:block}
   background:rgba(2,10,8,.5);color:#fff;border:1px solid rgba(255,255,255,.15);
   backdrop-filter:blur(3px);transition:transform .15s,background .15s;
 }
+.stv-fav::before{content:'';position:absolute;inset:-5px} /* مراجعة T7: هدف لمس ≥44px */
 .stv-fav:hover{transform:scale(1.1)}
 .stv-fav:active{transform:scale(.9)}
 .stv-fav .ic{width:17px;height:17px}
@@ -489,6 +499,142 @@ img,svg{display:block}
 .stv-toast .ic{width:18px;height:18px;color:var(--accent)}
 .stv-toast.err .ic{color:var(--danger)}
 @keyframes stvToastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ═══════════ 7) المقدمة الافتتاحية ═══════════ */
+.stv-intro{
+  position:fixed;inset:0;z-index:400;display:none;place-items:center;
+  background:radial-gradient(120% 90% at 50% 10%,#0f241c 0%,var(--bg) 62%);
+  overflow:hidden;
+}
+.stv-intro.show{display:grid}
+.stv-intro.out{opacity:0;transition:opacity .45s ease}
+.stv-intro-bg{position:absolute;inset:0;background:
+  radial-gradient(42% 32% at 50% 42%,rgba(16,185,129,.16),transparent 70%),
+  repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.012) 3px 4px)}
+.stv-intro-in{position:relative;text-align:center;animation:stvIntroIn .7s ease both}
+@keyframes stvIntroIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.stv-intro-logo{width:118px;height:118px;margin-inline:auto}
+.stv-intro-logo .il-frame{stroke-dasharray:340;stroke-dashoffset:340;animation:stvDraw 1.5s ease forwards .15s}
+.stv-intro-logo .il-ant{stroke-dasharray:80;stroke-dashoffset:80;animation:stvDraw .8s ease forwards 1.35s}
+.stv-intro-logo .il-play{opacity:0;transform-origin:65px 63px;animation:stvPop .5s cubic-bezier(.2,1.4,.4,1) forwards 1.9s}
+@keyframes stvDraw{to{stroke-dashoffset:0}}
+@keyframes stvPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.stv-intro-word{
+  margin-top:14px;font-size:30px;font-weight:900;letter-spacing:.5px;
+  opacity:0;animation:stvWordUp .6s ease forwards 2.15s;
+}
+.stv-intro-word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes stvWordUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stv-intro-sub{margin-top:6px;color:var(--muted);font-size:12.5px;font-weight:700;opacity:0;animation:stvWordUp .6s ease forwards 2.5s}
+.stv-intro-skip{
+  position:absolute;bottom:calc(24px + var(--sab));right:50%;transform:translateX(50%);
+  display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 18px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid var(--line2);color:var(--muted);
+  font-size:13px;font-weight:800;cursor:pointer;opacity:0;animation:stvWordUp .5s ease forwards 1.1s;
+  transition:all .15s;
+}
+.stv-intro-skip:hover{color:var(--text);background:rgba(255,255,255,.1)}
+@media (prefers-reduced-motion: reduce){
+  .stv-intro-logo .il-frame,.stv-intro-logo .il-ant{stroke-dashoffset:0;animation:none}
+  .stv-intro-logo .il-play,.stv-intro-word,.stv-intro-sub,.stv-intro-skip{opacity:1;animation:none}
+}
+
+/* ═══════════ 8) قائمة الترجمة CC وشارة المزوّد ═══════════ */
+.stv-ccmenu{
+  position:absolute;bottom:64px;inset-inline-end:10px;z-index:30;min-width:210px;max-height:240px;overflow:auto;
+  background:color-mix(in srgb,var(--panel) 96%,transparent);border:1px solid var(--line2);border-radius:14px;
+  box-shadow:var(--shadow);padding:6px;display:none;backdrop-filter:blur(10px);
+}
+.stv-ccmenu.open{display:block}
+.stv-ccmenu button{
+  width:100%;display:flex;align-items:center;gap:8px;min-height:44px;height:auto;padding:0 10px;border-radius:9px;
+  background:transparent;border:0;color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;text-align:start;
+}
+.stv-ccmenu button:hover{background:var(--panel2)}
+.stv-ccmenu button .ic{width:15px;height:15px;margin-inline-start:auto;color:var(--accent);opacity:0}
+.stv-ccmenu button.on{color:var(--accent)}
+.stv-ccmenu button.on .ic{opacity:1}
+.stv-ccmenu button small{color:var(--faint);font-size:10.5px;font-weight:700}
+.stv-ccmenu .stv-cc-note{padding:7px 10px;color:var(--faint);font-size:10.5px;font-weight:700;line-height:1.6;border-top:1px solid var(--line);margin-top:4px}
+.stv-cbtn.on{color:var(--accent)}
+.stv-prov{
+  display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:8px;
+  background:rgba(255,255,255,.07);border:1px solid var(--line2);color:var(--muted);
+  font-size:10.5px;font-weight:800;white-space:nowrap;
+}
+.stv-badge.prov{background:rgba(255,255,255,.1);color:var(--text)}
+.stv-badge.dur{background:rgba(0,0,0,.62);color:#fff;font-size:10px}
+
+/* ═══════════ 9) ورقة تفاصيل العنوان ═══════════ */
+.stv-detail{position:fixed;inset:0;z-index:150;display:none}
+.stv-detail.open{display:block}
+.stv-detail-back{position:absolute;inset:0;background:rgba(2,8,6,.72);backdrop-filter:blur(3px);animation:stvToastIn .2s ease}
+.stv-detail-sheet{
+  position:absolute;bottom:0;left:0;right:0;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--bg2);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;
+  padding:0 0 calc(18px + var(--sab));animation:stvSheetUp .32s cubic-bezier(.2,.9,.3,1) both;
+}
+@keyframes stvSheetUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@media (min-width:900px){
+  .stv-detail-sheet{
+    top:50%;bottom:auto;right:50%;transform:translate(50%,-50%);max-width:680px;width:92vw;max-height:84vh;
+    border-radius:20px;border-bottom:1px solid var(--line);
+  }
+}
+.stv-detail-close{
+  position:absolute;top:12px;inset-inline-start:12px;z-index:5;width:38px;height:38px;border-radius:50%;
+  background:rgba(0,0,0,.5);border:1px solid var(--line2);color:#fff;display:grid;place-items:center;cursor:pointer;
+}
+.stv-detail-close:hover{background:rgba(0,0,0,.7)}
+.stv-detail-hero{position:relative;aspect-ratio:16/7;overflow:hidden;background:var(--panel)}
+.stv-detail-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.stv-detail-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,var(--bg2) 100%)}
+.stv-detail-body{padding:0 16px}
+.stv-detail-head h3{font-size:19px;font-weight:900;margin:2px 0 4px}
+.stv-detail-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.stv-detail-meta span{
+  display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:8px;font-size:11px;font-weight:800;
+  background:var(--panel);border:1px solid var(--line);color:var(--muted);
+}
+.stv-detail-meta span.hot{background:var(--grad);color:var(--accent-ink);border-color:transparent}
+.stv-detail-desc{margin-top:9px;color:var(--muted);font-size:13px;font-weight:600;line-height:1.85}
+.stv-detail-src{
+  display:flex;gap:7px;align-items:flex-start;margin-top:9px;padding:9px 11px;border-radius:11px;
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));border:1px solid var(--line);
+  color:var(--muted);font-size:11.5px;font-weight:700;line-height:1.7;
+}
+.stv-detail-src .ic{width:15px;height:15px;flex:none;color:var(--accent);margin-top:2px}
+.stv-detail-actions{display:flex;gap:9px;margin-top:13px}
+.stv-detail-actions .stv-btn{flex:1;height:46px;justify-content:center}
+.stv-detail-seasons{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+.stv-detail-seasons:empty{display:none}
+.stv-detail-seasons button{
+  height:34px;padding:0 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);
+  color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;
+}
+.stv-detail-seasons button.on{background:var(--grad);color:var(--accent-ink);border-color:transparent}
+.stv-detail-eps{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:11px}
+@media (min-width:640px){.stv-detail-eps{grid-template-columns:repeat(3,1fr)}}
+.stv-detal{position:relative;border-radius:13px;overflow:hidden;background:var(--panel);border:1px solid var(--line);cursor:pointer;text-align:start;padding:0}
+.stv-detal:hover{border-color:var(--line2)}
+.stv-detal.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.stv-detal .th{position:relative;aspect-ratio:16/9;display:block;overflow:hidden;background:var(--panel2)}
+.stv-detal .th img{width:100%;height:100%;object-fit:cover;display:block}
+.stv-detal .th .stv-badge.dur{position:absolute;bottom:5px;inset-inline-end:5px}
+.stv-detal .th .stv-prog{z-index:2}
+.stv-detal .tx{padding:7px 9px 9px}
+.stv-detal .tx b{display:block;font-size:11.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stv-detal .tx small{display:block;margin-top:1px;font-size:10px;font-weight:700;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stv-detail-similar{margin-top:17px}
+.stv-detail-similar h4{font-size:13px;font-weight:900;color:var(--muted);margin-bottom:8px}
+.stv-simil-row{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.stv-simil{
+  flex:none;width:108px;border-radius:12px;overflow:hidden;background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;padding:0;text-align:start;
+}
+.stv-simil:hover{border-color:var(--line2)}
+.stv-simil img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--panel2)}
+.stv-simil b{display:block;padding:6px 8px 8px;font-size:10.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -522,7 +668,26 @@ img,svg{display:block}
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
   <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21 7 14.2 2 9.3l6.9-1Z"/></symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10.5 10.2a2.3 2.3 0 0 0-4 .8 2.5 2.5 0 0 0 0 2 2.3 2.3 0 0 0 4 .8"/><path d="M17.5 10.2a2.3 2.3 0 0 0-4 .8 2.5 2.5 0 0 0 0 2 2.3 2.3 0 0 0 4 .8"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></symbol>
+  <symbol id="i-kid" viewBox="0 0 24 24"><path d="M12 21a8 8 0 1 1 8-8c0 4-3.6 5-8 5"/><circle cx="9" cy="11" r=".6" fill="currentColor"/><circle cx="15" cy="11" r=".6" fill="currentColor"/><path d="M9.5 15c1.5 1 3.5 1 5 0"/><path d="M12 2V0.5"/></symbol>
 </svg>
+
+<!-- ═══ المقدمة الافتتاحية (مرة كل جلسة · قابلة للتخطي · بديل ثابت مضمون لأنها SVG/CSS بلا تحميل) ═══ -->
+<div class="stv-intro" id="stvIntro" role="dialog" aria-label="مقدمة سوفتارا TV" aria-hidden="true">
+  <div class="stv-intro-bg" aria-hidden="true"></div>
+  <div class="stv-intro-in">
+    <svg class="stv-intro-logo" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><linearGradient id="stvIntroG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs>
+      <rect class="il-frame" x="12" y="30" width="96" height="66" rx="13" fill="none" stroke="url(#stvIntroG)" stroke-width="5"/>
+      <path class="il-ant" d="M47 30 60 12l13 18" fill="none" stroke="url(#stvIntroG)" stroke-width="5" stroke-linecap="round"/>
+      <path class="il-play" d="M52 48v30l26-15Z" fill="url(#stvIntroG)"/>
+    </svg>
+    <div class="stv-intro-word">سوفتارا <b>TV</b></div>
+    <div class="stv-intro-sub">قنوات مباشرة · أفلام · مسلسلات · برامج · وثائقيات</div>
+  </div>
+  <button class="stv-intro-skip" id="stvIntroSkip">تخطي المقدمة <svg class="ic" style="width:15px;height:15px"><use href="#i-chev-l"/></svg></button>
+</div>
 
 <div class="stv-app">
 
@@ -551,7 +716,7 @@ img,svg{display:block}
         <div class="stv-search-box">
           <svg class="ic"><use href="#i-search"/></svg>
           <input type="search" id="stvSearch" placeholder="ابحث عن قناة أو فيلم أو مسلسل أو برنامج…" aria-label="بحث في المحتوى">
-          <button class="stv-icon-btn" id="stvSearchClear" aria-label="مسح البحث" style="width:34px;height:34px"><svg class="ic" style="width:17px;height:17px"><use href="#i-x"/></svg></button>
+          <button class="stv-icon-btn" id="stvSearchClear" aria-label="مسح البحث" style="width:38px;height:38px"><svg class="ic" style="width:17px;height:17px"><use href="#i-x"/></svg></button>
         </div>
       </div>
     </div>
@@ -608,6 +773,7 @@ img,svg{display:block}
             <!-- الشريط العلوي -->
             <div class="stv-topbar">
               <span class="stv-chip" id="stvNameChip"><span id="stvName">—</span></span>
+              <span class="stv-prov" id="stvProv" style="display:none">—</span>
               <span class="stv-chip" id="stvLiveChip" style="display:none"><i class="stv-live-dot"></i><span>مباشر</span></span>
               <span class="stv-badge-hd" id="stvHd" style="display:none" title="جودة عالية">HD</span>
               <span class="stv-tb-spacer"></span>
@@ -616,6 +782,7 @@ img,svg{display:block}
               <button class="stv-topbtn" id="stvPipBtn" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
             </div>
             <div class="stv-qualmenu" id="stvQualMenu" role="menu"></div>
+            <div class="stv-ccmenu" id="stvCcMenu" role="menu"></div>
 
             <!-- زر تشغيل مركزي (عند حجب التشغيل التلقائي) -->
             <div class="stv-center-play" id="stvCenterPlay">
@@ -631,6 +798,7 @@ img,svg{display:block}
               <svg class="ic"><use href="#i-alert"/></svg>
               <h3 id="stvErrTitle">تعذّر التشغيل</h3>
               <p id="stvErrMsg"></p>
+              <a id="stvErrLink" style="display:none" target="_blank" rel="noopener" class="stv-btn stv-btn-ghost"><svg class="ic" style="width:18px;height:18px"><use href="#i-ext"/></svg> فتح الفيديو على مصدره الأصلي</a>
               <div class="stv-err-row">
                 <button class="stv-btn stv-btn-primary" id="stvErrRetry"><svg class="ic" style="width:18px;height:18px"><use href="#i-refresh"/></svg> إعادة المحاولة</button>
                 <button class="stv-btn stv-btn-ghost" id="stvErrOther"><svg class="ic" style="width:18px;height:18px"><use href="#i-list"/></svg> اختيار آخر</button>
@@ -651,6 +819,7 @@ img,svg{display:block}
                   <input type="range" class="stv-vol" id="stvVol" min="0" max="100" value="100" aria-label="مستوى الصوت">
                 </div>
                 <span class="sp"></span>
+                <button class="stv-cbtn on" id="stvCcBtn" style="display:none" aria-label="قائمة الترجمة" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-cc"/></svg></button>
                 <button class="stv-cbtn" id="stvPipBtn2" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
                 <button class="stv-cbtn" id="stvFsBtn" aria-label="ملء الشاشة"><svg class="ic"><use href="#i-max" id="stvFsIc"/></svg></button>
               </div>
@@ -677,7 +846,7 @@ img,svg{display:block}
           <div class="stv-eps" id="stvEps"></div>
 
           <!-- شريط الأخبار -->
-          <div class="stv-ticker" id="stvTicker" aria-hidden="true">
+          <div class="stv-ticker" id="stvTicker">
             <span class="stv-ticker-label"><svg class="ic" style="width:14px;height:14px"><use href="#i-info"/></svg> أخبار سوفتارا</span>
             <div class="stv-ticker-view"><div class="stv-ticker-track" id="stvTickerTrack"></div></div>
           </div>
@@ -708,6 +877,30 @@ img,svg{display:block}
     </div>
   </main>
 
+  <!-- ═══ ورقة تفاصيل العنوان (موبايل: ورقة سفلية · حاسب: نافذة) ═══ -->
+  <div class="stv-detail" id="stvDetail" role="dialog" aria-modal="true" aria-label="تفاصيل العنوان" aria-hidden="true">
+    <div class="stv-detail-back" id="stvDetailBack"></div>
+    <div class="stv-detail-sheet stv-scroll" id="stvDetailSheet">
+      <button class="stv-detail-close" id="stvDetailClose" aria-label="إغلاق"><svg class="ic"><use href="#i-x"/></svg></button>
+      <div class="stv-detail-hero" id="stvDetailHero"></div>
+      <div class="stv-detail-body">
+        <div class="stv-detail-head">
+          <h3 id="stvDetailName">—</h3>
+          <div class="stv-detail-meta" id="stvDetailMeta"></div>
+          <p class="stv-detail-desc" id="stvDetailDesc"></p>
+          <div class="stv-detail-src" id="stvDetailSrc"></div>
+        </div>
+        <div class="stv-detail-actions">
+          <button class="stv-btn stv-btn-primary" id="stvDetailPlay"><svg class="ic ic-fill"><use href="#i-play"/></svg><span id="stvDetailPlayLbl">تشغيل</span></button>
+          <button class="stv-btn stv-btn-ghost" id="stvDetailFav"><svg class="ic"><use href="#i-heart"/></svg><span>المفضلة</span></button>
+        </div>
+        <div class="stv-detail-seasons" id="stvDetailSeasons"></div>
+        <div class="stv-detail-eps" id="stvDetailEps"></div>
+        <div class="stv-detail-similar" id="stvDetailSimilar"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ التذييل ═══ -->
   <footer class="stv-footer">
     <div class="stv-container stv-footer-in">
@@ -717,9 +910,9 @@ img,svg{display:block}
       </span>
       <div class="stv-footer-links">
         <a href="https://softara.yoo7.com/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg> منتدى سوفتارا</a>
-        <a href="/report.html" target="_blank" rel="noopener"><svg class="ic"><use href="#i-info"/></svg> التقرير الفني الكامل</a>
+        <a href="/softara-tv-report.html" target="_blank" rel="noopener"><svg class="ic"><use href="#i-info"/></svg> التقرير الفني الكامل</a>
       </div>
-      <span class="stv-copy">نسخة تجريبية v2.0 · محتوى العرض التجريبي مرخّص أو مصادر عامة رسمية · © سوفتارا</span>
+      <span class="stv-copy">نسخة تجريبية v2.1 · محتوى العرض التجريبي مرخّص أو مصادر عامة رسمية · © سوفتارا</span>
     </div>
   </footer>
 </div>
@@ -728,7 +921,7 @@ img,svg{display:block}
 
 <script>
 /* ════════════════════════════════════════════════════════════════
-   سوفتارا TV — منطق التطبيق (بدون أي مكتبات خارجية)
+   سوفتارا TV — منطق التطبيق المستقل (المكتبات الخارجية الوحيدة hls.js وYouTube IFrame API تُحمَّلان كسولًا)
    ════════════════════════════════════════════════════════════════ */
 (function(){
 'use strict';
@@ -737,54 +930,224 @@ img,svg{display:block}
 var STV_CONFIG = {
   hlsSrc: 'https://cdn.jsdelivr.net/npm/hls.js@1.7.4/dist/hls.min.js',
   hlsSrcFallback: '/vendor/hls.min.js',
-  reportUrl: '/report.html',
-  storage: { favs:'stv_v2_favs', prog:'stv_v2_progress', theme:'stv_v2_theme' },
+  storage: { favs:'stv_v2_favs', prog:'stv_v2_progress', theme:'stv_v2_theme', cc:'stv_cc' },
   autoplayDefault: true /* تشغيل القناة الافتراضية مكتومة عند الفتح */
 };
 
-/* مخطط البيانات: type = hls | mp4 | youtube | dailymotion | okru
-   youtube: src = معرّف الفيديو · dailymotion: src = معرّف الفيديو · okru: src = معرّف الفيديو
-   kind = channel | movie | series | program | wrestling
-   featured = تُشغَّل افتراضيًا عند الفتح · demo = محتوى تجريبي مرخّص */
+/* مخطط البيانات — الإصدار 3:
+   type = hls | mp4 | youtube | dailymotion | okru (المزوّد الخمسة)
+   kind = channel | movie | series | program | wrestling | docs | kids
+   items  : العناصر المفردة (قنوات/أفلام/وثائقيات…)
+   groups : مسلسلات/قوائم حلقات — تُفكّ آليًا إلى عناصر حلقات أسفل هذا الكائن
+   الحلقة e = {src: معرّف الفيديو أو رابط الملف, title: عنوان الحلقة, durText: المدة}
+   كل الروابط أدناه فُحصت فعليًا يوم 2026-11-02 (الأدلة في research/content/*.json) */
+var DEMO_AR_VTT = 'WEBVTT\nNOTE ترجمة تجريبية توضيحية — لعرض إمكانية الترجمة الخارجية (VTT) في مشغل سوفتارا TV.\nNOTE فيلم Big Buck Bunny لا يحتوي حوارًا أصلًا؛ هذه أوصاف مشاهد مكتوبة للعرض.\n\n1\n00:00:00.000 --> 00:00:08.000\nترجمة تجريبية — عرض إمكانية الترجمة الخارجية (ملف VTT مستقل)\n\n2\n00:00:08.000 --> 00:00:16.000\nالفيلم: Big Buck Bunny (2008) — فيلم قصير مفتوح المصدر من Blender Foundation\n\n3\n00:00:16.000 --> 00:00:24.000\nالمشهد: شاشة الافتتاح — شعار الاستوديو يظهر على خلفية داكنة\n\n4\n00:00:24.000 --> 00:00:32.000\nتُفتح الكاميرا على غابة هادئة في ضوء الصباح داخل وادٍ أخضر\n\n5\n00:00:32.000 --> 00:00:40.000\nيخرج الأرنب الكبير من جحوره داخل الشجرة ويتمدد تحت أشعة الشمس\n\n6\n00:00:40.000 --> 00:00:48.000\n[وصف مشهد تجريبي — الفيلم بلا حوار، فالأوصاف تُستخدم بديلًا عن الحوار]\n\n7\n00:00:48.000 --> 00:00:56.000\nفراشة ملونة ترفرف حول الأرنب وتثير اهتمامه ببطء\n\n8\n00:00:56.000 --> 00:01:04.000\nيلحق الأرنب بالفراشة بخطوات ثقيلة بين الأعشاب العالية\n\n9\n00:01:04.000 --> 00:01:12.000\nمشاهد كوميدية هادئة بلا كلام تناسب جميع الأعمار\n\n10\n00:01:12.000 --> 00:01:20.000\nالكاميرا تتبع الأرنب عبر مرج الأزهار المتلألئ\n\n11\n00:01:20.000 --> 00:01:26.000\nيمكنك إيقاف هذه الترجمة من قائمة CC في شريط التحكم — وسيتذكّرها المشغل\n\n12\n00:01:26.000 --> 00:01:30.000\nنهاية قسم الترجمة التجريبي لأول 90 ثانية من الفيلم';
+
 var STV_DATA = {
-  version: 2,
-  updated: '2026-11-01',
+  version: 3,
+  updated: '2026-11-02',
   news: [
-    'مرحبًا بكم في سوفتارا TV — منصة التلفزيون والترفيه الرسمية لمجتمع سوفتارا',
-    'النسخة التجريبية تعمل بمحتوى مرخّص ومصادر عامة رسمية (قنوات ناشئة + أفلام مفتوحة المصدر)',
-    'لإضافة قنوات أو أفلام جديدة: عدّل قسم البيانات في أعلى الصفحة — دون لمس أي كود آخر',
-    'واجهة الهاتف أُعيد بناؤها بالكامل: قائمة القنوات أسفل المشغل وملء الشاشة يعمل على كل المتصفحات',
-    'الأقسام الحالية: البث المباشر · الأفلام · المسلسلات · البرامج · المصارعة · المفضلة'
+    'مرحبًا بكم في سوفتارا TV 2.1 — مكتبة تلفزيونية متكاملة: قنوات مباشرة، أفلام، مسلسلات، برامج، مصارعة، وثائقيات وأطفال',
+    'خمسة مزوّدين بتنفيذ فعلي: HLS (M3U8 بجودات متعددة) · MP4 (جودات + ترجمة VTT) · YouTube (ترجمة وقوائم) · DailyMotion · OK.ru',
+    'جديد الترجمة: زر CC في شريط التحكم — إيقاف/تشغيل محفوظ التفضيل؛ قائمة اللغات الفعلية متاحة لـ HLS وMP4، ويعتمد يوتيوب على تفضيلك المحفوظ عند التحميل (حدود رسمية موثقة)',
+    'المصادر: قنوات رسمية ناشئة + أفلام ملكية عامة (archive.org) + قنوات رسمية (ناسا، الجزيرة الوثائقية، WWE، بلندر، TRT Çocuk)',
+    'تغيير الفيديو أو القناة ينظّف المشغل السابق جذريًا: لا ترجمة معلقة ولا صوت خفي ولا مؤقتات قديمة',
+    'لإضافة محتوى: عدّل قسم البيانات في أعلى الصفحة فقط — دون لمس أي كود آخر'
   ],
   items: [
-    /* ── البث المباشر: قنوات رسمية بمصادر عامة ── */
-    {id:'ch-aj', kind:'channel', name:'الجزيرة', cat:'أخبار', country:'قطر', type:'hls', src:'https://live-hls-web-aja.getaj.net/AJA/index.m3u8', hd:true, featured:true, desc:'القناة الإخبارية الرئيسية'},
-    {id:'ch-f24', kind:'channel', name:'فرانس 24 عربية', cat:'أخبار', country:'فرنسا', type:'hls', src:'https://static.france24.com/live/F24_AR_HI_HLS/live_web.m3u8', hd:true, desc:'القناة الإخبارية الفرنسية بالعربية'},
-    {id:'ch-dw', kind:'channel', name:'DW عربية', cat:'أخبار', country:'ألمانيا', type:'hls', src:'https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8', hd:true, desc:'إذاعة DW الألمانية بالعربية'},
-    {id:'ch-trt', kind:'channel', name:'TRT عربي', cat:'عامة', country:'تركيا', type:'hls', src:'https://tv-trtarabi.medya.trt.com.tr/master.m3u8', hd:true, desc:'برامج متنوعة وثقافية'},
-    {id:'ch-sna', kind:'channel', name:'سكاي نيوز عربية', cat:'أخبار', country:'الإمارات', type:'hls', src:'https://stream.skynewsarabia.com/hls/sna.m3u8', hd:true, desc:'القناة الإخبارية السعودية'},
-    {id:'ch-alarabiya', kind:'channel', name:'العربية', cat:'أخبار', country:'السعودية', type:'hls', src:'https://av.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', hd:true, desc:'قناة العربية الإخبارية'},
-    {id:'ch-rbtv', kind:'channel', name:'Red Bull TV', cat:'رياضة', country:'النمسا', type:'hls', src:'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8', hd:true, desc:'رياضات قتالية وأحداث عالمية'},
+    /* ── البث المباشر: 7 قنوات رسمية فُحصت حيّة (ماستر + child + segment) ── */
+    {id:'ch-aj', kind:'channel', name:'الجزيرة', cat:'أخبار', country:'قطر', type:'hls', src:'https://live-hls-web-aja.getaj.net/AJA/index.m3u8', hd:true, featured:true, levels:6, desc:'القناة الإخبارية الرئيسية — تصل إلى 6 جودات حسب التوافر (حتى 1080p)'},
+    {id:'ch-alarabiya', kind:'channel', name:'العربية', cat:'أخبار', country:'السعودية', type:'hls', src:'https://av.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', hd:true, levels:4, desc:'قناة العربية الإخبارية — تصل إلى 4 جودات حسب التوافر'},
+    {id:'ch-sna', kind:'channel', name:'سكاي نيوز عربية', cat:'أخبار', country:'الإمارات', type:'hls', src:'https://stream.skynewsarabia.com/hls/sna.m3u8', hd:true, levels:5, desc:'القناة الإخبارية الإماراتية — تصل إلى 5 جودات حسب التوافر'},
+    {id:'ch-dw', kind:'channel', name:'DW عربية', cat:'أخبار', country:'ألمانيا', type:'hls', src:'https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8', hd:true, levels:5, desc:'DW بالعربية — تصل إلى 5 جودات حسب التوافر'},
+    {id:'ch-dw-en', kind:'channel', name:'DW English', cat:'أخبار', country:'ألمانيا', type:'hls', src:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8', hd:true, levels:5, desc:'DW بالإنجليزية — مع ترجمة إنجليزية مدمجة عند توافرها في البث — بديل مفحوص عن فرانس24'},
+    {id:'ch-trt', kind:'channel', name:'TRT عربي', cat:'عامة', country:'تركيا', type:'hls', src:'https://tv-trtarabi.medya.trt.com.tr/master.m3u8', hd:true, levels:5, desc:'برامج متنوعة وثقافية — حتى 1440p'},
+    {id:'ch-rbtv', kind:'channel', name:'Red Bull TV', cat:'رياضة', country:'النمسا', type:'hls', src:'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8', hd:true, levels:6, desc:'رياضات وأحداث عالمية — تصل إلى 6 جودات مع ترجمة CC عند توافرها'},
 
-    /* ── الأفلام: محتوى مفتوح مرخّص (Blender Foundation وغيرها) ── */
-    {id:'mv-bbb', kind:'movie', name:'الأرنب الكبير — Big Buck Bunny', cat:'أنيميشن', year:2008, type:'hls', src:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', demo:true, qualityMenu:true, desc:'فيلم مفتوح المصدر بجودات متعددة — مثال حي لتبديل الجودة'},
-    {id:'mv-tos', kind:'movie', name:'دموع الفولاذ — Tears of Steel', cat:'خيال علمي', year:2012, type:'hls', src:'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', demo:true, desc:'فيلم قصير مفتوح المصدر من بلندر'},
-    {id:'mv-sintel', kind:'movie', name:'سينتل — Sintel', cat:'فانتازيا', year:2010, type:'mp4', src:'https://media.w3.org/2010/05/sintel/trailer.mp4', demo:true, desc:'الإعلان الرسمي لفيلم سينتل — مثال mp4 مباشر'},
+    /* ── الأفلام: HLS (جودات/ترجمات) + MP4 (جودات/ملكية عامة) + YouTube + DailyMotion ── */
+    {id:'mv-bbb-hls', kind:'movie', name:'الأرنب الكبير — عرض جودات HLS', cat:'أنيميشن', year:2008, type:'hls', src:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', demo:true, levels:5, durText:'10:35', poster:'https://archive.org/services/img/BigBuckBunny_124', desc:'فيلم بلندر المفتوح عبر HLS بخمس جودات حتى 1080p حسب التوافر — جرّب زر الجودة والتبديل اليدوي'},
+    {id:'mv-bipbop', kind:'movie', name:'عرض الترجمات المدمجة في HLS', cat:'تجريبي', year:2015, type:'hls', src:'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8', demo:true, levels:5, durText:'10:00', desc:'بث Apple التجريبي: 4 لغات ترجمة مدمجة (en/fr/es/ja) — افتح قائمة الترجمة CC'},
+    {id:'mv-tos-hls', kind:'movie', name:'دموع من فولاذ — HLS', cat:'خيال علمي', year:2012, type:'hls', src:'https://test-streams.mux.dev/tos_ismc/main.m3u8', demo:true, levels:1, durText:'12:14', poster:'https://archive.org/services/img/Tears-of-Steel', desc:'فيلم بلندر بترجمة إنجليزية مدمجة (WebVTT داخل المانيفست)'},
+    {id:'mv-bbb-mp4', kind:'movie', name:'الأرنب الكبير — MP4 متعدد الجودات', cat:'أنيميشن', year:2008, type:'mp4', variants:[{label:'1080p (1920×1080)',src:'https://archive.org/download/BigBuckBunnyFULLHD60FPS/Big%20Buck%20Bunny%20-%20FULL%20HD%2060FPS.mp4'},{label:'360p (640×360)',src:'https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4'}], subs:[{label:'العربية (تجريبية)',lang:'ar'}], demo:true, durText:'9:56', poster:'https://archive.org/services/img/BigBuckBunny_124', desc:'نفس الفيلم بجودتين MP4 حقيقيتين (فُحصتا بـ ffprobe) + ترجمة عربية خارجية VTT — اختبر تبديل الجودة من زر الجودة'},
+    {id:'mv-tos-mp4', kind:'movie', name:'دموع من فولاذ — MP4', cat:'خيال علمي', year:2012, type:'mp4', src:'https://archive.org/download/Tears-of-Steel/tears_of_steel_1080p.mp4', demo:true, durText:'12:14', poster:'https://archive.org/services/img/Tears-of-Steel', srcNote:'نسخ archive.org الوحيدة المتاحة لهذا الفيلم متطابقتا الأبعاد تقريبًا (864×360) فلم تُقدَّم كجودتين — صدقًا مع المستخدم', desc:'فيلم بلندر المفتوح (رخصة CC BY 3.0) — ملف MP4 واحد'},
+    {id:'mv-sintel-mp4', kind:'movie', name:'سينتِل — MP4 متعدد الجودات', cat:'أنيميشن', year:2010, type:'mp4', variants:[{label:'2048×872 (أصلية)',src:'https://archive.org/download/Sintel/sintel-2048-stereo.mp4'},{label:'240p (564×240)',src:'https://archive.org/download/Sintel/sintel-2048-stereo_512kb.mp4'}], demo:true, durText:'14:48', poster:'https://archive.org/services/img/Sintel', desc:'فيلم بلندر بجودتين حقيقيتين مختلفتين جذريًا (فُحصتا بـ ffprobe): 2048×872 مقابل 564×240 — الفرق يظهر فورًا عند التبديل'},
+    {id:'mv-charade', kind:'movie', name:'شاراد — Charade (1963)', cat:'غموض', year:1963, type:'mp4', src:'https://archive.org/download/charade-1963-cary-grant-audrey-hepburn-comedy-mystery-romance-thriller-full-movie/Charade_READY.mp4', durText:'1:53:05', poster:'https://archive.org/services/img/charade-1963-cary-grant-audrey-hepburn-comedy-mystery-romance-thriller-full-movie', srcNote:'فيلم كامل (~ساعتان) — ملكية عامة (Public Domain Mark) عبر archive.org', desc:'كوميديا غموض ورومانسية مع كاري غرانت وأودري هيبورن — يُدعم البحث والاستكمال (Range)'},
+    {id:'mv-nold', kind:'movie', name:'ليلة الموتى الأحياء (1968)', cat:'رعب', year:1968, type:'mp4', src:'https://archive.org/download/night-of-the-living-dead-1968-hd/Night%20Of%20The%20Living%20Dead%20%281968%29%20%5BHD%5D.mp4', durText:'1:35:38', poster:'https://archive.org/services/img/night-of-the-living-dead-1968-hd', srcNote:'فيلم كامل HD — ملكية عامة عبر archive.org', desc:'الكلاسيكية المؤسِّسة لرعب الزومبي بجودة HD'},
+    {id:'mv-plan9', kind:'movie', name:'الخطة 9 من الفضاء الخارجي (1959)', cat:'خيال علمي', year:1959, type:'mp4', src:'https://archive.org/download/plan-9-from-outer-space_202009/Plan%209%20from%20Outer%20Space.mp4', durText:'1:19:07', poster:'https://archive.org/services/img/plan-9-from-outer-space_202009', srcNote:'فيلم كامل — ملكية عامة (Public Domain Mark)', desc:'أشهر أفلام إد وود — رمز ثقافي في تاريخ السينما'},
+    {id:'mv-charade-yt', kind:'movie', name:'شاراد (1963) — نسخة يوتيوب', cat:'غموض', year:1963, type:'youtube', src:'SLQc9kSkRmo', durText:'1:53:23', poster:'https://i.ytimg.com/vi/SLQc9kSkRmo/mqdefault.jpg', srcNote:'قناة Shout! Studios الرسمية — فيلم ملكية عامة', desc:'اختبار يوتيوب لفيلم طويل 90+ دقيقة مع ترجمة CC عبر زر الترجمة'},
+    {id:'mv-nold-yt', kind:'movie', name:'ليلة الموتى الأحياء (1968) — يوتيوب', cat:'رعب', year:1968, type:'youtube', src:'VpyzMaij3Yw', durText:'1:35:31', poster:'https://i.ytimg.com/vi/VpyzMaij3Yw/mqdefault.jpg', srcNote:'فيلم ملكية عامة منشور على يوتيوب', desc:'النسخة الأصلية الكاملة'},
+    {id:'mv-hgf-yt', kind:'movie', name:'صديقته الجمعة (1940) — يوتيوب', cat:'كوميديا', year:1940, type:'youtube', src:'E21hRISkLBA', durText:'1:31:31', poster:'https://i.ytimg.com/vi/E21hRISkLBA/mqdefault.jpg', srcNote:'قناة Shout! Studios الرسمية — ملكية عامة', desc:'كاري غرانت وروزاليند راسل — كوميديا الكواليس الصحفية'},
+    {id:'mv-nold-dm', kind:'movie', name:'ليلة الموتى الأحياء (1968) — DailyMotion', cat:'رعب', year:1968, type:'dailymotion', src:'x7v2k6l', durText:'1:35:51', poster:'https://s1.dmcdn.net/v/SLisj1g421D2mnteR/x480', srcNote:'DailyMotion — فيلم ملكية عامة، تضمين مفعّل رسميًا', desc:'اختبار تضمين DailyMotion لفيلم طويل'},
+    {id:'mv-general-dm', kind:'movie', name:'الجنرال (1926) — DailyMotion', cat:'كوميديا صامتة', year:1926, type:'dailymotion', src:'x2eo6sp', durText:'1:18:52', poster:'https://s2.dmcdn.net/v/8hKvf1g43EDDYe3FJ/x480', srcNote:'DailyMotion — ملكية عامة، تضمين مفعّل رسميًا', desc:'تحفة باستر كيتون الصامتة الكاملة'},
+    {id:'mv-hgf-dm', kind:'movie', name:'صديقته الجمعة (1940) — DailyMotion', cat:'كوميديا', year:1940, type:'dailymotion', src:'xbrbwie', durText:'1:31:52', poster:'https://s1.dmcdn.net/v/gOO1M1guGsc1v2dD_/x480', srcNote:'DailyMotion — ملكية عامة، تضمين مفعّل رسميًا', desc:'نسخة كاملة قابلة للتضمين'},
 
-    /* ── المسلسلات: سلسلة تجريبية بحلقات ── */
-    {id:'sr-b-1', kind:'series', group:'sr-blender', name:'سلسلة بلندر المفتوحة', ep:'الحلقة 1', cat:'أنيميشن', type:'hls', src:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', demo:true, desc:'الموسم الأول'},
-    {id:'sr-b-2', kind:'series', group:'sr-blender', name:'سلسلة بلندر المفتوحة', ep:'الحلقة 2', cat:'أنيميشن', type:'hls', src:'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', demo:true, desc:'الموسم الأول'},
-    {id:'sr-b-3', kind:'series', group:'sr-blender', name:'سلسلة بلندر المفتوحة', ep:'الحلقة 3', cat:'أنيميشن', type:'mp4', src:'https://media.w3.org/2010/05/sintel/trailer.mp4', demo:true, desc:'الموسم الأول'},
+    /* ── البرامج: بث رسمي + برنامج OK.ru (انظر المجموعات) ── */
+    {id:'pr-nasalive', kind:'program', name:'ناسا لايف — البث الرسمي', cat:'برامج وثائقية', type:'youtube', src:'21X5lGlDOfg', durText:'بث حي', srcNote:'القناة الرسمية لناسا على يوتيوب', desc:'بث ناسا الرسمي المباشر على يوتيوب'},
 
-    /* ── البرامج: تضمينات يوتيوب رسمية ── */
-    {id:'pr-nasa', kind:'program', name:'ناسا لايف — البث الرسمي', cat:'برامج وثائقية', type:'youtube', src:'21X5lGlDOfg', demo:true, desc:'قناة ناسا الرسمية على يوتيوب'},
-    {id:'pr-bbb4k', kind:'program', name:'بلندر: الأرنب الكبير 4K', cat:'أفلام قصيرة', type:'youtube', src:'aqz-KE-bpKQ', demo:true, desc:'النسخة الرسمية بدقة 4K على يوتيوب'},
-    {id:'pr-sintel', kind:'program', name:'بلندر: سينتل كامل', cat:'أفلام قصيرة', type:'youtube', src:'eRsGyueVLvQ', demo:true, desc:'الفيلم الكامل على القناة الرسمية'},
+    /* ── الوثائقيات: ناسا + الجزيرة الوثائقية + DailyMotion + OK.ru ── */
+    {id:'dc-cosmic', kind:'docs', name:'الفجر الكوني — Cosmic Dawn', cat:'وثائقي', year:2023, type:'youtube', src:'uSMGENDH_QI', durText:'1:36:46', poster:'https://i.ytimg.com/vi/uSMGENDH_QI/mqdefault.jpg', srcNote:'NASA+ الأصلي — القناة الرسمية لناسا', desc:'وثائقي كامل 90+ دقيقة عن تلسكوب جيمس ويب'},
+    {id:'dc-color', kind:'docs', name:'لون الفضاء', cat:'وثائقي', type:'youtube', src:'S6vYHdH0AeE', durText:'50:08', poster:'https://i.ytimg.com/vi/S6vYHdH0AeE/mqdefault.jpg', srcNote:'القناة الرسمية لناسا', desc:'رحلة رواد الفضاء السود — وثائقي ناسا'},
+    {id:'dc-apollo', kind:'docs', name:'رحلات أبولو', cat:'وثائقي', type:'youtube', src:'GNJpoP642wc', durText:'57:45', poster:'https://i.ytimg.com/vi/GNJpoP642wc/mqdefault.jpg', srcNote:'القناة الرسمية لناسا', desc:'قصة برنامج أبولو الكاملة'},
+    {id:'dc-pluto', kind:'docs', name:'عام بلوتو — New Horizons', cat:'وثائقي', type:'youtube', src:'EJxwWpaGoJs', durText:'58:34', poster:'https://i.ytimg.com/vi/EJxwWpaGoJs/mqdefault.jpg', srcNote:'القناة الرسمية لناسا', desc:'وثائقي مهمة نيوهورايزنز'},
+    {id:'dc-che', kind:'docs', name:'تشي غيفارا.. الصورة الأكثر شعبية في التاريخ', cat:'وثائقي', type:'youtube', src:'VCL2KhhFZjk', durText:'52:58', poster:'https://i.ytimg.com/vi/VCL2KhhFZjk/mqdefault.jpg', srcNote:'قناة الجزيرة الوثائقية الرسمية', desc:'كيف أصبحت صورة تشي رمزًا عالميًا؟'},
+    {id:'dc-tiktok', kind:'docs', name:'تيك توك.. ولادة العملاق الصيني', cat:'وثائقي', type:'youtube', src:'3DuMaOvjKOc', durText:'45:26', poster:'https://i.ytimg.com/vi/3DuMaOvjKOc/mqdefault.jpg', srcNote:'قناة الجزيرة الوثائقية الرسمية', desc:'قصة صعود تيك توك'},
+    {id:'dc-patagonia', kind:'docs', name:'باتاغونيا.. الحياة عند حافة العالم', cat:'وثائقي', type:'youtube', src:'HZDhfJavoJo', durText:'39:45', poster:'https://i.ytimg.com/vi/HZDhfJavoJo/mqdefault.jpg', srcNote:'قناة الجزيرة الوثائقية الرسمية', desc:'الساحل الصحراوي — طبيعة نادرة'},
+    {id:'dc-dm-hiro', kind:'docs', name:'قنبلة هيروشيما — وثائقي بالعربية', cat:'وثائقي', type:'dailymotion', src:'x2y5wlz', durText:'44:14', poster:'https://s2.dmcdn.net/v/AeDvN1gvLIQrLLKV7/x480', demo:true, srcNote:'DailyMotion — تضمين مفعّل من الناشر (محتوى تجريبي يُستبدل عند توقيع التراخيص)', desc:'اختبار تضمين وثائقي طويل على DailyMotion'},
+    {id:'dc-dm-mayadeen', kind:'docs', name:'وثائقي الميادين', cat:'وثائقي', type:'dailymotion', src:'x4duxas', durText:'51:10', poster:'https://s2.dmcdn.net/v/FpS4K1e8x17SofSVS/x480', demo:true, srcNote:'DailyMotion — تضمين مفعّل من الناشر (محتوى تجريبي)', desc:'برنامج وثائقي عربي كامل'},
+    {id:'dc-ok-science', kind:'docs', name:'المستشعرات الكمومية — غيغاناوكا', cat:'وثائقي', type:'okru', src:'16321332513493', durText:'3:00', poster:'https://iv.okcdn.ru/i?r=BDFSTM1h2o92P_v-s8DgGlgYdFBN4yOPoVg2814aHjCc_clMWNCAyvhEjLZV2on9wsM&fn=external_8', demo:true, srcNote:'OK.ru — عينة قصيرة لإثبات التضمين (قناة علمية رسمية)', desc:'اختبار تضمين OK.ru — انظر قسم البرامج لاختبار الحلقات الطويلة'},
 
-    /* ── المصارعة: هيكل جاهز بانتظار مصادر مرخّصة ── */
-    {id:'wr-soon', kind:'wrestling', name:'العروض العالمية — قريبًا', cat:'عروض', soon:true, desc:'سيُزوَّد القسم بعروض مرخّصة رسميًا بعد اعتماد المصادر القانونية'}
-  ]
+    /* ── الأطفال: أفلام بلندر الرسمية + مجموعتا حلقات (ناسا للأطفال + كيلوغلان TRT) ── */
+    {id:'kd-bbb', kind:'kids', name:'أرنوب الكبير — Big Buck Bunny', cat:'أطفال', year:2008, type:'youtube', src:'aqz-KE-bpKQ', durText:'10:35', poster:'https://i.ytimg.com/vi/aqz-KE-bpKQ/mqdefault.jpg', srcNote:'القناة الرسمية لبلندر — رخصة CC BY', desc:'فيلم الأنيميشن الأشهر مفتوح المصدر — بجودة عالية حتى 4K حسب المصدر'},
+    {id:'kd-sintel', kind:'kids', name:'سينتِل — Sintel', cat:'أطفال', year:2010, type:'youtube', src:'eRsGyueVLvQ', durText:'14:48', poster:'https://i.ytimg.com/vi/eRsGyueVLvQ/mqdefault.jpg', srcNote:'القناة الرسمية لبلندر — رخصة CC BY', desc:'فيلم فانتازيا قصير كامل'},
+    {id:'kd-tos', kind:'kids', name:'دموع من فولاذ — Tears of Steel', cat:'أطفال', year:2012, type:'youtube', src:'R6MlUcmOul8', durText:'12:15', poster:'https://i.ytimg.com/vi/R6MlUcmOul8/mqdefault.jpg', srcNote:'القناة الرسمية لبلندر — رخصة CC BY', desc:'فيلم مؤثرات بصرية كامل'}
+  ],
+
+  /* ── المجموعات: مسلسلات وقوائم حلقات حقيقية (تُفكّ آليًا إلى عناصر حلقات) ──
+     كل معرّفات الحلقات أدناه مأخوذة من القوائم الأصلية على المنصات نفسها وفُحصت فرديًا */
+  groups: {
+    'sr-flash': {
+      kind:'series', name:'فلاش غوردون (1936)', cat:'خيال علمي', year:1936, type:'youtube',
+      playlist:'PLB_icse0jSBAeEVXsUezCsC1IdTd7raa_',
+      poster:'https://i.ytimg.com/vi/aFhjpXdfhZI/mqdefault.jpg',
+      srcNote:'القائمة الأصلية على يوتيوب (13 فصلًا كاملًا) — مسلسل ملكية عامة، فُحصت الحلقات الـ13 فرديًا',
+      desc:'مسلسل الفضاء الكلاسيكي المتسلسل بـ 13 فصلًا (Space Soldiers) — الحلقات هي الحلقات الحقيقية من قائمة يوتيوب الأصلية، مع مصغرات رسمية من i.ytimg.com.',
+      seasons:[{name:'الفصول 1-13',eps:[
+        {src:'aFhjpXdfhZI',title:'كوكب الخطر',durText:'20:59'},
+        {src:'2-WBCukZtq0',title:'نفق الرعب',durText:'20:27'},
+        {src:'NHm6-0qufSE',title:'أسر رجال القرش',durText:'21:21'},
+        {src:'EINKM_PKKa0',title:'معركة وحش البحر',durText:'18:26'},
+        {src:'ys-YwkJXXKs',title:'شعاع التدمير',durText:'18:13'},
+        {src:'M_dAwuvhuJ4',title:'التعذيب الملتهب',durText:'18:15'},
+        {src:'X6AP-ZZ3_K8',title:'الهلاك المدمر',durText:'18:27'},
+        {src:'DqqpmPzx71M',title:'بطولة الموت',durText:'17:13'},
+        {src:'gf7OeUiJe_Q',title:'محاربة التنين الناري',durText:'19:34'},
+        {src:'GrGezW9A2nc',title:'الخطر الخفي',durText:'19:07'},
+        {src:'08Jd26VuVEc',title:'في مخالب التيغرون',durText:'18:26'},
+        {src:'R_N7gP9Qu1E',title:'محاصرون في البرج',durText:'18:10'},
+        {src:'wM1Z8Mk_9cM',title:'الإقلاع نحو الأرض',durText:'20:27'}
+      ]}]
+    },
+    'sr-lucy': {
+      kind:'series', name:'عرض لوسي — The Lucy Show', cat:'كوميديا', year:1962, type:'youtube',
+      playlist:'PLmHgXUJMN1TXCZbl3w_RYofN_XMCRDtdy',
+      poster:'https://i.ytimg.com/vi/m2JAuLljltI/mqdefault.jpg',
+      srcNote:'قائمة PizzaFlix على يوتيوب (30 حلقة كاملة) — حلقات ملكية عامة، عُيّنت 10 حلقات وفُحصت',
+      desc:'كوميديا لوسيل بول الكلاسيكية — 10 حلقات كاملة (من أصل 30 في القائمة الأصلية) بمصغرات رسمية.',
+      seasons:[{name:'الحلقات الكاملة',eps:[
+        {src:'m2JAuLljltI',title:'لوسي العجوز | S6E7',durText:'22:29'},
+        {src:'AF52-oO--p0',title:'لوسي تلتقي جون وين | S5E10',durText:'25:14'},
+        {src:'8petwReCGsQ',title:'لوسي وفيف في حمام | S1E18',durText:'25:44'},
+        {src:'CcZyB7-XZXQ',title:'لوسي محاصرة | S6E2',durText:'25:00'},
+        {src:'KmHLa56h0qA',title:'رباعية الحلاقة | S1E19',durText:'25:45'},
+        {src:'_36_dTq_vJQ',title:'لوسي وملكة الفاصولياء | S5E3',durText:'25:28'},
+        {src:'4xvpqXInreY',title:'لوسي تؤجّر غرفة | S5E6',durText:'22:19'},
+        {src:'LKeq0K23uzQ',title:'لوسي والخاتم | S5E5',durText:'25:09'},
+        {src:'PmlrsEmMBBQ',title:'لوسي تطير إلى لندن | S5E6',durText:'25:20'},
+        {src:'u8A4CTStIN8',title:'لوسي تلتقي جورج بيرنز | S5E1',durText:'25:26'}
+      ]}]
+    },
+    'sr-superman': {
+      kind:'series', name:'سوبرمان فليشر (1941)', cat:'أنيميشن', year:1941, type:'mp4',
+      poster:'https://archive.org/services/img/fleischer-superman',
+      srcNote:'ملكية عامة (Public Domain Mark) — 17 حلقة MP4 بحجم 1080p من archive.org، فُحصت 10 حلقات بـ Range 206',
+      desc:'سلسلة الرسوم المتحركة الأسطورية من استوديوهات فليشر — ملفات MP4 مستقلة لكل حلقة تُشغّل مباشرة من archive.org.',
+      seasons:[{name:'الحلقات 1-10',eps:[
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%20%281941%3B%20HD%29.mp4",title:'Superman',durText:'10:28'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20The%20Mechanical%20Monsters%20%281941%3B%20HD%29.mp4",title:'The Mechanical Monsters',durText:'10:16'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20Billion%20Dollar%20Limited%20%281942%3B%20HD%29.mp4",title:'Billion Dollar Limited',durText:'8:37'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20The%20Arctic%20Giant%20%281942%3B%20HD%29.mp4",title:'The Arctic Giant',durText:'8:36'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20The%20Bulleteers%20%281942%3B%20HD%29.mp4",title:'The Bulleteers',durText:'8:05'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20The%20Magnetic%20Telescope%20%281942%3B%20HD%29.mp4",title:'The Magnetic Telescope',durText:'7:41'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20The%20Electric%20Earthquake%20%281942%3B%20HD%29.mp4",title:'The Electric Earthquake',durText:'8:45'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20Volcano%20%281942%3B%20HD%29.mp4",title:'Volcano',durText:'7:57'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20Terror%20on%20the%20Midway%20%281942%3B%20HD%29.mp4",title:'Terror on the Midway',durText:'8:22'},
+        {src:"https://archive.org/download/fleischer-superman/Max%20Fleischer's%20Superman%EF%BC%9A%20Japoteurs%20%281942%3B%20HD%29.mp4",title:'Japoteurs',durText:'9:07'}
+      ]}]
+    },
+    'sr-kel': {
+      kind:'kids', name:'كيلوغلان — TRT Çocuk', cat:'أطفال', year:2019, type:'dailymotion',
+      playlist:'xe1w36',
+      poster:'https://s1.dmcdn.net/v/beLn61gjhSF5dfWzU/x480',
+      srcNote:'قائمة TRT Çocuk الرسمية على DailyMotion (33 حلقة قابلة للتضمين) — دمجنا 12 حلقة مفحوصة',
+      desc:'مسلسل الأطفال التركي الشهير من قناة TRT Çocuk الرسمية عبر تضمين DailyMotion الرسمي — حلقات حقيقية بصور رسمية.',
+      seasons:[{name:'الحلقات المفحوصة',eps:[
+        {src:'xafvmti',title:'بين الأخوة',durText:'13:59',thumb:'https://s1.dmcdn.net/v/beLn61gjhSF5dfWzU/x480'},
+        {src:'xafw5re',title:'كاميرا الوزير',durText:'13:32',thumb:'https://s2.dmcdn.net/v/beRmg1gjhSE4c2fYr/x480'},
+        {src:'xafw6pu',title:'عطلة الشاطئ',durText:'3:38',thumb:'https://s2.dmcdn.net/v/beS421gjhSEswnvHG/x480'},
+        {src:'xafw6yy',title:'علماء وفنانون',durText:'11:21',thumb:'https://s2.dmcdn.net/v/beS9A1gjhSEoZ5kPJ/x480'},
+        {src:'xafw8be',title:'اثنان طويلان',durText:'11:48',thumb:'https://s1.dmcdn.net/v/beSaQ1gjhSDKasXHP/x480'},
+        {src:'xagann2',title:'المجلس',durText:'14:20',thumb:'https://s1.dmcdn.net/v/bh0uk1gjhSDA5fdYY/x480'},
+        {src:'xagapma',title:'احترس مما تتمنى',durText:'10:33',thumb:'https://s1.dmcdn.net/v/bh1Wo1gjhSC4-kFB-/x480'},
+        {src:'xagbfzu',title:'الفواق',durText:'8:57',thumb:'https://s2.dmcdn.net/v/bh9sw1gjhSCITtgUr/x480'},
+        {src:'xagbo8a',title:'البازل',durText:'13:14',thumb:'https://s2.dmcdn.net/v/bhCTg1gjhSCGKpWad/x480'},
+        {src:'xaotymu',title:'صديق العنكبوت',durText:'13:38',thumb:'https://s2.dmcdn.net/v/cXjIM1gjhR-UT5kBu/x480'},
+        {src:'xaoxr6i',title:'الفضائيون',durText:'13:01',thumb:'https://s2.dmcdn.net/v/cYOVQ1gjhR-g6k1Zh/x480'},
+        {src:'xb0v9ya',title:'الغواصة',durText:'14:18',thumb:'https://s1.dmcdn.net/v/dkr0Y1gjhRUluSYWn/x480'}
+      ]}]
+    },
+    'sr-okshow': {
+      kind:'program', name:'أوكنَيوتييه لودي — برنامج OK.ru الرسمي', cat:'برامج ترفيهية', year:2023, type:'okru',
+      poster:'https://iv.okcdn.ru/i?r=BDFSTM1h2o92P_v-s8DgGlgY7ocpkrWi3VR4Ma6zgGIoxB50c1qINx1VTCOhieM3uj0&fn=external_8',
+      srcNote:'برنامج من إنتاج منصة OK.ru نفسها (حلقات 48-60 دقيقة) — أطول محتوى يمكن التحقق من إتاحته الرسمية للتضمين على المنصة',
+      desc:'برنامج ترفيهي روسي من إنتاج OK.ru الأصلي — اختبار حقيقي لحلقات طويلة عبر تضمين OK.ru، مع ملاحظة صادقة: أفلام OK.ru الطويلة المتاحة لا يمكن التحقق من ترخيصها فلم تُدرج.',
+      seasons:[{name:'الحلقات',eps:[
+        {src:'5230068632094',title:'الحلقة 1: موساغالييف ضد دوروخوف',durText:'59:54'},
+        {src:'7475662490142',title:'الحلقة 3: فولكوفا وتشيهوف ضد غافريلينا وميغيل',durText:'48:47'},
+        {src:'7496860633630',title:'الحلقة 4: جورافليف وإفانتشينكو ضد فيدونكيف وكروس',durText:'50:21'}
+      ]}]
+    },
+    'wr-wwe': {
+      kind:'wrestling', name:'WWE — نزالات كاملة رسمية', cat:'رياضة قتالية', type:'youtube',
+      playlist:'PLqIVmFaHA8Bo10epRPNq3N4FyeJ6IORVe',
+      poster:'https://i.ytimg.com/vi/cb-1xvZB7AA/mqdefault.jpg',
+      srcNote:'القائمة الرسمية لقناة WWE على يوتيوب (100 نزال) — فُحصت 8 نزالات فرديًا والتضمين مفعّل رسميًا',
+      desc:'نزالات كاملة من القناة الرسمية لـ WWE — بعناوينها العربية الرسمية ومصغراتها الأصلية.',
+      seasons:[{name:'نزالات كاملة',eps:[
+        {src:'cb-1xvZB7AA',title:'كودي رودز وراندي أورتن ضد غونتر ولودفيغ كايزر — سماكداون',durText:'14:35'},
+        {src:'VCTuK9bO1h4',title:'رومان رينز ضد روسيف — قفص الجحيم 2016',durText:'31:07'},
+        {src:'TSpIAJrYHUI',title:'ري ميستيريو ضد لوغان بول — كراون جول 2023',durText:'25:48'},
+        {src:'dtOgWxJR_b8',title:'شجار رولينز وريد في موقف السيارات — راو',durText:'7:19'},
+        {src:'FIrP3QBvLTA',title:'Stephanie Vaquer vs. Tiffany Stratton — Crown Jewel 2025',durText:'21:12'},
+        {src:'tkkB6vmb7xc',title:'رومان رينز ضد شينسكي ناكامورا — تكريم القوات 2021',durText:'9:54'},
+        {src:'ROkVj9lb2Rc',title:'سيث رولينز ضد درو ماكنتاير — كراون جول',durText:'27:34'},
+        {src:'nowVUKEe8T0',title:'رولينز ضد ستايلز — بطل ضد بيل 2019',durText:'12:44'}
+      ]}]
+    },
+    'pl-nasakids': {
+      kind:'kids', name:'المجموعة الشمسية للأطفال — ناسا', cat:'أطفال', type:'youtube',
+      playlist:'PLiuUQ9asub3TDPzGOi_L2hYJGnYwWUAVU',
+      poster:'https://i.ytimg.com/vi/Y2ijS8jY4F4/mqdefault.jpg',
+      srcNote:'القائمة الرسمية لقناة NASA Video للأطفال (28 عنصرًا) — فُحصت 6 حلقات',
+      desc:'سلسلة تعليمية ممتعة عن الفضاء من ناسا للأطفال — حلقات قصيرة بالعربية والإنجليزية.',
+      seasons:[{name:'الحلقات',eps:[
+        {src:'upCu4h0fsTo',title:'تقديم السلسلة',durText:'0:33'},
+        {src:'Y2ijS8jY4F4',title:'ما هو النظام الشمسي؟',durText:'5:59'},
+        {src:'hMMqbfQvU6w',title:'الشمس — نجم حقيقي',durText:'5:26'},
+        {src:'CWuWoiHmXUs',title:'مدرسة الفضاء الموسيقية',durText:'5:42'},
+        {src:'lQF3SfHK3j4',title:'ممّ تتكون الكويكبات؟ (عربي)',durText:'3:05'},
+        {src:'o87QLo3gzmA',title:'الكويكبات مقابل المذنبات',durText:'4:58'}
+      ]}]
+    }
+  }
 };
+
+/* تفكيك المجموعات آليًا إلى عناصر حلقات قابلة للتشغيل (مع مواسم وحلقات ومصغرات) */
+(function expandGroups(){
+  var eps=[];var G=STV_DATA.groups;
+  Object.keys(G).forEach(function(gid){
+    var g=G[gid];
+    (g.seasons||[]).forEach(function(se,si){
+      (se.eps||[]).forEach(function(e,i){
+        eps.push({id:gid+'-s'+(si+1)+'e'+(i+1),kind:g.kind||'series',group:gid,name:g.name,
+          ep:'الحلقة '+(i+1),epNo:i+1,season:si+1,cat:g.cat,year:g.year,type:e.type||g.type,src:e.src,
+          poster:g.poster,thumb:e.thumb||g.poster,durText:e.durText||'',desc:e.title||g.name,
+          srcNote:g.srcNote,playlist:g.playlist,demo:g.demo});
+      });
+    });
+    g.total=(g.seasons||[]).reduce(function(n,se){return n+(se.eps||[]).length},0);
+  });
+  STV_DATA.items=STV_DATA.items.concat(eps);
+})();
 
 /* ─────────── 2) أدوات مساعدة ─────────── */
 var d=document, w=window;
@@ -806,7 +1169,7 @@ function toast(msg,isErr){
   box.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove()},320)},3000);
 }
 /* ألوان حسب التصنيف */
-var CAT_COLORS={'أخبار':['#0ea5a0','#0f766e'],'رياضة':['#f5a524','#b45309'],'وثائقي':['#84cc16','#3f6212'],'عامة':['#14b8a6','#115e59'],'أنيميشن':['#22c55e','#15803d'],'خيال علمي':['#fb923c','#c2410c'],'فانتازيا':['#34d399','#047857'],'برامج وثائقية':['#2dd4bf','#0f766e'],'أفلام قصيرة':['#a3e635','#3f6212'],'عروض':['#f87171','#991b1b'],'عائلي':['#fbbf24','#92400e']};
+var CAT_COLORS={'أخبار':['#0ea5a0','#0f766e'],'رياضة':['#f5a524','#b45309'],'وثائقي':['#84cc16','#3f6212'],'عامة':['#14b8a6','#115e59'],'أنيميشن':['#22c55e','#15803d'],'خيال علمي':['#fb923c','#c2410c'],'فانتازيا':['#34d399','#047857'],'برامج وثائقية':['#2dd4bf','#0f766e'],'أفلام قصيرة':['#a3e635','#3f6212'],'عروض':['#f87171','#991b1b'],'عائلي':['#fbbf24','#92400e'],'غموض':['#fb923c','#9a3412'],'رعب':['#ef4444','#7f1d1d'],'كوميديا':['#fbbf24','#92400e'],'كوميديا صامتة':['#d97706','#92400e'],'برامج ترفيهية':['#f472b6','#9d174d'],'رياضة قتالية':['#f5a524','#b45309'],'تجريبي':['#34d399','#065f46'],'أطفال':['#fbbf24','#92400e']};
 function catColors(cat){return CAT_COLORS[cat]||['#2dd4bf','#115e59']}
 function gradCss(cat){var c=catColors(cat);return 'linear-gradient(135deg,'+c[0]+','+c[1]+')'}
 /* ملصق SVG مولَّد (بديل عن الصور الخارجية — يعمل دائمًا وبدون تحميل) */
@@ -815,7 +1178,7 @@ function posterSVG(it,w,h){
   var name=it.name||'';var words=name.split(' ');var l1='',l2='';
   for(var i=0;i<words.length;i++){ if((l1+' '+words[i]).trim().length<=20&&i<Math.ceil(words.length/2)||(l2===''&&l1.length>6)) {if(l1.length+words[i].length<20&&l2===''){l1=(l1+' '+words[i]).trim()}else{l2=(l2+' '+words[i]).trim()}} }
   if(!l1)l1=name;
-  var kindLabel={movie:'فيلم',series:'مسلسل',program:'برنامج',wrestling:'مصارعة',channel:'قناة'}[it.kind]||'';
+  var kindLabel={movie:'فيلم',series:'مسلسل',program:'برنامج',wrestling:'مصارعة',channel:'قناة',docs:'وثائقي',kids:'أطفال'}[it.kind]||'';
   var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 600 900">'
     +'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c[0]+'"/><stop offset="1" stop-color="'+c[1]+'"/></linearGradient>'
     +'<linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="rgba(2,10,8,.88)"/></linearGradient></defs>'
@@ -857,17 +1220,19 @@ var hls=null, ytPlayer=null, currentHlsLevels=null, retryCount=0, retryTimer=nul
 var nativeMode=false, embedMode=false, isLive=false;
 
 function showLoader(v){$('#stvLoader').classList.toggle('show',!!v)}
-function showErr(title,msg){
+function showErr(title,msg,url){
   $('#stvErrTitle').textContent=title;$('#stvErrMsg').textContent=msg||'';
+  var la=$('#stvErrLink');
+  if(la){ if(url){la.href=url;la.style.display=''}else{la.style.display='none'} }
   $('#stvErr').classList.add('show');showLoader(false);
 }
 function hideErr(){$('#stvErr').classList.remove('show')}
-function showIdle(v){$('#stvIdle').classList.toggle('show',!!v)}
+function showIdle(v){var el=$('#stvIdle');el.classList.toggle('show',!!v);el.setAttribute('aria-hidden',v?'false':'true')}
 function setUi(v){shell.classList.toggle('stv-ui',!!v);scheduleUiHide()}
 function scheduleUiHide(){
   clearTimeout(uiTimer);
   uiTimer=setTimeout(function(){
-    if(!video.paused&&!d.fullscreenElement||true){ if(!video.paused&&shell.classList.contains('stv-ui'))shell.classList.remove('stv-ui') }
+    if(!video.paused&&shell.classList.contains('stv-ui'))shell.classList.remove('stv-ui');
   },3500);
 }
 function showCenter(v){$('#stvCenterPlay').classList.toggle('show',!!v)}
@@ -887,6 +1252,8 @@ function ensureHls(){
     };
     tryLoad(STV_CONFIG.hlsSrc,function(){ tryLoad(STV_CONFIG.hlsSrcFallback,null) });
   });
+  /* عند الفشل نسمح بإعادة المحاولة لاحقًا بدل قفل الوعد المرفوض للأبد (مراجعة T7) */
+  hlsPromise.catch(function(){hlsPromise=null});
   return hlsPromise;
 }
 /* ── YouTube IFrame API (كسول) ── */
@@ -894,75 +1261,228 @@ var ytPromise=null;
 function ensureYT(){
   if(w.YT&&w.YT.Player)return Promise.resolve(w.YT);
   if(ytPromise)return ytPromise;
-  ytPromise=new Promise(function(res){
-    w.onYouTubeIframeAPIReady=function(){res(w.YT)};
-    var s=d.createElement('script');s.src='https://www.youtube.com/iframe_api';d.head.appendChild(s);
+  ytPromise=new Promise(function(res,rej){
+    var done=false;
+    /* مراجعة T7: سلسلة أي معالج سابق للصفحة المضيفة + onerror يرفض بدل وعد معلق أبدًا */
+    var prev=w.onYouTubeIframeAPIReady;
+    w.onYouTubeIframeAPIReady=function(){ try{if(prev)prev()}catch(_){} if(!done){done=true;res(w.YT)} };
+    var s=d.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;
+    s.onerror=function(){ if(!done){done=true;rej(new Error('yt-load-failed'))} };
+    d.head.appendChild(s);
   });
+  ytPromise.catch(function(){ytPromise=null});
+  /* إن لم يجهز السكربت خلال 20 ثانية نسمح بإعادة المحاولة في النداء التالي (مراجعة T7) */
+  var to=setTimeout(function(){ if(!w.YT||!w.YT.Player)ytPromise=null },20000);
+  ytPromise.then(function(){clearTimeout(to)},function(){clearTimeout(to)});
   return ytPromise;
 }
 
-/* ── إيقاف كل شيء (تنظيف الذاكرة) ── */
-function stopPlayback(){
-  clearTimeout(retryTimer);
-  if(hls){try{hls.destroy()}catch(_){} hls=null}
+/* ── المزوّدون: تسميات وقدرات صادقة (ما لا تتيحه المنصة يُعرض للمستخدم كما هو) ── */
+var PROVIDERS={
+  hls:        {label:'HLS · M3U8'},
+  mp4:        {label:'MP4'},
+  youtube:    {label:'YouTube'},
+  dailymotion:{label:'DailyMotion'}, /* لا SDK تحكم عام — التشغيل/الصوت/الجودة من واجهة المشغل الداخلية */
+  okru:       {label:'OK.ru'}        /* لا SDK ولا أحداث رسمية — نفس القيد */
+};
+
+/* ── تفضيل الترجمة الموحّد (يُحفظ محليًا وينطبق على كل فيديو جديد دون إعادة إيقاف) ── */
+var ccPref=store.get(STV_CONFIG.storage.cc,{on:false,lang:''});
+function saveCcPref(){store.set(STV_CONFIG.storage.cc,ccPref)}
+
+/* ── إيقاف كل شيء: تفكيك جذري لكل مشغل سابق ──
+   هذا هو العلاج من جذوره لمشكلة «الترجمة المعلقة عند تغيير القناة»:
+   إيقاف → تفريغ وحدات الترجمة → تدمير المشغل → إزالة عناصر DOM والمسارات والمؤقتات →
+   لا تنقل أي حالة للفيديو الجديد إلا تفضيل المستخدم المخزَّن عمدًا (ccPref). */
+var ytSyncTimer=0, ytErrTimer=0, blobUrls=[], curProvider=null, curVariant=-1, qualSrc=null, mountSeq=0;
+function teardownAll(){
+  clearTimeout(retryTimer);clearTimeout(ytErrTimer);retryCount=0;stopYtSync();
+  /* 1) YouTube: إيقاف → تفريغ وحدات الترجمة → تدمير → محو أي iframe متبقٍ */
+  if(ytPlayer){
+    try{ytPlayer.stopVideo()}catch(_){}
+    try{
+      var ms=(typeof ytPlayer.getOptions==='function')?(ytPlayer.getOptions()||[]):[];
+      ms.forEach(function(m){try{ytPlayer.unloadModule(m)}catch(_){}});
+    }catch(_){}
+    try{ytPlayer.destroy()}catch(_){}
+    ytPlayer=null;
+  }
+  try{ytBox.querySelectorAll('iframe').forEach(function(n){n.parentNode.removeChild(n)})}catch(_){}
+  try{ytBox.innerHTML='<div id="stvYtMount"></div>'}catch(_){}
+  /* 2) hls.js: إيقاف التحميل → فصل الوسائط → تدمير المثيل */
+  if(hls){try{hls.stopLoad()}catch(_){}try{hls.detachMedia()}catch(_){}try{hls.destroy()}catch(_){}hls=null}
+  /* 3) عنصر الفيديو: إيقاف → تعطيل مسارات الترجمة → إزالة track → تحرير Blob URLs */
   try{video.pause()}catch(_){}
+  try{ if(video.textTracks){for(var i=video.textTracks.length-1;i>=0;i--){try{video.textTracks[i].mode='disabled'}catch(_){}}} }catch(_){}
+  try{video.querySelectorAll('track').forEach(function(t){t.parentNode.removeChild(t)})}catch(_){}
+  blobUrls.forEach(function(u){try{URL.revokeObjectURL(u)}catch(_){}});blobUrls=[];
   video.removeAttribute('src');try{video.load()}catch(_){}
   video.controls=false;shell.classList.remove('stv-native');
-  if(ytPlayer){try{ytPlayer.destroy()}catch(_){} ytPlayer=null}
-  ytBox.innerHTML='<div id="stvYtMount"></div>';
+  /* 4) التضمينات (DailyMotion/OK.ru): إزالة iframe توقف التشغيل والصوت فورًا */
+  try{embedBox.querySelectorAll('iframe').forEach(function(n){n.parentNode.removeChild(n)})}catch(_){}
   embedBox.innerHTML='';
   shell.classList.remove('stv-embed');embedMode=false;nativeMode=false;isLive=false;
+  curProvider=null;curVariant=-1;qualSrc=null;
   $('#stvSeekRow').style.display='none';$('#stvQualBtn').style.display='none';closeQual();
-  $('#stvLiveChip').style.display='none';$('#stvHd').style.display='none';
-  showCenter(false);showUnmute(false);
+  $('#stvCcBtn').style.display='none';closeCc();
+  $('#stvLiveChip').style.display='none';$('#stvHd').style.display='none';$('#stvProv').style.display='none';
+  $('#stvVolWrap').style.display='';$('#stvPlayBtn').style.display='';
+  hideErr();showCenter(false);showUnmute(false);
 }
 
-/* ── تشغيل عنصر ── */
+/* ── عناصر التحكم المتاحة/غير المتاحة حسب المزوّد (بصدق: DM/OK بلا API تحكم) ── */
+var hintTold=false;
+function setEmbedControls(apiOn){
+  $('#stvVolWrap').style.display=apiOn?'':'none';
+  $('#stvPlayBtn').style.display=apiOn?'':'none';
+  if(!apiOn&&!hintTold){hintTold=true;setTimeout(function(){toast('التحكم بالتشغيل والصوت من واجهة مشغل المنصة نفسها — قيد رسمي في التضمين')},900)}
+}
+
+/* ── تشغيل عنصر: تفكيك ثم بناء حالة نظيفة مستقلة لكل فيديو جديد ── */
 function playItem(it,opts){
   opts=opts||{};
   if(!it)return;
   if(it.soon){ setNow(it); showErr('قريبًا','هذا القسم سيُزوَّد بمحتوى مرخّص رسميًا قريبًا. البنية التقنية جاهزة بالكامل — أضف المصادر من قسم البيانات.'); return }
-  stopPlayback();
-  state.current=it;setNow(it);hideErr();showIdle(false);showLoader(true);syncFavUI();
+  teardownAll();
+  mountSeq++; /* مراجعة T7: جيل جديد — يُبطل أي تحميل كسول قديم معلّق فلا يُنشأ مشغل يتيم أبدًا */
+  state.current=it;setNow(it);showIdle(false);showLoader(true);syncFavUI();
   savePlaylistFor(it);
   renderEps(it);
-  try{d.title=it.name+' — سوفتارا TV'}catch(_){}
+  try{d.title=it.name+(it.ep?' — '+it.ep:'')+' — سوفتارا TV'}catch(_){}
   var muted=opts.muted!==undefined?opts.muted:state.muted;
   state.muted=muted;
-
-  if(it.type==='youtube'){ playEmbed('youtube',it,muted); return }
-  if(it.type==='dailymotion'){ playEmbed('dailymotion',it,muted); return }
-  if(it.type==='okru'){ playEmbed('okru',it,muted); return }
-
-  /* hls أو mp4 */
-  if(it.type==='hls'){
-    ensureHls().then(function(Hls){
-      if(state.current!==it)return;
-      if(Hls.isSupported()){
-        hls=new Hls({capLevelToPlayerSize:true,enableWorker:true,maxBufferLength:30,backBufferLength:30});
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){
-          if(state.current!==it)return;
-          buildQualityMenu(hls);$('#stvQualBtn').style.display='';
-          tryPlay(muted);
-        });
-        hls.on(Hls.Events.LEVEL_SWITCHED,function(){updateQualLabel(hls)});
-        hls.on(Hls.Events.ERROR,onHlsError);
-        hls.loadSource(it.src);hls.attachMedia(video);
-      }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-        nativeMode=true;shell.classList.add('stv-native');
-        video.controls=true;video.src=it.src;
-        video.addEventListener('loadedmetadata',function(){isLive=!isFinite(video.duration)}, {once:true});
-        tryPlay(muted);
-      }else{
-        showErr('متصفح غير مدعوم','هذا المتصفح لا يدعم تشغيل HLS. جرّب Chrome أو Safari حديثًا.');
-      }
-    }).catch(function(){showErr('تعذّر تحميل محرك البث','تحقّق من الاتصال بالإنترنت ثم أعد المحاولة.')});
-  }else{
-    video.src=it.src;
-    video.addEventListener('loadedmetadata',function(){isLive=false}, {once:true});
-    tryPlay(muted);
-  }
+  var mount={hls:mountHls,mp4:mountMp4,youtube:mountYouTube,dailymotion:mountDailymotion,okru:mountOkru}[it.type];
+  if(mount)mount(it,muted);
+  else showErr('مصدر غير معروف','نوع المصدر غير مدعوم في هذه النسخة.');
 }
+
+/* ── المزوّد 1: HLS / M3U8 عبر hls.js (جودات + ترجمات مدمجة) أو HLS الأصلي (iOS) ── */
+function mountHls(it,muted){
+  curProvider='hls';
+  var seq=mountSeq; /* مراجعة T7: حماية من سباق إعادة الاختيار أثناء نافذة التحميل الكسول */
+  ensureHls().then(function(Hls){
+    if(seq!==mountSeq||state.current!==it)return;
+    if(Hls.isSupported()){
+      hls=new Hls({capLevelToPlayerSize:true,enableWorker:true,maxBufferLength:30,backBufferLength:30});
+      hls.on(Hls.Events.MANIFEST_PARSED,function(){
+        if(seq!==mountSeq||state.current!==it)return;
+        qualSrc={kind:'hls'};buildQualityMenu();$('#stvQualBtn').style.display='';
+        tryPlay(muted);
+      });
+      hls.on(Hls.Events.LEVEL_SWITCHED,function(){updateQualLabel()});
+      hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED,function(){
+        if(seq!==mountSeq||state.current!==it)return;
+        $('#stvCcBtn').style.display=(hls.subtitleTracks&&hls.subtitleTracks.length)?'':'none';
+        ccApplyHls();buildCcMenu();
+      });
+      hls.on(Hls.Events.SUBTITLE_TRACK_SWITCH,function(){buildCcMenu()});
+      hls.on(Hls.Events.ERROR,onHlsError);
+      hls.loadSource(it.src);hls.attachMedia(video);
+    }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      nativeMode=true;shell.classList.add('stv-native');
+      video.controls=true;video.src=it.src;
+      video.addEventListener('loadedmetadata',function(){isLive=!isFinite(video.duration);if(video.textTracks.length){$('#stvCcBtn').style.display='';buildCcMenu()}}, {once:true});
+      tryPlay(muted);
+    }else{
+      showErr('متصفح غير مدعوم','هذا المتصفح لا يدعم تشغيل HLS. جرّب Chrome أو Safari حديثًا.');
+    }
+  }).catch(function(){showErr('تعذّر تحميل محرك البث','تحقّق من الاتصال بالإنترنت ثم أعد المحاولة.')});
+}
+
+/* ── المزوّد 2: MP4 مباشر (جودات متعددة + ترجمة VTT خارجية عبر Blob) ── */
+function mountMp4(it,muted){
+  curProvider='mp4';
+  var variants=it.variants&&it.variants.length>1?it.variants:null;
+  qualSrc={kind:'mp4',variants:variants};
+  var vsrc=(variants?variants[0]:it).src||it.src;
+  curVariant=0;
+  video.src=vsrc;
+  if(variants){$('#stvQualBtn').style.display='';buildQualityMenu()}
+  if(it.subs&&it.subs.length){
+    it.subs.forEach(function(s){
+      try{
+        var tr=d.createElement('track');tr.kind='subtitles';tr.label=s.label;tr.srclang=s.lang||'ar';
+        var u=null;try{u=URL.createObjectURL(new Blob([DEMO_AR_VTT],{type:'text/vtt;charset=utf-8'}));blobUrls.push(u)}catch(_){}
+        if(u)tr.src=u;
+        video.appendChild(tr);
+      }catch(_){}
+    });
+    $('#stvCcBtn').style.display='';
+  }
+  buildCcMenu();
+  tryPlay(muted);
+}
+
+/* ── المزوّد 3: YouTube عبر IFrame API الرسمية (ترجمة + مزامنة تحكم كاملة) ── */
+function mountYouTube(it,muted){
+  curProvider='youtube';
+  shell.classList.add('stv-embed');embedMode=true;
+  var seq=mountSeq; /* مراجعة T7 */
+  ytErrTimer=setTimeout(function(){
+    if(seq===mountSeq&&state.current===it&&curProvider==='youtube')showErr('تعذّر تحميل مشغل يوتيوب','الاتصال بطيء أو محجوب من شبكتك. أعد المحاولة أو افتح الفيديو على يوتيوب مباشرة.');
+  },16000);
+  ensureYT().then(function(YT){
+    if(seq!==mountSeq||state.current!==it){clearTimeout(ytErrTimer);return}
+    /* تفضيل الترجمة يُطبَّق عبر المعاملين الرسميين الموثّقين cc_load_policy وcc_lang_pref عند الإنشاء.
+       ملاحظة مثبتة بالتجربة المعزولة: مشغل يوتيوب الحديث لم يعد يكشف وحدة captions عبر getOptions()
+       فلا يمكن معرفة لغات الفيديو برمجيًا — لذا يُعرض زر CC دائمًا ليوتيوب ويطبّق التفضيل عند الإنشاء. */
+    var pv={autoplay:1,mute:muted?1:0,playsinline:1,rel:0,enablejsapi:1,origin:w.location.origin,cc_load_policy:ccPref.on?1:0};
+    if(ccPref.on&&ccPref.lang)pv.cc_lang_pref=ccPref.lang;
+    ytPlayer=new YT.Player('stvYtMount',{
+      videoId:it.src,host:'https://www.youtube.com',playerVars:pv,
+      events:{
+        onReady:function(e){
+          if(seq!==mountSeq||state.current!==it)return;
+          if($('#stvErr').classList.contains('show')){clearTimeout(ytErrTimer);return} /* مراجعة T7: لا صوت خلف شاشة الخطأ */
+          clearTimeout(ytErrTimer);showLoader(false);setEmbedControls(true);
+          e.target.playVideo();
+          if(muted)showUnmute(true);
+          setUi(true);
+          /* مجسّ توافر الترجمات: يوقظ وحدة captions رسميًا ليُطلق onApiChange حتى لو كان التفضيل «إيقاف» */
+          try{e.target.loadModule('captions')}catch(_){}
+          ccApplyYt();buildCcMenu();
+          startYtSync();
+        },
+        onApiChange:function(){ if(seq!==mountSeq||state.current!==it)return; ccApplyYt();buildCcMenu(); },
+        onStateChange:function(e){
+          if(seq!==mountSeq||state.current!==it)return;
+          if(e.data===YT.PlayerState.PLAYING){showLoader(false);setUi(true);setPlayIcon(true)}
+          if(e.data===YT.PlayerState.PAUSED)setPlayIcon(false);
+          if(e.data===YT.PlayerState.ENDED)onEnded();
+        },
+        onError:function(ev){
+          if(seq!==mountSeq||state.current!==it)return;
+          clearTimeout(ytErrTimer);
+          var msg={2:'معرّف الفيديو غير صالح.',5:'خطأ في مشغل HTML5 لهذا الفيديو.',100:'الفيديو غير موجود أو حُذف.',101:'ناشر الفيديو منع تضمينه خارج يوتيوب.',150:'ناشر الفيديو منع تضمينه خارج يوتيوب.',153:'يوتيوب يطلب تحققًا إضافيًا من هذا المصدر (قد يحدث في بعض الشبكات).'}[ev.data];
+          showErr('تعذّر تشغيل فيديو يوتيوب',msg||'حدث خطأ غير معروف في مشغل يوتيوب.','https://www.youtube.com/watch?v='+it.src);
+        }
+      }
+    });
+  }).catch(function(){
+    if(seq===mountSeq&&state.current===it)showErr('تعذّر تحميل مشغل يوتيوب','تعذّر تحميل واجهة يوتيوب من شبكتك. أعد المحاولة أو افتح الفيديو على يوتيوب مباشرة.');
+  });
+}
+
+/* ── المزوّد 4: DailyMotion عبر التضمين الرسمي ── */
+function mountDailymotion(it,muted){
+  curProvider='dailymotion';
+  embedMode=true;shell.classList.add('stv-embed');
+  setEmbedControls(false);
+  var allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+  embedBox.innerHTML='<iframe src="https://www.dailymotion.com/embed/video/'+encodeURIComponent(it.src)+'?autoplay=1&mute='+(muted?1:0)+'&queue-enable=0&sharing-enable=0&ui-logo=0" allow="'+allow+'" allowfullscreen loading="lazy"></iframe>';
+  showLoader(false);
+}
+
+/* ── المزوّد 5: OK.ru عبر التضمين الرسمي ── */
+function mountOkru(it,muted){
+  curProvider='okru';
+  embedMode=true;shell.classList.add('stv-embed');
+  setEmbedControls(false);
+  var allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+  embedBox.innerHTML='<iframe src="https://ok.ru/videoembed/'+encodeURIComponent(it.src)+'?autoplay=1" allow="'+allow+'" allowfullscreen loading="lazy"></iframe>';
+  showLoader(false);
+}
+
 function tryPlay(muted){
   video.muted=!!muted;video.volume=$('#stvVol').value/100;
   var p=video.play();
@@ -977,30 +1497,151 @@ function tryPlay(muted){
     if(muted)showUnmute(true);
   });
 }
-function playEmbed(kind,it,muted){
-  embedMode=true;shell.classList.add('stv-embed');
-  var url,allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
-  if(kind==='youtube'){
-    ensureYT().then(function(YT){
-      if(state.current!==it)return;
-      ytPlayer=new YT.Player('stvYtMount',{
-        videoId:it.src,host:'https://www.youtube.com',
-        playerVars:{autoplay:1,mute:muted?1:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1,origin:w.location.origin},
-        events:{
-          onReady:function(e){showLoader(false);e.target.playVideo();if(muted)showUnmute(true)},
-          onStateChange:function(e){ if(e.data===YT.PlayerState.PLAYING){showLoader(false);setUi(true)} },
-          onError:function(){showErr('تعذّر تشغيل فيديو يوتيوب','قد يكون تضمين هذا الفيديو معطّلًا من ناشره.')}
-        }
-      });
+
+/* ── الترجمة (CC): تطبيق موحّد على كل مزوّد ── */
+/* YouTube: loadModule/unloadModule/getOptions موثقة ضمن IFrame API،
+   وgetOption/setOption('captions',…) غير موثقة رسميًا في الجدول لكنها جزء من كود المشغل الرسمي —
+   نستخدمها بحذر مع معاملات cc_load_policy/cc_lang_pref الموثقة، ونُظهر ما لا يعمل بصدق. */
+function ccApplyYt(){
+  if(!ytPlayer)return;
+  try{
+    /* إظهار دائم ليوتيوب: الـ API الحديث لا يكشف توافر الترجمات (مثبت تجريبيًا) فلا نستطيع الإخفاء المشروط بصدق */
+    $('#stvCcBtn').style.display='';
+    if(ccPref.on){
+      try{ytPlayer.loadModule('captions')}catch(_){}
+      $('#stvCcBtn').classList.add('on');
+    }else{
+      try{ytPlayer.unloadModule('captions')}catch(_){}
+      $('#stvCcBtn').classList.remove('on');
+    }
+  }catch(_){}
+}
+function ccYtTracks(){
+  var list=[];
+  try{
+    if(!ytPlayer||typeof ytPlayer.getOption!=='function')return list;
+    var tl=ytPlayer.getOption('captions','tracklist',{includeAsr:true})||[];
+    tl.forEach(function(t){
+      var nm=t.languageName;
+      if(nm&&typeof nm==='object')nm=nm.displayName||(nm.run&&nm.run[0]&&nm.run[0].text)||t.languageCode;
+      list.push({code:t.languageCode,label:String(nm||t.languageCode),asr:t.kind==='asr'});
     });
-  }else if(kind==='dailymotion'){
-    embedBox.innerHTML='<iframe src="https://www.dailymotion.com/embed/video/'+encodeURIComponent(it.src)+'?autoplay=1" allow="'+allow+'" allowfullscreen loading="lazy"></iframe>';
-    showLoader(false);
-  }else{ /* okru */
-    embedBox.innerHTML='<iframe src="https://ok.ru/videoembed/'+encodeURIComponent(it.src)+'?autoplay=1" allow="'+allow+'" allowfullscreen loading="lazy"></iframe>';
-    showLoader(false);
+  }catch(_){}
+  return list;
+}
+function ccApplyHls(){
+  if(!hls)return;
+  try{
+    if(ccPref.on&&hls.subtitleTracks&&hls.subtitleTracks.length){
+      var idx=-1;
+      if(ccPref.lang){for(var i=0;i<hls.subtitleTracks.length;i++){if(hls.subtitleTracks[i].lang===ccPref.lang){idx=i;break}}}
+      hls.subtitleTrack=idx>=0?idx:0;
+      $('#stvCcBtn').classList.add('on');
+    }else{
+      hls.subtitleTrack=-1;
+      $('#stvCcBtn').classList.remove('on');
+    }
+  }catch(_){}
+}
+function buildCcMenu(){
+  var menu=$('#stvCcMenu');if(!menu)return;
+  menu.innerHTML='';
+  var mk=function(label,active,onpick,sub){
+    var b=d.createElement('button');b.setAttribute('role','menuitem');
+    if(active)b.className='on';
+    b.innerHTML='<span>'+esc(label)+(sub?' <small>'+esc(sub)+'</small>':'')+'</span>'+icon('check');
+    b.addEventListener('click',function(){onpick();buildCcMenu()});
+    menu.appendChild(b);
+  };
+  var tracks=[];
+  if(curProvider==='youtube'&&ytPlayer)tracks=ccYtTracks();
+  else if(curProvider==='hls'&&hls&&hls.subtitleTracks)tracks=hls.subtitleTracks.map(function(t,i){return {hlsIdx:i,code:t.lang||'',label:t.name||t.lang||('مسار '+(i+1))}});
+  else if(curProvider==='mp4'||nativeMode){
+    try{for(var i=0;i<video.textTracks.length;i++){var tt=video.textTracks[i];tracks.push({track:tt,code:tt.language||'',label:tt.label||tt.language||('مسار '+(i+1))})}}catch(_){}
+  }
+  if(curProvider==='youtube'&&!tracks.length){
+    /* يوتيوب الحديث لا يكشف قائمة اللغات عبر الـ API (مثبت تجريبيًا) — قائمة صادقة بخيارين + إفصاح */
+    mk('إيقاف الترجمة',!ccPref.on,function(){
+      ccPref={on:false,lang:''};saveCcPref();ccApplyYt();
+      toast('أُوقفت الترجمة — ستبقى موقفة لكل الفيديوهات الجديدة');
+    });
+    mk('تشغيل الترجمة'+(ccPref.lang?' ('+ccPref.lang+')':''),ccPref.on,function(){
+      ccPref={on:true,lang:ccPref.lang||''};saveCcPref();ccApplyYt();
+      toast('تشغيل الترجمة حسب لغات الفيديو المتاحة في مشغل يوتيوب');
+    });
+    var note=d.createElement('div');note.className='stv-cc-note';
+    note.textContent='ملاحظة: مشغل يوتيوب الحديث لا يتيح للصفحات الخارجية قراءة قائمة لغات الترجمة — اللغة المحفوظة تُطبَّق تلقائيًا عند فتح أي فيديو إن وُجدت ضمن لغاته.';
+    menu.appendChild(note);
+    return;
+  }
+  if(!tracks.length){
+    menu.innerHTML='<div class="stv-cc-note">لا توجد ترجمات متاحة لهذا الفيديو حاليًا — توفّرها ترجمات المصدر نفسه (أصلية أو تلقائية).</div>';
+    return;
+  }
+  mk('إيقاف الترجمة',!ccPref.on,function(){
+    ccPref={on:false,lang:''};saveCcPref();
+    if(curProvider==='youtube')ccApplyYt();
+    else if(curProvider==='hls'){try{hls.subtitleTrack=-1}catch(_){}}
+    else{try{for(var j=0;j<video.textTracks.length;j++)video.textTracks[j].mode='disabled'}catch(_){}}
+    $('#stvCcBtn').classList.remove('on');
+    toast('أُوقفت الترجمة — ستبقى موقفة لكل الفيديوهات الجديدة');
+  });
+  tracks.forEach(function(t){
+    var active=ccPref.on&&(ccPref.lang===(t.code||''));
+    mk(t.label+(t.asr?' (تلقائية)':''),active,function(){
+      ccPref={on:true,lang:t.code||''};saveCcPref();
+      if(curProvider==='youtube')ccApplyYt();
+      else if(curProvider==='hls'){try{hls.subtitleTrack=t.hlsIdx}catch(_){}}
+      else{try{for(var j=0;j<video.textTracks.length;j++)video.textTracks[j].mode=(video.textTracks[j]===t.track)?'showing':'disabled'}catch(_){}}
+      $('#stvCcBtn').classList.add('on');
+      toast('الترجمة: '+t.label);
+    });
+  });
+  if(curProvider==='youtube'){
+    var note=d.createElement('div');note.className='stv-cc-note';
+    note.textContent='اللغات يوفّرها الفيديو نفسه عبر مشغل يوتيوب الرسمي (ترجمات أصلية أو تلقائية ASR) — بعض الفيديوهات لا تتوفر لها ترجمات.';
+    menu.appendChild(note);
   }
 }
+function closeCc(){$('#stvCcMenu').classList.remove('open');$('#stvCcBtn').setAttribute('aria-expanded','false')}
+
+/* ── مزامنة شريط التحكم مع مشغل يوتيوب (getCurrentTime/getDuration رسمية) ── */
+function startYtSync(){
+  stopYtSync();
+  ytSyncTimer=setInterval(function(){
+    if(!ytPlayer||curProvider!=='youtube')return;
+    var t=0,dur=0,st=-1;
+    try{t=ytPlayer.getCurrentTime()||0;dur=ytPlayer.getDuration()||0;st=ytPlayer.getPlayerState()}catch(_){return}
+    if(dur>0&&isFinite(dur)){
+      $('#stvSeekRow').style.display='';
+      if(!seeking){$('#stvSeek').value=Math.round(t/dur*1000)}
+      $('#stvCur').textContent=fmtT(t);$('#stvDur').textContent=fmtT(dur);
+      if(st===1)saveProgress(t,dur); /* مراجعة T7: حفظ فقط أثناء التشغيل الفعلي لا أثناء الإيقاف */
+    }
+  },600);
+}
+function stopYtSync(){ if(ytSyncTimer){clearInterval(ytSyncTimer);ytSyncTimer=0} }
+
+/* ── حفظ موضع المشاهدة (لكل المزوّدين الذين يتيحون الموضع) ── */
+function saveProgress(t,dur){
+  var now=Date.now();
+  if(now-progTimer<3000||!state.current||state.current.kind==='channel')return;
+  if(t>25&&dur>0&&t<dur*.95){
+    progTimer=now;
+    state.prog[state.current.id]={t:t,d:dur,at:now,name:state.current.name,ep:state.current.ep||''};
+    store.set(STV_CONFIG.storage.prog,state.prog);
+  }
+}
+function onEnded(){
+  if(state.current){delete state.prog[state.current.id];store.set(STV_CONFIG.storage.prog,state.prog);renderContinue()}
+  /* الحلقة التالية تلقائيًا داخل المجموعة نفسها */
+  if(state.current&&state.current.group){
+    var list=state.items.filter(function(i){return i.group===state.current.group});
+    var idx=list.map(function(i){return i.id}).indexOf(state.current.id);
+    if(idx>-1&&list[idx+1]){toast('تشغيل الحلقة التالية…');playItem(list[idx+1])}
+  }
+}
+
 function onHlsError(ev,data){
   if(!data||!data.fatal)return;
   if(data.type===w.Hls.ErrorTypes.NETWORK_ERROR){
@@ -1020,32 +1661,52 @@ function onHlsError(ev,data){
   }
 }
 
-/* ── الجودة ── */
-function buildQualityMenu(h){
+/* ── الجودة: قائمة موحّدة لمستويات HLS أو ملفات MP4 المتعددة ── */
+function buildQualityMenu(){
   var menu=$('#stvQualMenu');menu.innerHTML='';
-  var cur=-2;
-  var mk=function(label,idx){
+  if(!qualSrc)return;
+  var mk=function(label,active,onpick){
     var b=d.createElement('button');b.setAttribute('role','menuitem');
+    if(active)b.className='on';
     b.innerHTML='<span>'+esc(label)+'</span>'+icon('check');
-    b.addEventListener('click',function(){
-      try{h.currentLevel=idx}catch(_){}
-      closeQual();updateQualLabel(h);toast('الجودة: '+label);
-    });
+    b.addEventListener('click',function(){onpick();buildQualityMenu();closeQual()});
     menu.appendChild(b);
   };
-  mk('تلقائي (تكيّفي)',-1);
-  var seen={};
-  var lvls=(h.levels||[]).map(function(l,i){return {i:i,h:l.height||0}}).filter(function(l){return l.h>0}).sort(function(a,b){return b.h-a.h});
-  lvls.forEach(function(l){
-    if(seen[l.h])return;seen[l.h]=1;
-    mk(l.h+'p',l.i);
-  });
-  updateQualLabel(h);
+  if(qualSrc.kind==='hls'&&hls){
+    mk('تلقائي (تكيّفي)',hls.autoLevelEnabled,function(){try{hls.currentLevel=-1}catch(_){}updateQualLabel();toast('الجودة: تلقائي')});
+    var seen={};
+    var lvls=(hls.levels||[]).map(function(l,i){return {i:i,h:l.height||0}}).filter(function(l){return l.h>0}).sort(function(a,b){return b.h-a.h});
+    lvls.forEach(function(l){
+      if(seen[l.h])return;seen[l.h]=1;
+      var idx=l.i;
+      mk(l.h+'p',!hls.autoLevelEnabled&&hls.currentLevel===idx,function(){try{hls.currentLevel=idx}catch(_){}updateQualLabel();toast('الجودة: '+l.h+'p')});
+    });
+  }else if(qualSrc.kind==='mp4'&&qualSrc.variants){
+    qualSrc.variants.forEach(function(v,i){
+      mk(v.label,i===curVariant,function(){
+        curVariant=i;
+        var t=video.currentTime,wasPaused=video.paused;
+        var expected=v.src;
+        video.src=expected;
+        try{video.load()}catch(_){}
+        video.addEventListener('loadedmetadata',function(){
+          if(video.src!==expected)return; /* مراجعة T7: أطفئ المستمع إذا تغيّر المصدر قبل اكتمال التحميل فلا قفز موضع */
+          try{video.currentTime=t}catch(_){}
+          if(!wasPaused)video.play().catch(function(){showCenter(true)});
+        },{once:true});
+        updateQualLabel();toast('الجودة: '+v.label);
+      });
+    });
+  }
+  updateQualLabel();
 }
-function updateQualLabel(h){
-  var btn=$('#stvQualBtn');if(!btn)return;
-  if(h&&h.autoLevelEnabled){btn.textContent='جودة: تلقائي'}
-  else if(h&&h.levels&&h.levels[h.currentLevel]&&h.levels[h.currentLevel].height){btn.textContent='جودة: '+h.levels[h.currentLevel].height+'p'}
+function updateQualLabel(){
+  var btn=$('#stvQualBtn');if(!btn||!qualSrc)return;
+  if(qualSrc.kind==='hls'&&hls){
+    btn.textContent=hls.autoLevelEnabled?'جودة: تلقائي':(hls.levels&&hls.levels[hls.currentLevel]&&hls.levels[hls.currentLevel].height?('جودة: '+hls.levels[hls.currentLevel].height+'p'):'جودة');
+  }else if(qualSrc.kind==='mp4'&&qualSrc.variants&&qualSrc.variants[curVariant]){
+    btn.textContent='جودة: '+qualSrc.variants[curVariant].label;
+  }
 }
 function closeQual(){$('#stvQualMenu').classList.remove('open');$('#stvQualBtn').setAttribute('aria-expanded','false')}
 
@@ -1064,6 +1725,7 @@ function toggleFullscreen(){
       if(p&&p.catch)p.catch(function(){
         /* رفض المتصفح → جرّب ملء الشاشة الأصلي للفيديو (iPhone) */
         if(video.webkitEnterFullscreen){try{video.webkitEnterFullscreen()}catch(_){toast('ملء الشاشة غير متاح حاليًا',true)}}
+        else if(embedMode)toast('على iPhone استخدم زر ملء الشاشة داخل مشغل المنصة نفسه',true);
         else toast('رفض المتصفح طلب ملء الشاشة',true);
       });
       return;
@@ -1071,7 +1733,8 @@ function toggleFullscreen(){
   }
   if(video.webkitEnterFullscreen){ try{video.webkitEnterFullscreen()}catch(_){toast('ملء الشاشة غير مدعوم هنا',true)} return }
   if(video.webkitSupportsFullscreen){ try{video.webkitEnterFullscreen()}catch(_){toast('ملء الشاشة غير مدعوم هنا',true)} return }
-  toast('ملء الشاشة غير مدعوم في هذا المتصفح',true);
+  if(embedMode)toast('استخدم زر ملء الشاشة داخل مشغل المنصة نفسه',true);
+  else toast('ملء الشاشة غير مدعوم في هذا المتصفح',true);
 }
 ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
   d.addEventListener(ev,function(){
@@ -1084,10 +1747,10 @@ function toggleFullscreen(){
 
 /* ── شريط التحكم: ربط الأحداث ── */
 function setPlayIcon(playing){$('#stvPlayIc').setAttribute('href',playing?'#i-pause':'#i-play')}
-video.addEventListener('play',function(){setPlayIcon(true);setUi(true)});
+video.addEventListener('play',function(){setPlayIcon(true);setUi(true);showCenter(false)});
 video.addEventListener('pause',function(){setPlayIcon(false);setUi(true);clearTimeout(uiTimer)});
 video.addEventListener('waiting',function(){showLoader(true)});
-video.addEventListener('playing',function(){showLoader(false);retryCount=0;$('#stvLoader span').textContent='جارٍ تحميل البث…'});
+video.addEventListener('playing',function(){showLoader(false);showCenter(false);retryCount=0;$('#stvLoader span').textContent='جارٍ تحميل البث…'});
 video.addEventListener('volumechange',function(){
   var ic=$('#stvVolIc');ic.setAttribute('href',video.muted||video.volume===0?'#i-mute':'#i-vol');
   if(!IS_IOS)$('#stvVol').value=video.muted?0:Math.round(video.volume*100);
@@ -1101,23 +1764,15 @@ video.addEventListener('timeupdate',function(){
   var s=$('#stvSeek');if(s&&!seeking){s.value=Math.round(video.currentTime/video.duration*1000)}
   $('#stvCur').textContent=fmtT(video.currentTime);$('#stvDur').textContent=fmtT(video.duration);
   /* حفظ موضع المشاهدة (الأفلام والمسلسلات فقط — ليس البث المباشر) */
-  var now=Date.now();
-  if(now-progTimer>3000&&state.current&&state.current.kind!=='channel'){
-    progTimer=now;
-    if(video.currentTime>25&&video.currentTime<video.duration*.95){
-      state.prog[state.current.id]={t:video.currentTime,d:video.duration,at:now,name:state.current.name,ep:state.current.ep||''};
-      store.set(STV_CONFIG.storage.prog,state.prog);
-    }
-  }
+  saveProgress(video.currentTime,video.duration);
 });
-video.addEventListener('ended',function(){
-  if(state.current){delete state.prog[state.current.id];store.set(STV_CONFIG.storage.prog,state.prog);renderContinue()}
-  /* الحلقة التالية تلقائيًا */
-  if(state.current&&state.current.group){
-    var list=state.items.filter(function(i){return i.group===state.current.group});
-    var idx=list.map(function(i){return i.id}).indexOf(state.current.id);
-    if(idx>-1&&list[idx+1]){toast('تشغيل الحلقة التالية…');playItem(list[idx+1])}
-  }
+video.addEventListener('ended',onEnded);
+/* عند جاهزية MP4: طبّق تفضيل الترجمة على المسارات الخارجية (لا نُفرض الترجمة إن أوقفها المستخدم) */
+video.addEventListener('loadedmetadata',function(){
+  try{
+    var n=video.textTracks?video.textTracks.length:0;
+    if(n&&curProvider!=='hls'){for(var i=0;i<n;i++){video.textTracks[i].mode=(ccPref.on&&i===0)?'showing':'disabled'}}
+  }catch(_){}
 });
 /* لمس الفيديو = إظهار/إخفاء عناصر التحكم (بدون حجب) */
 var lastTap=0;
@@ -1129,23 +1784,74 @@ shell.addEventListener('click',function(e){
   lastTap=now;
   shell.classList.contains('stv-ui')?shell.classList.remove('stv-ui'):setUi(true);
 });
-$('#stvPlayBtn').addEventListener('click',function(){ if(embedMode&&ytPlayer){ytPlayer.getPlayerState()===1?ytPlayer.pauseVideo():ytPlayer.playVideo();return} video.paused?video.play().catch(function(){showCenter(true)}):video.pause() });
-$('#stvCenterPlay button').addEventListener('click',function(){showCenter(false);video.play().catch(function(){})});
-$('#stvMuteBtn').addEventListener('click',function(){ video.muted=!video.muted; if(!video.muted&&video.volume===0)video.volume=.6; showUnmute(false); if(embedMode&&ytPlayer){video.muted?ytPlayer.mute():ytPlayer.unMute()} });
-$('#stvVol').addEventListener('input',function(){ video.muted=this.value==0; video.volume=this.value/100; });
-$('#stvUnmute').addEventListener('click',function(){ video.muted=false; if(embedMode&&ytPlayer)ytPlayer.unMute(); showUnmute(false); });
+function togglePlay(){
+  if(curProvider==='youtube'&&ytPlayer){
+    try{ (ytPlayer.getPlayerState()===1)?ytPlayer.pauseVideo():ytPlayer.playVideo() }catch(_){}
+    return;
+  }
+  if(embedMode)return; /* DailyMotion/OK.ru: التحكم من واجهة مشغلهما الداخلية */
+  video.paused?video.play().catch(function(){showCenter(true)}):video.pause();
+}
+$('#stvPlayBtn').addEventListener('click',togglePlay);
+$('#stvCenterPlay button').addEventListener('click',function(){
+  showCenter(false);
+  if(embedMode){ if(curProvider==='youtube'&&ytPlayer){try{ytPlayer.playVideo()}catch(_){}} return }
+  video.play().catch(function(){});
+});
+$('#stvMuteBtn').addEventListener('click',function(){
+  if(curProvider==='youtube'&&ytPlayer){
+    var m=false;try{m=ytPlayer.isMuted()}catch(_){}
+    try{ m?ytPlayer.unMute():ytPlayer.mute() }catch(_){}
+    if(m){var v=$('#stvVol').value/100;try{ytPlayer.setVolume(Math.round(v*100))}catch(_){}}
+    showUnmute(false);
+    setTimeout(function(){var m2=false;try{m2=ytPlayer.isMuted()}catch(_){}$('#stvVolIc').setAttribute('href',m2?'#i-mute':'#i-vol')},150);
+    return;
+  }
+  video.muted=!video.muted; if(!video.muted&&video.volume===0)video.volume=.6;
+  showUnmute(false);
+});
+$('#stvVol').addEventListener('input',function(){
+  if(curProvider==='youtube'&&ytPlayer){
+    try{ytPlayer.setVolume(Number(this.value)); if(this.value>0)ytPlayer.unMute()}catch(_){}
+    return;
+  }
+  video.muted=this.value==0; video.volume=this.value/100;
+});
+$('#stvUnmute').addEventListener('click',function(){
+  if(curProvider==='youtube'&&ytPlayer){try{ytPlayer.unMute();ytPlayer.setVolume(60)}catch(_){} $('#stvVol').value=60;}
+  else{ video.muted=false; if(video.volume===0){video.volume=.6;$('#stvVol').value=60} }
+  showUnmute(false);
+});
 $('#stvFsBtn').addEventListener('click',toggleFullscreen);
 $('#stvFavBtn').addEventListener('click',function(){ if(state.current&&!state.current.soon)toggleFav(state.current.id) });
 $('#stvQualBtn').addEventListener('click',function(e){e.stopPropagation();var m=$('#stvQualMenu');var on=m.classList.toggle('open');this.setAttribute('aria-expanded',on)});
+$('#stvCcBtn').addEventListener('click',function(e){e.stopPropagation();var m=$('#stvCcMenu');var on=m.classList.toggle('open');this.setAttribute('aria-expanded',on)});
 d.addEventListener('click',function(e){ if(!e.target.closest('#stvQualMenu,#stvQualBtn'))closeQual() });
+d.addEventListener('click',function(e){ if(!e.target.closest('#stvCcMenu,#stvCcBtn'))closeCc() });
+/* أزرار صندوق الخطأ */
+$('#stvErrRetry').addEventListener('click',function(){ hideErr(); if(state.current)playItem(state.current) });
+$('#stvErrOther').addEventListener('click',function(){ hideErr(); showIdle(true); state.current=null; try{d.title='سوفتارا TV — مركز التلفزيون والترفيه'}catch(_){} });
 /* شريط التقدم */
 var seeking=false;
-$('#stvSeek').addEventListener('input',function(){seeking=true;$('#stvCur').textContent=fmtT(this.value/1000*video.duration)});
-$('#stvSeek').addEventListener('change',function(){seeking=false;try{video.currentTime=this.value/1000*video.duration}catch(_){}});
+$('#stvSeek').addEventListener('input',function(){
+  seeking=true;
+  var dur=video.duration;
+  if(curProvider==='youtube'&&ytPlayer){try{dur=ytPlayer.getDuration()||0}catch(_){}}
+  $('#stvCur').textContent=fmtT(this.value/1000*(dur||0));
+});
+$('#stvSeek').addEventListener('change',function(){
+  seeking=false;
+  var frac=this.value/1000;
+  if(curProvider==='youtube'&&ytPlayer){try{ytPlayer.seekTo(frac*(ytPlayer.getDuration()||0),true)}catch(_){}}
+  else try{video.currentTime=frac*video.duration}catch(_){}
+});
 /* PiP */
 function pipAvailable(){return !IS_IOS&&d.pictureInPictureEnabled&&('pictureInPictureEnabled' in d)}
 if(pipAvailable()){ $('#stvPipBtn').style.display='';$('#stvPipBtn2').style.display=''; }
-function togglePip(){ if(d.pictureInPictureElement){d.exitPictureInPicture()} else if(pipAvailable()&&video.src){video.requestPictureInPicture().catch(function(){toast('تعذّر فتح الصورة داخل صورة',true)})} }
+function togglePip(){
+  if(d.pictureInPictureElement){d.exitPictureInPicture()}
+  else if(pipAvailable()&&video.src){video.requestPictureInPicture().catch(function(){toast('تعذّر فتح الصورة داخل صورة',true)})}
+  else if(!video.src){toast('الصورة داخل صورة متاحة مع مشغّل الصفحة (HLS/MP4) فقط — التضمينات الخارجية يديرها مشغّل المنصة')} }
 $('#stvPipBtn').addEventListener('click',togglePip);
 $('#stvPipBtn2').addEventListener('click',togglePip);
 
@@ -1155,6 +1861,8 @@ function setNow(it){
   $('#stvNowName').textContent=it.name+(it.ep?' — '+it.ep:'');
   $('#stvLiveChip').style.display=(it.kind==='channel'&&!it.soon)?'':'none';
   $('#stvHd').style.display=it.hd?'':'none';
+  var pv=$('#stvProv');
+  if(pv){var p=PROVIDERS[it.type];if(p){pv.textContent=p.label;pv.style.display=''}else{pv.style.display='none'}}
 }
 function savePlaylistFor(it){
   if(it.kind==='channel'){ state.playlist=state.items.filter(function(i){return i.kind==='channel'&&!i.soon}) }
@@ -1225,9 +1933,11 @@ var TABS=[
   {id:'series',name:'المسلسلات',ic:'series'},
   {id:'program',name:'البرامج',ic:'clap'},
   {id:'wrestling',name:'المصارعة',ic:'zap'},
+  {id:'docs',name:'وثائقيات',ic:'book'},
+  {id:'kids',name:'أطفال',ic:'kid'},
   {id:'favs',name:'المفضلة',ic:'heart'}
 ];
-var TAB_TITLES={channel:'البث المباشر',movie:'الأفلام',series:'المسلسلات',program:'البرامج',wrestling:'المصارعة',favs:'المفضلة'};
+var TAB_TITLES={channel:'البث المباشر',movie:'الأفلام',series:'المسلسلات',program:'البرامج',wrestling:'المصارعة',docs:'وثائقيات',kids:'أطفال',favs:'المفضلة'};
 function renderTabs(){
   var box=$('#stvTabs');box.innerHTML='';
   TABS.forEach(function(t){
@@ -1237,7 +1947,7 @@ function renderTabs(){
     b.dataset.tab=t.id;
     b.innerHTML=icon(t.ic)+'<span>'+t.name+'</span>'+(t.id==='favs'?'<span class="cnt">'+state.favs.length+'</span>':'');
     b.addEventListener('click',function(){
-      state.tab=t.id;state.query='';$('#stvSearch').value='';
+      state.tab=t.id;state.query='';state.chFilter='الكل';$('#stvSearch').value='';
       renderTabs();renderTabFilters();renderGrid();
       if(t.id!=='channel'){ $('#stvGrid').scrollIntoView({behavior:'smooth',block:'start'}) }
     });
@@ -1257,8 +1967,25 @@ function renderTabFilters(){
     b.addEventListener('click',function(){state.chFilter=cat;renderTabFilters();renderGrid()});box.appendChild(b);
   });
 }
+/* بطاقات المجموعات: مسلسل/قائمة تظهر كبطاقة واحدة تفتح ورقة التفاصيل */
+var GROUP_KINDS={series:1,program:1,wrestling:1,kids:1};
+function groupCard(gid){
+  var g=STV_DATA.groups[gid];
+  return {isGroup:true,id:gid,kind:(g.kind||'series'),name:g.name,cat:g.cat,year:g.year,poster:g.poster,demo:g.demo,desc:g.desc,total:g.total||0};
+}
+function groupCardsFor(kind){
+  var out=[];
+  Object.keys(STV_DATA.groups).forEach(function(gid){ if((STV_DATA.groups[gid].kind||'series')===kind)out.push(groupCard(gid)) });
+  state.items.forEach(function(i){ if(i.kind===kind&&!i.group&&!i.soon)out.push(i) });
+  return out;
+}
 function viewItems(){
-  if(state.tab==='favs')return state.items.filter(function(i){return isFav(i.id)});
+  if(state.tab==='favs'){
+    var out=state.items.filter(function(i){return isFav(i.id)});
+    Object.keys(STV_DATA.groups).forEach(function(gid){ if(isFav(gid))out.push(groupCard(gid)) });
+    return out;
+  }
+  if(GROUP_KINDS[state.tab])return groupCardsFor(state.tab);
   return state.items.filter(function(i){return i.kind===state.tab});
 }
 /* الشبكة */
@@ -1268,9 +1995,17 @@ function renderGrid(){
   var q=(state.query||'').trim().toLowerCase();
   var title=$('#stvGridTitle'),count=$('#stvGridCount');
   if(q){
-    items=state.items.filter(function(i){
-      return (i.name+' '+(i.cat||'')+' '+(i.country||'')+' '+(i.desc||'')+' '+(i.ep||'')).toLowerCase().indexOf(q)>-1;
+    var matched=state.items.filter(function(i){
+      /* مراجعة T7: إذا طابقت المجموعة نفسها في البحث تُستبعد حلقاتها من النتائج فلا ازدواجية عرض */
+      if(i.group){ var gg=STV_DATA.groups[i.group]; if(gg&&(gg.name+' '+(gg.cat||'')+' '+(gg.desc||'')).toLowerCase().indexOf(q)>-1)return false }
+      return (i.name+' '+(i.cat||'')+' '+(i.country||'')+' '+(i.desc||'')+' '+(i.ep||'')+' '+(i.durText||'')).toLowerCase().indexOf(q)>-1;
     });
+    var gc=[];
+    Object.keys(STV_DATA.groups).forEach(function(gid){
+      var g=STV_DATA.groups[gid];
+      if((g.name+' '+(g.cat||'')+' '+(g.desc||'')).toLowerCase().indexOf(q)>-1)gc.push(groupCard(gid));
+    });
+    items=gc.concat(matched);
     title.textContent='نتائج البحث عن: «'+state.query+'»';
     count.textContent=items.length+' نتيجة';
   }else{
@@ -1290,20 +2025,30 @@ function renderGrid(){
   });
 }
 function makeCard(it,channelStyle){
-  var card=d.createElement('button');
-  card.className='stv-card'+(channelStyle?'':' poster')+(state.current&&state.current.id===it.id?' playing':'');
+  /* مراجعة T7: زر داخل زر مخالف لنموذج محتوى HTML — البطاقة الآن div قابل للوحة المفاتيح */
+  var card=d.createElement('div');
+  card.setAttribute('role','button');card.tabIndex=0;
+  card.setAttribute('aria-label',it.name+(it.isGroup?' — عرض الحلقات':' — تشغيل'));
+  card.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click()} });
+  var playing=state.current&&(state.current.id===it.id||state.current.group===it.id);
+  card.className='stv-card'+(channelStyle?'':' poster')+(playing?' playing':'');
   var media;
   if(channelStyle){
     media='<span class="stv-card-av" style="background:'+gradCss(it.cat)+'">'+esc(it.name.trim().charAt(0))+'</span>';
   }else{
-    media='<img loading="lazy" alt="'+esc(it.name)+'" src="'+posterSVG(it,600,900)+'">';
+    var psrc=it.poster||it.thumb||posterSVG(it,600,900);
+    media='<img loading="lazy" alt="'+esc(it.name)+'" src="'+esc(psrc)+'">';
   }
   var badges='';
   if(it.kind==='channel'&&!it.soon)badges+='<span class="stv-badge live">● مباشر</span>';
   if(it.hd)badges+='<span class="stv-badge hd">HD</span>';
   if(it.demo)badges+='<span class="stv-badge demo">تجريبي</span>';
-  if(it.ep)badges+='<span class="stv-badge ep">'+esc(it.ep)+'</span>';
+  if(it.isGroup)badges+='<span class="stv-badge ep">'+(it.total||0)+' حلقة</span>';
+  else if(it.ep)badges+='<span class="stv-badge ep">'+esc(it.ep)+'</span>';
+  if(it.durText&&!it.isGroup)badges+='<span class="stv-badge dur">'+esc(it.durText)+'</span>';
   if(it.soon)badges+='<span class="stv-badge demo">قريبًا</span>';
+  var provLbl=PROVIDERS[it.type]?PROVIDERS[it.type].label:'';
+  if(provLbl)badges+='<span class="stv-badge prov">'+esc(provLbl)+'</span>';
   card.innerHTML=
     '<span class="stv-card-media">'+media+
       '<span class="stv-card-badges">'+badges+'</span>'+
@@ -1312,10 +2057,13 @@ function makeCard(it,channelStyle){
     '<span class="stv-card-body"><b>'+esc(it.name)+'</b><small>'+esc([it.year,it.cat,it.country,(it.desc||'').slice(0,42)].filter(Boolean).join(' · '))+'</small></span>';
   card.querySelector('.stv-fav').addEventListener('click',function(e){e.stopPropagation();toggleFav(it.id)});
   card.addEventListener('click',function(){
+    if(it.isGroup){openDetail(it.id);return}
     playItem(it);
     if(w.innerWidth<1024)setTimeout(function(){shell.scrollIntoView({behavior:'smooth',block:'start'})},120);
     renderChLists();
   });
+  var im=card.querySelector('img');
+  if(im)im.addEventListener('error',function(){this.onerror=null;this.src=posterSVG(it,600,900)});
   return card;
 }
 
@@ -1329,10 +2077,13 @@ function renderContinue(){
   sec.style.display='';box.classList.add('show');box.innerHTML='';
   list.forEach(function(o){
     var card=d.createElement('button');card.className='stv-card';
-    card.innerHTML='<span class="stv-card-media"><img loading="lazy" alt="'+esc(o.it.name)+'" src="'+posterSVG(o.it,600,340)+'"></span>'+
+    var psrc=o.it.poster||o.it.thumb||posterSVG(o.it,600,340);
+    card.innerHTML='<span class="stv-card-media"><img loading="lazy" alt="'+esc(o.it.name)+'" src="'+esc(psrc)+'"></span>'+
       '<span class="stv-card-body"><b>'+esc(o.it.name)+'</b><small>'+esc((o.it.ep?o.it.ep+' · ':'')+'من '+fmtT(o.p.t)+' · '+fmtAgo(o.p.at))+'</small></span>'+
       '<span class="stv-prog"><i style="width:'+Math.min(100,Math.round(o.p.t/o.p.d*100))+'%"></i></span>';
     card.addEventListener('click',function(){playItem(o.it)});
+    var im=card.querySelector('img');
+    if(im)im.addEventListener('error',function(){this.onerror=null;this.src=posterSVG(o.it,600,340)});
     box.appendChild(card);
   });
 }
@@ -1373,16 +2124,24 @@ $('#stvThemeBtn').addEventListener('click',function(){
 d.addEventListener('keydown',function(e){
   var tag=(e.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='textarea')return;
+  /* Space/Enter تُفعّل العنصر المركّز نفسه (زر/تبويب/قائمة) — لا نختطفها لمشغل الفيديو (مراجعة T7) */
+  if(e.key===' '&&e.target.closest('button,a,[role="tab"],[role="menuitem"]'))return;
   if(e.key==='/' ){e.preventDefault();$('#stvSearchWrap').classList.add('open');$('#stvSearch').focus();return}
-  if(embedMode)return;
+  if(e.key==='Escape'){closeDetail();return}
+  if(embedMode&&curProvider!=='youtube')return;
   switch(e.key){
-    case ' ':case 'k':e.preventDefault();video.paused?video.play().catch(function(){showCenter(true)}):video.pause();break;
+    case ' ':case 'k':e.preventDefault();togglePlay();break;
     case 'f':toggleFullscreen();break;
-    case 'm':video.muted=!video.muted;break;
+    case 'm':$('#stvMuteBtn').click();break;
     case 'n':step(1);break;
     case 'p':step(-1);break;
-    case 'ArrowUp':e.preventDefault();video.muted=false;video.volume=Math.min(1,video.volume+.1);break;
-    case 'ArrowDown':e.preventDefault();video.volume=Math.max(0,video.volume-.1);break;
+    case 'ArrowUp':case 'ArrowDown':{
+      e.preventDefault();
+      var dir=e.key==='ArrowUp'?10:-10;
+      var v=Math.max(0,Math.min(100,Number($('#stvVol').value)+dir));
+      $('#stvVol').value=v;$('#stvVol').dispatchEvent(new Event('input'));
+      break;
+    }
   }
 });
 /* حفظ الموضع عند مغادرة الصفحة */
@@ -1393,29 +2152,159 @@ d.addEventListener('visibilitychange',function(){
   }
 });
 
+/* ─────────── 6ب) ورقة تفاصيل العنوان (مواسم/حلقات/مشابه) ─────────── */
+var detailGid=null,detailSeason=0;
+function firstWatchableEp(gid){
+  var list=state.items.filter(function(i){return i.group===gid});
+  var best=null;
+  list.forEach(function(e){ if(state.prog[e.id]&&(!best||state.prog[e.id].at>state.prog[best.id].at))best=e });
+  return best||list[0];
+}
+function updateDetailPlayLbl(gid){
+  var lbl='تشغيل';
+  var best=firstWatchableEp(gid);
+  if(best&&state.prog[best.id])lbl='متابعة — '+best.ep;
+  else if(best)lbl='تشغيل — '+best.ep;
+  $('#stvDetailPlayLbl').textContent=lbl;
+}
+function openDetail(gid){
+  var g=STV_DATA.groups[gid];if(!g)return;
+  detailGid=gid;detailSeason=0;
+  var card={name:g.name,cat:g.cat,year:g.year,kind:g.kind||'series'};
+  var hero=$('#stvDetailHero');
+  hero.innerHTML=g.poster?'<img alt="'+esc(g.name)+'" src="'+esc(g.poster)+'">':'<img alt="'+esc(g.name)+'" src="'+posterSVG(card,900,420)+'">';
+  var hImg=hero.querySelector('img');
+  if(hImg)hImg.addEventListener('error',function(){this.onerror=null;this.src=posterSVG(card,900,420)});
+  $('#stvDetailName').textContent=g.name;
+  var chips=[];
+  if(g.total)chips.push('<span class="hot">'+g.total+' حلقة</span>');
+  if(g.year)chips.push('<span>'+esc(g.year)+'</span>');
+  if(g.cat)chips.push('<span>'+esc(g.cat)+'</span>');
+  if(g.playlist)chips.push('<span>قائمة أصلية على المنصة</span>');
+  if(g.demo)chips.push('<span class="hot">تجريبي</span>');
+  $('#stvDetailMeta').innerHTML=chips.join('');
+  $('#stvDetailDesc').textContent=g.desc||'';
+  $('#stvDetailSrc').innerHTML=icon('info')+'<span>'+esc(g.srcNote||'مصدر المحتوى مرفق مع كل عنصر')+'</span>';
+  $('#stvDetailPlay').onclick=function(){ var first=firstWatchableEp(gid); closeDetail(); if(first)playItem(first) };
+  updateDetailPlayLbl(gid);
+  var fb=$('#stvDetailFav');
+  fb.onclick=function(){ toggleFav(gid); fb.classList.toggle('is-fav',isFav(gid)) };
+  fb.classList.toggle('is-fav',isFav(gid));
+  renderDetailSeasons(gid);renderDetailEps(gid);renderDetailSimilar(gid);
+  var dd=$('#stvDetail');dd.classList.add('open');dd.setAttribute('aria-hidden','false');
+  try{d.body.style.overflow='hidden'}catch(_){}
+}
+function closeDetail(){
+  var dd=$('#stvDetail');if(!dd.classList.contains('open'))return;
+  dd.classList.remove('open');dd.setAttribute('aria-hidden','true');
+  try{d.body.style.overflow=''}catch(_){}
+  detailGid=null;
+}
+function renderDetailSeasons(gid){
+  var g=STV_DATA.groups[gid];var box=$('#stvDetailSeasons');box.innerHTML='';
+  if(!g||!g.seasons||g.seasons.length<2)return;
+  g.seasons.forEach(function(se,si){
+    var b=d.createElement('button');b.className=si===detailSeason?'on':'';
+    b.textContent=se.name+' ('+(se.eps?se.eps.length:0)+')';
+    b.addEventListener('click',function(){detailSeason=si;renderDetailSeasons(gid);renderDetailEps(gid)});
+    box.appendChild(b);
+  });
+}
+function renderDetailEps(gid){
+  var g=STV_DATA.groups[gid];var box=$('#stvDetailEps');box.innerHTML='';
+  if(!g)return;
+  var se=(g.seasons||[])[detailSeason]||{eps:[]};
+  se.eps.forEach(function(e,i){
+    var epId=gid+'-s'+(detailSeason+1)+'e'+(i+1);
+    var it=null;
+    for(var k=0;k<state.items.length;k++)if(state.items[k].id===epId){it=state.items[k];break}
+    var b=d.createElement('button');b.className='stv-detal'+(state.current&&state.current.id===epId?' on':'');
+    var p=state.prog[epId];
+    var pct=p?Math.min(100,Math.round(p.t/p.d*100)):0;
+    b.innerHTML='<span class="th">'+((e.thumb||g.poster)?'<img loading="lazy" alt="'+esc(e.title||'')+'" src="'+esc(e.thumb||g.poster)+'">':'')
+      +'<span class="stv-badge dur">'+esc(e.durText||'')+'</span>'
+      +(pct?'<span class="stv-prog"><i style="width:'+pct+'%"></i></span>':'')+'</span>'
+      +'<span class="tx"><b>الحلقة '+(i+1)+'</b><small>'+esc(e.title||'')+'</small></span>';
+    b.addEventListener('click',function(){ closeDetail(); if(it)playItem(it) });
+    var im=b.querySelector('img');
+    if(im)im.addEventListener('error',function(){this.onerror=null;this.src=posterSVG({name:g.name,cat:g.cat,kind:g.kind||'series'},640,360)});
+    box.appendChild(b);
+  });
+}
+function renderDetailSimilar(gid){
+  var g=STV_DATA.groups[gid];var box=$('#stvDetailSimilar');
+  if(!g){box.innerHTML='';return}
+  var sims=[];
+  Object.keys(STV_DATA.groups).forEach(function(other){
+    var og=STV_DATA.groups[other];
+    if(other!==gid&&og.cat===g.cat)sims.push({gid:other,g:og});
+  });
+  state.items.forEach(function(i){
+    if(!i.group&&i.cat===g.cat&&i.poster&&sims.length<8)sims.push({item:i});
+  });
+  if(!sims.length){box.innerHTML='';return}
+  box.innerHTML='<h4>محتوى مشابه</h4>';
+  var row=d.createElement('div');row.className='stv-simil-row';
+  sims.slice(0,8).forEach(function(s){
+    var b=d.createElement('button');b.className='stv-simil';
+    var nm=s.g?s.g.name:s.item.name;
+    var po=s.g?s.g.poster:s.item.poster;
+    b.innerHTML='<img loading="lazy" alt="'+esc(nm)+'" src="'+esc(po||posterSVG(s.g?{name:nm,cat:s.g.cat,kind:s.g.kind}:s.item,300,450))+'"><b>'+esc(nm)+'</b>';
+    b.addEventListener('click',function(){ if(s.g)openDetail(s.gid); else {closeDetail();playItem(s.item)} });
+    row.appendChild(b);
+  });
+  box.appendChild(row);
+}
+$('#stvDetailClose').addEventListener('click',closeDetail);
+$('#stvDetailBack').addEventListener('click',closeDetail);
+
 /* ─────────── 7) شريط الأخبار ─────────── */
 function renderTicker(){
   var track=$('#stvTickerTrack');if(!track)return;
-  var html=state.items&&STV_DATA.news?STV_DATA.news:[];
-  var chunk=html.map(function(n){return '<span>'+esc(n)+'<i class="sep"></i></span>'}).join('');
-  track.innerHTML=chunk+chunk; /* نسختان للتمرير السلس */
-  track.style.setProperty('--tick-dur',Math.max(30,STV_DATA.news.length*9)+'s');
+  var list=STV_DATA.news||[];
+  var chunk=list.map(function(n){return '<span>'+esc(n)+'<i class="sep"></i></span>'}).join('');
+  /* مراجعة T7: النسخة المكررة للتمرير السلس مخفية عن قارئات الشاشة والأصل مقروء */
+  track.innerHTML=chunk+'<span aria-hidden="true" style="display:contents">'+chunk+'</span>';
+  track.style.setProperty('--tick-dur',Math.max(30,list.length*9)+'s');
 }
 
-/* ─────────── 8) البدء ─────────── */
+/* ─────────── 8) البدء: المقدمة الافتتاحية ثم التشغيل الافتراضي ─────────── */
+/* المقدمة: SVG/CSS خالص (بديل ثابت مضمون — لا فيديو خارجي ولا صوت ولا أثر على سرعة الفتح)،
+   تُعرض مرة واحدة في الجلسة، قابلة للتخطي، وتحترم تفضيل تقليل الحركة */
+function bootDefault(){
+  if(state.current)return;
+  if(STV_CONFIG.autoplayDefault){
+    var featured=state.items.filter(function(i){return i.featured})[0]||state.items.filter(function(i){return i.kind==='channel'})[0];
+    if(featured){playItem(featured,{muted:true});return}
+  }
+  showIdle(true); /* مراجعة T7: شاشة بداية رشيقة إذا عُطّل التشغيل التلقائي أو لا توجد قنوات */
+}
+function maybeIntro(){
+  var el=$('#stvIntro');
+  if(!el){bootDefault();return}
+  var seen=false;
+  try{seen=sessionStorage.getItem('stv_intro_done')==='1'}catch(_){}
+  if(seen){ if(el.parentNode)el.parentNode.removeChild(el); bootDefault(); return }
+  el.classList.add('show');el.setAttribute('aria-hidden','false');
+  var done=false;
+  var finish=function(){
+    if(done)return;done=true;
+    try{sessionStorage.setItem('stv_intro_done','1')}catch(_){}
+    el.classList.add('out');el.setAttribute('aria-hidden','true');
+    setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el) },480);
+    bootDefault();
+  };
+  $('#stvIntroSkip').addEventListener('click',finish);
+  var reduce=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(finish,reduce?1500:5600);
+}
 function init(){
   applyTheme();renderTicker();renderTabs();renderChLists();renderTabFilters();renderGrid();renderContinue();
   $('#stvStartBtn').addEventListener('click',function(){
     var featured=state.items.filter(function(i){return i.kind==='channel'})[0];
     if(featured){playItem(featured,{muted:false});state.muted=false}
   });
-  if(STV_CONFIG.autoplayDefault){
-    setTimeout(function(){
-      if(state.current)return;
-      var featured=state.items.filter(function(i){return i.featured})[0]||state.items.filter(function(i){return i.kind==='channel'})[0];
-      if(featured){playItem(featured,{muted:true})}
-    },900);
-  }
+  maybeIntro();
 }
 if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init);else init();
 })();
