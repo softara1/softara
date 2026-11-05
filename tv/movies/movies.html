@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!--
+  ═════════════════════════════════════════════════════════════════
+  سوفتارا Media v3.0.0 — نسخة معاينة مستقلة بمسارات نسبية (للفحص المحلي)
+  نسخة المنتدى (روابط jsDelivr) في مجلد forum/softara-movies-forum.html
+  ★ هذه الصفحة هيكل فقط؛ كل الأنماط والمنطق والبيانات مستضافة خارجيًا:
+    • الأنماط   : css/softara-movies.css
+    • الأيقونات : ../shared/js/softara-icons.js
+    • المشغل    : js/softara-movies-player.js  (مشغل أحادي المصدر)
+    • المنطق    : js/softara-movies-app.js
+    • القنوات   : data/softara-movies-channels.js (مكتبات قابلة للتحديث)
+    • البيانات  : data/softara-movies-data.js     (أضف المحتوى هنا)
+  ═════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0f0d" id="stmMetaTheme">
+<meta name="description" content="سوفتارا Media — منصة الأفلام والمسلسلات والوثائقيات ومكتبات القنوات الرسمية بتجربة مشاهدة سريعة متوافقة مع الهاتف">
+<title>سوفتارا Media — الأفلام والمسلسلات والمكتبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="css/softara-movies.css">
+</head>
+<body>
+
+<!-- ═══ المقدمة الافتتاحية (مرة كل جلسة · قابلة للتخطي) ═══ -->
+<div class="stm-intro" id="stmIntro" role="dialog" aria-label="مقدمة سوفتارا Media" aria-hidden="true">
+  <div class="stm-intro-bg" aria-hidden="true"></div>
+  <div class="stm-intro-in">
+    <svg class="stm-intro-logo" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><linearGradient id="stmIntroG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs>
+      <rect class="il-frame" x="12" y="30" width="96" height="66" rx="13" fill="none" stroke="url(#stmIntroG)" stroke-width="5"/>
+      <path class="il-ant" d="M47 30 60 12l13 18" fill="none" stroke="url(#stmIntroG)" stroke-width="5" stroke-linecap="round"/>
+      <path class="il-play" d="M52 48v30l26-15Z" fill="url(#stmIntroG)"/>
+    </svg>
+    <div class="stm-intro-word" id="stmIntroWord">سوفتارا <b>Media</b></div>
+    <div class="stm-intro-sub" id="stmIntroSub">أفلام · مسلسلات · وثائقيات · قرآن · كرتون · رياضة</div>
+  </div>
+  <button class="stm-intro-skip" id="stmIntroSkip">تخطي <svg class="ic" style="width:15px;height:15px"><use href="#i-chev-l"/></svg></button>
+</div>
+
+<div class="stm-app">
+
+  <!-- ═══ الترويسة ═══ -->
+  <header class="stm-header">
+    <div class="stm-container stm-header-in">
+      <div class="stm-brand">
+        <svg class="stm-brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <defs><linearGradient id="stmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+          <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stmG)"/>
+          <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+          <circle cx="36.5" cy="11.5" r="4.4" fill="#04241b"/><path d="M35 11.6l2.2 1.4V10.2Z" fill="#2dd4bf"/>
+        </svg>
+        <div class="stm-brand-txt">
+          <b>سوفتارا<i> Media</i></b>
+          <span id="stmBrandSub">منصة الأفلام والمسلسلات والمكتبات — منتدى سوفتارا</span>
+        </div>
+      </div>
+      <div class="stm-header-tools">
+        <button class="stm-icon-btn" id="stmSearchBtn" aria-label="بحث في المكتبات" aria-expanded="false"><svg class="ic"><use href="#i-search"/></svg></button>
+        <button class="stm-icon-btn" id="stmThemeBtn" aria-label="تبديل الوضع الليلي/النهاري"><svg class="ic" id="stmThemeIc"><use href="#i-sun"/></svg></button>
+      </div>
+    </div>
+    <div class="stm-searchwrap" id="stmSearchWrap">
+      <div class="stm-container stm-search-in">
+        <div class="stm-search-box">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <input type="search" id="stmSearch" placeholder="ابحث عن فيلم أو مسلسل أو حلقة أو قناة…" aria-label="بحث في المكتبات">
+          <button class="stm-icon-btn" id="stmSearchClear" aria-label="مسح البحث" style="width:36px;height:36px"><svg class="ic" style="width:16px;height:16px"><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ المحتوى ═══ -->
+  <main class="stm-main">
+    <div class="stm-container">
+
+      <!-- منطقة المشغل (تثبت أعلى الصفحة أثناء تصفح المكتبات) -->
+      <div class="stm-stagewrap" id="stmStagewrap">
+        <section class="stm-shell" id="stmShell" aria-label="مشغل سوفتارا Media">
+          <div class="stm-stage" id="stmStage"></div>
+
+          <!-- شاشة البداية -->
+          <div class="stm-idle" id="stmIdle">
+            <div class="stm-idle-bg" aria-hidden="true"></div>
+            <div class="stm-idle-beam b1" aria-hidden="true"></div>
+            <div class="stm-idle-beam b2" aria-hidden="true"></div>
+            <div class="stm-idle-in">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <defs><linearGradient id="stmG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+                <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stmG2)"/>
+                <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+              </svg>
+              <h1 id="stmIdleTitle">سوفتارا <i>Media</i></h1>
+              <p id="stmIdleText">مكتبات أفلام ومسلسلات ووثائقيات وقرآن — اختر ما تحب وابدأ المشاهدة</p>
+              <button class="stm-btn stm-btn-primary" id="stmStartBtn">
+                <svg class="ic ic-fill" style="width:19px;height:19px"><use href="#i-play"/></svg>
+                تصفّح المكتبات الآن
+              </button>
+            </div>
+          </div>
+
+          <!-- العلامة المائية -->
+          <div class="stm-mark" title="سوفتارا Media">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <defs><linearGradient id="stmG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#5eead4"/></linearGradient></defs>
+              <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stmG3)"/>
+              <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+            </svg>
+            <b>سوفتارا<i>Media</i></b>
+          </div>
+
+          <!-- الشريط العلوي -->
+          <div class="stm-topbar">
+            <span class="stm-chip" id="stmNameChip"><span id="stmName">—</span></span>
+            <span class="stm-prov" id="stmProv" style="display:none">—</span>
+            <span class="stm-tb-spacer"></span>
+            <a class="stm-topbtn" id="stmWatchBtn" style="display:none" target="_blank" rel="noopener nofollow" aria-label="فتح على المصدر الأصلي"><svg class="ic"><use href="#i-ext"/></svg></a>
+            <button class="stm-topbtn" id="stmFavBtn" aria-label="إضافة إلى المفضلة"><svg class="ic"><use href="#i-heart"/></svg></button>
+          </div>
+          <div class="stm-qualmenu" id="stmQualMenu" role="menu"></div>
+
+          <!-- زر تشغيل مركزي -->
+          <div class="stm-center-play" id="stmCenter">
+            <button aria-label="تشغيل"><svg class="ic ic-fill"><use href="#i-play"/></svg></button>
+          </div>
+
+          <!-- التحميل والأخطاء -->
+          <div class="stm-loader" id="stmLoader"><div class="stm-spinner"></div><span>جارٍ تحميل الفيديو…</span></div>
+          <div class="stm-err" id="stmErr">
+            <svg class="ic"><use href="#i-alert"/></svg>
+            <h3 id="stmErrTitle">تعذّر التشغيل</h3>
+            <p id="stmErrMsg"></p>
+            <a id="stmErrLink" style="display:none" target="_blank" rel="noopener nofollow" class="stm-btn stm-btn-ghost"><svg class="ic" style="width:17px;height:17px"><use href="#i-ext"/></svg> فتح الفيديو على مصدره الأصلي</a>
+            <div class="stm-err-row">
+              <button class="stm-btn stm-btn-primary" id="stmErrRetry"><svg class="ic" style="width:17px;height:17px"><use href="#i-refresh"/></svg> إعادة المحاولة</button>
+            </div>
+          </div>
+
+          <!-- شريط التحكم (للتشغيل المباشر) -->
+          <div class="stm-ctrls">
+            <div class="stm-seekrow" id="stmSeekRow" style="display:none">
+              <time id="stmCur">00:00</time>
+              <input type="range" class="stm-seek" id="stmSeek" min="0" max="1000" value="0" aria-label="شريط التقدم">
+              <time id="stmDur">00:00</time>
+            </div>
+            <div class="stm-btnrow" id="stmBtnRow" style="display:none">
+              <button class="stm-cbtn" id="stmPlayBtn" aria-label="تشغيل / إيقاف مؤقت"><svg class="ic ic-fill"><use href="#i-play" id="stmPlayIc"/></svg></button>
+              <div class="stm-volwrap">
+                <button class="stm-cbtn" id="stmMuteBtn" aria-label="كتم الصوت"><svg class="ic"><use href="#i-vol" id="stmVolIc"/></svg></button>
+                <input type="range" class="stm-vol" id="stmVol" min="0" max="100" value="100" aria-label="مستوى الصوت">
+              </div>
+              <span style="flex:1"></span>
+              <button class="stm-topbtn" id="stmQualBtn" style="display:none;width:auto;padding:0 12px;font-size:11.5px;font-weight:900" aria-haspopup="true" aria-expanded="false">جودة</button>
+              <button class="stm-cbtn" id="stmPipBtn" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
+              <button class="stm-cbtn" id="stmFsBtn" aria-label="ملء الشاشة"><svg class="ic"><use href="#i-max"/></svg></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- شريط التنقل (سابق/تالي داخل القائمة) -->
+        <div class="stm-underbar">
+          <button class="stm-navbtn" id="stmPrevBtn"><svg class="ic"><use href="#i-chev-r"/></svg><span class="stm-t-full">السابق</span><span class="stm-t-short">السابق</span></button>
+          <button class="stm-navbtn" id="stmNextBtn"><span class="stm-t-full">التالي</span><span class="stm-t-short">التالية</span><svg class="ic"><use href="#i-chev-l"/></svg></button>
+          <span class="stm-now">تشغيل الآن: <b id="stmNowName">—</b></span>
+        </div>
+
+        <!-- حلقات العمل الحالية -->
+        <div class="stm-eps" id="stmEps"></div>
+      </div>
+
+      <!-- شريط الأخبار -->
+      <div class="stm-ticker" id="stmTicker">
+        <span class="stm-ticker-label"><svg class="ic" style="width:14px;height:14px"><use href="#i-info"/></svg> سوفتارا Media</span>
+        <div class="stm-ticker-view"><div class="stm-ticker-track" id="stmTickerTrack"></div></div>
+      </div>
+
+      <!-- متابعة المشاهدة -->
+      <section id="stmContinueSec" style="display:none">
+        <div class="stm-sechead"><h2>متابعة المشاهدة</h2><small>أكمل من حيث توقفت</small></div>
+        <div class="stm-cont stm-scroll" id="stmContinue"></div>
+      </section>
+
+      <!-- تنقل المكتبات -->
+      <div class="stm-sechead" style="margin-top:18px"><h2>المكتبات</h2><small>عربي وعالمي</small></div>
+      <nav class="stm-libnav" id="stmLibNav" role="tablist" aria-label="المكتبات"></nav>
+
+      <!-- الشبكة -->
+      <div class="stm-sechead" style="margin-top:6px"><h2 id="stmGridTitle">المكتبات العربية</h2><small id="stmGridCount"></small></div>
+      <div class="stm-grid" id="stmGrid"></div>
+
+    </div>
+  </main>
+
+  <!-- ═══ ورقة تفاصيل العمل ═══ -->
+  <div class="stm-detail" id="stmDetail" role="dialog" aria-modal="true" aria-label="تفاصيل العمل" aria-hidden="true">
+    <div class="stm-detail-back" id="stmDetailBack"></div>
+    <div class="stm-detail-sheet stm-scroll" id="stmDetailSheet">
+      <button class="stm-detail-close" id="stmDetailClose" aria-label="إغلاق"><svg class="ic"><use href="#i-x"/></svg></button>
+      <div class="stm-detail-hero" id="stmDetailHero"></div>
+      <div class="stm-detail-body">
+        <div class="stm-detail-head">
+          <h3 id="stmDetailName">—</h3>
+          <div class="stm-detail-meta" id="stmDetailMeta"></div>
+          <p class="stm-detail-desc" id="stmDetailDesc"></p>
+          <div class="stm-detail-src" id="stmDetailSrc"></div>
+        </div>
+        <div class="stm-detail-actions" id="stmDetailActions"></div>
+        <div class="stm-detail-official" id="stmDetailOfficial"></div>
+        <div class="stm-detail-seasons" id="stmDetailSeasons"></div>
+        <div class="stm-detail-eps" id="stmDetailEps"></div>
+        <div class="stm-detail-similar" id="stmDetailSimilar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ التذييل ═══ -->
+  <footer class="stm-footer">
+    <div class="stm-container stm-footer-in">
+      <span class="stm-footer-brand">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="13" fill="#10b981"/><path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/></svg>
+        سوفتارا Media
+      </span>
+      <div class="stm-footer-links">
+        <a href="https://softara.yoo7.com/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg> منتدى سوفتارا</a>
+        <a href="https://softara.yoo7.com/h32-tv" id="stmFooterTv" target="_blank" rel="noopener"><svg class="ic"><use href="#i-tv"/></svg> البث المباشر</a>
+      </div>
+      <span class="stm-copy">© سوفتارا — جميع الأعمال تُعرض من قنواتها الرسمية أو من مصادر ملكية عامة أو عبر روابط المنصات الرسمية</span>
+    </div>
+  </footer>
+</div>
+
+<div class="stm-toasts" id="stmToasts" aria-live="polite"></div>
+<!-- ترتيب التحميل إلزامي: الأيقونات → المشغل → القنوات → البيانات → المنطق -->
+<script src="../shared/js/softara-icons.js"></script>
+<script src="js/softara-movies-player.js"></script>
+<script src="data/softara-movies-channels.js"></script>
+<script src="data/softara-movies-data.js"></script>
+<script src="js/softara-movies-app.js"></script>
+</body>
+</html>
