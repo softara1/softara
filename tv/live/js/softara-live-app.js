@@ -66,8 +66,11 @@ function renderChLists(){
       var on=player.current()&&player.current().id===c.id;
       var b=d.createElement('button');b.className='stv-ch'+(on?' on':'');
       b.setAttribute('aria-label','تشغيل قناة '+c.name);
-      b.innerHTML='<span class="stv-ch-av" style="background:'+S.gradCss(c.cat)+'">'+esc(c.name.trim().charAt(0))+'</span>'
-        +'<span class="stv-ch-meta"><b>'+esc(c.name)+'</b><small><i class="dotl"></i>'+esc(c.cat)+' · '+esc(c.country||'')+(c.hd?' <span class="stv-badge-hd">HD</span>':'')+'</small></span>'
+      var av='<span class="stv-ch-av" style="background:'+S.gradCss(c.cat)+'">'+esc(c.name.trim().charAt(0))+'</span>';
+      /* v2.4.0: شعار القناة فوق الحرف — عند فشل تحميل الشعار يُزال فيظهر الحرف تلقائيًا */
+      if(c.logo){av='<img class="stv-ch-logo" loading="lazy" alt="" src="'+esc(c.logo)+'" onerror="this.remove()">'+av}
+      b.innerHTML='<span class="stv-ch-avwrap">'+av+'</span>'
+        +'<span class="stv-ch-meta"><b>'+esc(c.name)+'</b><small><i class="dotl"></i>'+esc(c.cat)+' · '+esc(c.country||'')+(c.lang?' · '+esc(c.lang):'')+(c.hd?' <span class="stv-badge-hd">HD</span>':'')+'</small></span>'
         +icon(on?'pause':'play');
       b.addEventListener('click',function(){
         player.play(c);

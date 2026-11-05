@@ -22,6 +22,13 @@
   width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
   color:#fff;font-weight:900;font-size:16px;text-shadow:0 1px 2px rgba(0,0,0,.35);
 }
+/* v2.4.0: غلاف الشعار — الشعار يطفو فوق الحرف، وعند فشله يُزال فيظهر الحرف */
+.stv-ch-avwrap{position:relative;width:42px;height:42px;flex:none}
+.stv-ch-avwrap .stv-ch-av{width:100%;height:100%}
+.stv-ch-logo{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:11px;
+  background:rgba(255,255,255,.94);padding:4px;box-shadow:0 1px 4px rgba(0,0,0,.25);
+}
 .stv-ch-meta{min-width:0;flex:1}
 .stv-ch-meta b{display:block;font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stv-ch-meta small{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:700}
@@ -46,3 +53,16 @@
 .stv-live-results{margin-top:12px}
 .stv-live-results .stv-sechead{margin-top:0}
 .stv-live-hint{margin-top:12px}
+
+/* ══ v2.4.0 — تحسينات الهاتف فقط (لا تأثير على الحاسب إطلاقًا) ══
+   1) اختصار نصوص أزرار التنقل: «القناة السابقة»→«السابقة» و«القناة التالية»→«التالية»
+   2) «قائمة القنوات»→«القنوات»
+   3) تبديل موضعي بين زرّي السابقة/التالية (وظيفة كل زر كما هي — تبديل بصري فقط) */
+.stv-t-short{display:none}
+@media(max-width:1023.98px){
+  .stv-t-full{display:none}
+  .stv-t-short{display:inline}
+  /* التالية تأخذ موضع السابقة (تصبح أول زر)، والسابقة تأخذ موضع التالية السابق.
+     الوظيفة محفوظة: #stvNextBtn → القناة التالية فعليًا، #stvPrevBtn → القناة السابقة فعليًا */
+  .stv-underbar #stvNextBtn{order:-1}
+}

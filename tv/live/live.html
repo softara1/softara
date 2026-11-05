@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ═══════════════════════════════════════════════════════════════════
-  سوفتارا Live TV — Softara Live TV · v2.2.0 (نسخة معاينة مستقلة بمسارات نسبية — للفحص المحلي فقط؛ نسخة المنتدى في مجلد forum)
+  سوفتارا Live TV — Softara Live TV · v2.4.0 (نسخة معاينة مستقلة بمسارات نسبية — للفحص المحلي فقط؛ نسخة المنتدى في مجلد forum)
   صفحة قنوات البث المباشر فقط — الأفلام والمسلسلات في صفحة مستقلة.
   هذه الصفحة هيكل فقط؛ كل الأنماط والمنطق والبيانات مستضافة خارجيًا:
     • الأنماط   : ../shared/css/softara-shared.css
@@ -12,7 +12,7 @@
     • البيانات  : data/softara-live-data.js   (أضف القنوات هنا)
     • المنطق    : js/softara-live-app.js
   ★ للتحديث: عدّل الملف المطلوب على GitHub → أنشئ وسم إصدار جديد → استبدل
-    الرقم @v2.2.0 في الروابط أدناه بالوسم الجديد. لا حاجة لتعديل أي شيء آخر.
+    الرقم @v2.4.0 في الروابط أدناه بالوسم الجديد. لا حاجة لتعديل أي شيء آخر.
   ★ في منتدى أحلى منتدى: الصق هذا الكود في «صفحات HTML» بوضع المصدر
     (Source) دون التبديل إلى المحرر المرئي، واختر: بدون أعلى وأسفل المنتدى.
   ═══════════════════════════════════════════════════════════════════
@@ -187,9 +187,9 @@
 
           <!-- شريط التنقل بين القنوات -->
           <div class="stv-underbar">
-            <button class="stv-navbtn" id="stvPrevBtn"><svg class="ic"><use href="#i-chev-r"/></svg> القناة السابقة</button>
-            <button class="stv-navbtn" id="stvNextBtn">القناة التالية <svg class="ic"><use href="#i-chev-l"/></svg></button>
-            <button class="stv-navbtn" id="stvPanelBtn" aria-expanded="false" aria-controls="stvChPanel"><svg class="ic"><use href="#i-list"/></svg> قائمة القنوات</button>
+            <button class="stv-navbtn" id="stvPrevBtn"><svg class="ic"><use href="#i-chev-r"/></svg> <span class="stv-t-full">القناة السابقة</span><span class="stv-t-short">السابقة</span></button>
+            <button class="stv-navbtn" id="stvNextBtn"><span class="stv-t-full">القناة التالية</span><span class="stv-t-short">التالية</span> <svg class="ic"><use href="#i-chev-l"/></svg></button>
+            <button class="stv-navbtn" id="stvPanelBtn" aria-expanded="false" aria-controls="stvChPanel"><svg class="ic"><use href="#i-list"/></svg> <span class="stv-t-full">قائمة القنوات</span><span class="stv-t-short">القنوات</span></button>
             <span class="stv-now">تشغيل الآن: <span id="stvNowName">—</span></span>
           </div>
 
@@ -232,7 +232,7 @@
         <a href="#" id="stvFooterCompanion" style="display:none"><svg class="ic"><use href="#i-film"/></svg> الأفلام والمسلسلات</a>
         <a href="#" id="stvFooterReport" target="_blank" rel="noopener" style="display:none"><svg class="ic"><use href="#i-info"/></svg> التقرير الفني</a>
       </div>
-      <span class="stv-copy">نسخة تجريبية v2.2 · قنوات رسمية مباشرة فُحصت حيًّا · © سوفتارا</span>
+      <span class="stv-copy">نسخة تجريبية v2.4 · 847 قناة مباشرة عبر 16 تصنيفًا فُحصت حيًّا · © سوفتارا</span>
     </div>
   </footer>
 </div>
