@@ -225,10 +225,10 @@ a{color:var(--accent3)}
 <footer>تقرير تطوير Softara Media v3.0.0 — أُعد تلقائيًا كجزء من تسليم المشروع · <a href="guide-installation.html">الدليل الثاني: التركيب وإضافة المحتوى ←</a></footer>
 </div>
 <script>
-fetch('SHA256SUMS.txt').then(function(r){return r.text()}).then(function(t){
+fetch('../SHA256SUMS.txt').then(function(r){return r.ok?r.text():Promise.reject()}).then(function(t){
   document.getElementById('shasum').textContent = t;
 }).catch(function(){
-  document.getElementById('shasum').textContent = '# SHA256SUMS.txt (بجوار هذا التقرير في المستودع)';
+  document.getElementById('shasum').textContent = '# البصمات في الملف: tv/movies/SHA256SUMS.txt على المستودع (وسم v3.0.0)';
 });
 </script>
 </body>
