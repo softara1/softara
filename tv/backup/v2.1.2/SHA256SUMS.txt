@@ -1,0 +1,15 @@
+d687b619516b536e825bcd37ea6d7326a5c7bd27be1c314e184133ec432964cf  tv/backup/v2.1.2/softara-tv-2.1.2.zip
+986d8f9e5ac7d951f73c3ffc09d53b55d689e5cc3c122b5f4e40d5e1e2fcdcc1  tv/backup/v2.1.2/legacy-h18-tv-snapshot.html
+78718ae5ed1857a8783092ae2601bc9a464f09a16abb7dfc720c199d1eb00336  tv/backup/v2.1.2/live-forum-page-h19-library-snapshot.html
+41f3cf15b49f69ccb37de2253499e6d8df13fc97fda2e57776354bac06afad9d  ./README.md
+985b95991cdf9bbe33dcf23a3e552d37f72b76e70143727c6566c3a6474e8677  ./css/softara-tv.css
+35f9b870afe595bfff862dc5a819846e0f7b281a26bb31dae855d4e079159eef  ./data/softara-tv-data.json
+ba39d6f4f373b893cfa170d6218119a670f6f59ed8583f0003ac8c9ab269a262  ./forum/softara-report-forum.html
+39d4e0614b5918cb40367419f490fca021c4d1f764e1aaca85bbe2d79833acea  ./forum/softara-tv-forum.html
+b53717c50863a999fab26853668b97551cbafeb278384921e8a8145ab2638f01  ./js/softara-tv-app.js
+8da2b42fef533cd65a33bd64a265316acffed6531e237c847dd92070e1abb3ff  ./js/softara-tv-data.js
+aed393a1119774392a0a645fd82055539db04278acbf0348ddf0694bcb9f325e  ./report/report-body.html
+68c726c2c4136801572703dad193f07805fa74e30b0fd243767bdc9f41328f5c  ./report/report.css
+48f88449fab38f3d426bf0d5d596f059e55434aafc006395e13e5c715dd13a79  ./report/report.js
+770078737bfb2f4abba52e18c9fce19cc47482c28eb34a5f5881dd0c79d54c25  ./softara-tv-report.html
+50806c42ae0593104c56f59bd859a3b0793816d1da2143c23ccb2546291f6b5f  ./softara-tv.html

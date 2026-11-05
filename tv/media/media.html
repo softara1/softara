@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  سوفتارا Movies & Media — Softara Movies & Media · v2.2.0 (نسخة معاينة مستقلة بمسارات نسبية — للفحص المحلي فقط؛ نسخة المنتدى في مجلد forum)
+  صفحة الأفلام والمسلسلات ومقاطع يوتيوب والأرشيف المرئي فقط —
+  قنوات البث المباشر في صفحة مستقلة (Softara Live TV).
+  هذه الصفحة هيكل فقط؛ كل الأنماط والمنطق والبيانات مستضافة خارجيًا:
+    • الأنماط   : ../shared/css/softara-shared.css
+                  css/softara-media.css
+    • الأيقونات : ../shared/js/softara-icons.js
+    • النواة    : ../shared/js/softara-shared.js
+    • المشغل    : ../shared/js/softara-player.js
+    • البيانات  : data/softara-media-data.js   (أضف المحتوى هنا)
+    • المنطق    : js/softara-media-app.js
+  ★ للتحديث: عدّل الملف المطلوب على GitHub → أنشئ وسم إصدار جديد → استبدل
+    الرقم @v2.2.0 في الروابط أدناه بالوسم الجديد. لا حاجة لتعديل أي شيء آخر.
+  ★ في منتدى أحلى منتدى: الصق هذا الكود في «صفحات HTML» بوضع المصدر
+    (Source) دون التبديل إلى المحرر المرئي، واختر: بدون أعلى وأسفل المنتدى.
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0f0d" id="stvMetaTheme">
+<meta name="description" content="سوفتارا Movies & Media — أفلام ومسلسلات ووثائقيات وبرامج ومقاطع يوتيوب وأرشيف مرئي بمنصة عربية سريعة متوافقة مع الهاتف">
+<title>سوفتارا Movies & Media — الأفلام والمسلسلات والمكتبة المرئية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="../shared/css/softara-shared.css">
+<link rel="stylesheet" href="css/softara-media.css">
+</head>
+<body>
+
+<!-- ═══ المقدمة الافتتاحية (مرة كل جلسة · قابلة للتخطي · SVG/CSS بلا تحميل) ═══ -->
+<div class="stv-intro" id="stvIntro" role="dialog" aria-label="مقدمة سوفتارا Movies & Media" aria-hidden="true">
+  <div class="stv-intro-bg" aria-hidden="true"></div>
+  <div class="stv-intro-in">
+    <svg class="stv-intro-logo" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><linearGradient id="stvIntroG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs>
+      <rect class="il-frame" x="12" y="30" width="96" height="66" rx="13" fill="none" stroke="url(#stvIntroG)" stroke-width="5"/>
+      <path class="il-ant" d="M47 30 60 12l13 18" fill="none" stroke="url(#stvIntroG)" stroke-width="5" stroke-linecap="round"/>
+      <path class="il-play" d="M52 48v30l26-15Z" fill="url(#stvIntroG)"/>
+    </svg>
+    <div class="stv-intro-word" id="stvIntroWord">سوفتارا <b>Media</b></div>
+    <div class="stv-intro-sub" id="stvIntroSub">أفلام · مسلسلات · وثائقيات · برامج · أطفال · أرشيف</div>
+  </div>
+  <button class="stv-intro-skip" id="stvIntroSkip">تخطي المقدمة <svg class="ic" style="width:15px;height:15px"><use href="#i-chev-l"/></svg></button>
+</div>
+
+<div class="stv-app">
+
+  <!-- ═══ الترويسة ═══ -->
+  <header class="stv-header">
+    <div class="stv-container stv-header-in">
+      <div class="stv-brand">
+        <svg class="stv-brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <defs><linearGradient id="stvG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+          <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG)"/>
+          <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+          <circle cx="36.5" cy="11.5" r="4.4" fill="#04241b"/><path d="M35 11.6l2.2 1.4V10.2Z" fill="#2dd4bf"/>
+        </svg>
+        <div class="stv-brand-txt">
+          <b>سوفتارا<i> Media</i></b>
+          <span>الأفلام والمسلسلات والمكتبة المرئية — منتدى سوفتارا</span>
+        </div>
+      </div>
+      <div class="stv-header-tools">
+        <button class="stv-icon-btn" id="stvSearchBtn" aria-label="بحث في المكتبة" aria-expanded="false"><svg class="ic"><use href="#i-search"/></svg></button>
+        <button class="stv-icon-btn" id="stvThemeBtn" aria-label="تبديل الوضع الليلي/النهاري"><svg class="ic" id="stvThemeIc"><use href="#i-sun"/></svg></button>
+      </div>
+    </div>
+    <div class="stv-searchwrap" id="stvSearchWrap">
+      <div class="stv-container stv-search-in">
+        <div class="stv-search-box">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <input type="search" id="stvSearch" placeholder="ابحث عن فيلم أو مسلسل أو حلقة أو وثائقي…" aria-label="بحث في المكتبة">
+          <button class="stv-icon-btn" id="stvSearchClear" aria-label="مسح البحث" style="width:38px;height:38px"><svg class="ic" style="width:17px;height:17px"><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ المحتوى ═══ -->
+  <main class="stv-main">
+    <div class="stv-container">
+
+      <!-- المشغل -->
+      <section class="stv-shell stv-ui" id="stvShell" aria-label="مشغل المكتبة المرئية — سوفتارا Media">
+        <video id="stvVideo" playsinline webkit-playsinline preload="none"></video>
+        <div class="stv-ytbox" id="stvYtBox"><div id="stvYtMount"></div></div>
+        <div class="stv-embedbox" id="stvEmbedBox"></div>
+
+        <!-- شاشة البداية المتحركة -->
+        <div class="stv-idle" id="stvIdle" aria-hidden="true">
+          <div class="stv-idle-bg"></div>
+          <div class="stv-idle-lines"></div>
+          <div class="stv-idle-beam b1"></div><div class="stv-idle-beam b2"></div>
+          <div class="stv-idle-dot" style="left:8%;width:7px;height:7px;animation-duration:11s"></div>
+          <div class="stv-idle-dot" style="left:22%;width:4px;height:4px;animation-duration:14s;animation-delay:2s"></div>
+          <div class="stv-idle-dot" style="left:47%;width:6px;height:6px;animation-duration:9s;animation-delay:1s"></div>
+          <div class="stv-idle-dot" style="left:68%;width:5px;height:5px;animation-duration:13s;animation-delay:3s"></div>
+          <div class="stv-idle-dot" style="left:86%;width:8px;height:8px;animation-duration:10s;animation-delay:5s"></div>
+          <div class="stv-idle-in">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <defs><linearGradient id="stvG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+              <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG2)"/>
+              <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+            </svg>
+            <h1 id="stvIdleTitle">سوفتارا <i>Media</i></h1>
+            <p id="stvIdleText">أفلام ومسلسلات ووثائقيات وبرامج وأرشيف مرئي — اختر ما تحب من المكتبة وابدأ المشاهدة</p>
+            <button class="stv-btn stv-btn-primary" id="stvStartBtn">
+              <svg class="ic ic-fill" style="width:19px;height:19px"><use href="#i-play"/></svg>
+              تصفّح المكتبة الآن
+            </button>
+          </div>
+        </div>
+
+        <!-- العلامة المائية (الشعار داخل منطقة الفيديو أعلى اليمين) -->
+        <div class="stv-mark" id="stvMark" title="سوفتارا Movies & Media">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs><linearGradient id="stvG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#5eead4"/></linearGradient></defs>
+            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#stvG3)"/>
+            <path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/>
+          </svg>
+          <b>سوفتارا<i>TV</i></b>
+        </div>
+
+        <!-- الشريط العلوي -->
+        <div class="stv-topbar">
+          <span class="stv-chip" id="stvNameChip"><span id="stvName">—</span></span>
+          <span class="stv-prov" id="stvProv" style="display:none">—</span>
+          <span class="stv-chip" id="stvLiveChip" style="display:none"><i class="stv-live-dot"></i><span>مباشر</span></span>
+          <span class="stv-badge-hd" id="stvHd" style="display:none" title="جودة عالية">HD</span>
+          <span class="stv-tb-spacer"></span>
+          <button class="stv-topbtn stv-qbtn" id="stvQualBtn" style="display:none" aria-haspopup="true" aria-expanded="false">جودة</button>
+          <button class="stv-topbtn" id="stvFavBtn" aria-label="إضافة إلى المفضلة"><svg class="ic"><use href="#i-heart"/></svg></button>
+          <button class="stv-topbtn" id="stvPipBtn" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
+        </div>
+        <div class="stv-qualmenu" id="stvQualMenu" role="menu"></div>
+        <div class="stv-ccmenu" id="stvCcMenu" role="menu"></div>
+
+        <!-- زر تشغيل مركزي (عند حجب التشغيل التلقائي) -->
+        <div class="stv-center-play" id="stvCenterPlay">
+          <button aria-label="تشغيل"><svg class="ic ic-fill"><use href="#i-play"/></svg></button>
+        </div>
+        <button class="stv-unmute" id="stvUnmute">
+          <svg class="ic"><use href="#i-vol"/></svg> الصوت مكتوم — اضغط لتشغيله
+        </button>
+
+        <!-- التحميل والأخطاء -->
+        <div class="stv-loader" id="stvLoader"><div class="stv-spinner"></div><span>جارٍ تحميل الفيديو…</span></div>
+        <div class="stv-err" id="stvErr">
+          <svg class="ic"><use href="#i-alert"/></svg>
+          <h3 id="stvErrTitle">تعذّر التشغيل</h3>
+          <p id="stvErrMsg"></p>
+          <a id="stvErrLink" style="display:none" target="_blank" rel="noopener" class="stv-btn stv-btn-ghost"><svg class="ic" style="width:18px;height:18px"><use href="#i-ext"/></svg> فتح الفيديو على مصدره الأصلي</a>
+          <div class="stv-err-row">
+            <button class="stv-btn stv-btn-primary" id="stvErrRetry"><svg class="ic" style="width:18px;height:18px"><use href="#i-refresh"/></svg> إعادة المحاولة</button>
+            <button class="stv-btn stv-btn-ghost" id="stvErrOther"><svg class="ic" style="width:18px;height:18px"><use href="#i-list"/></svg> اختيار آخر</button>
+          </div>
+        </div>
+
+        <!-- شريط التحكم -->
+        <div class="stv-ctrls" id="stvCtrls">
+          <div class="stv-seekrow" id="stvSeekRow" style="display:none">
+            <time id="stvCur">00:00</time>
+            <input type="range" class="stv-seek" id="stvSeek" min="0" max="1000" value="0" aria-label="شريط التقدم">
+            <time id="stvDur">00:00</time>
+          </div>
+          <div class="stv-btnrow">
+            <button class="stv-cbtn" id="stvPlayBtn" aria-label="تشغيل / إيقاف مؤقت"><svg class="ic ic-fill"><use href="#i-play" id="stvPlayIc"/></svg></button>
+            <div class="stv-volwrap" id="stvVolWrap">
+              <button class="stv-cbtn" id="stvMuteBtn" aria-label="كتم الصوت"><svg class="ic"><use href="#i-vol" id="stvVolIc"/></svg></button>
+              <input type="range" class="stv-vol" id="stvVol" min="0" max="100" value="100" aria-label="مستوى الصوت">
+            </div>
+            <span class="sp"></span>
+            <button class="stv-cbtn on" id="stvCcBtn" style="display:none" aria-label="قائمة الترجمة" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-cc"/></svg></button>
+            <button class="stv-cbtn" id="stvPipBtn2" style="display:none" aria-label="صورة داخل صورة"><svg class="ic"><use href="#i-pip"/></svg></button>
+            <button class="stv-cbtn" id="stvFsBtn" aria-label="ملء الشاشة"><svg class="ic"><use href="#i-max" id="stvFsIc"/></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- شريط التنقل (سابق/تالي داخل القسم أو المسلسل) -->
+      <div class="stv-underbar">
+        <button class="stv-navbtn" id="stvPrevBtn"><svg class="ic"><use href="#i-chev-r"/></svg> السابق</button>
+        <button class="stv-navbtn" id="stvNextBtn">التالي <svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <span class="stv-now">تشغيل الآن: <span id="stvNowName">—</span></span>
+      </div>
+
+      <!-- حلقات المسلسل الحالي -->
+      <div class="stv-eps" id="stvEps"></div>
+
+      <!-- شريط الأخبار -->
+      <div class="stv-ticker" id="stvTicker">
+        <span class="stv-ticker-label"><svg class="ic" style="width:14px;height:14px"><use href="#i-info"/></svg> أخبار سوفتارا</span>
+        <div class="stv-ticker-view"><div class="stv-ticker-track" id="stvTickerTrack"></div></div>
+      </div>
+
+      <!-- متابعة المشاهدة -->
+      <section id="stvContinueSec" style="display:none">
+        <div class="stv-sechead"><h2>متابعة المشاهدة</h2><small>أكمل من حيث توقفت</small></div>
+        <div class="stv-cont stv-scroll" id="stvContinue"></div>
+      </section>
+
+      <!-- الأقسام -->
+      <nav class="stv-tabs" id="stvTabs" role="tablist" aria-label="أقسام المكتبة"></nav>
+      <div class="stv-chfilters" id="stvTabFilters" style="margin-top:12px"></div>
+      <div class="stv-sechead" style="margin-top:14px"><h2 id="stvGridTitle">الأفلام</h2><small id="stvGridCount"></small></div>
+      <div class="stv-grid" id="stvGrid"></div>
+
+    </div>
+  </main>
+
+  <!-- ═══ ورقة تفاصيل العنوان (موبايل: ورقة سفلية · حاسب: نافذة) ═══ -->
+  <div class="stv-detail" id="stvDetail" role="dialog" aria-modal="true" aria-label="تفاصيل العنوان" aria-hidden="true">
+    <div class="stv-detail-back" id="stvDetailBack"></div>
+    <div class="stv-detail-sheet stv-scroll" id="stvDetailSheet">
+      <button class="stv-detail-close" id="stvDetailClose" aria-label="إغلاق"><svg class="ic"><use href="#i-x"/></svg></button>
+      <div class="stv-detail-hero" id="stvDetailHero"></div>
+      <div class="stv-detail-body">
+        <div class="stv-detail-head">
+          <h3 id="stvDetailName">—</h3>
+          <div class="stv-detail-meta" id="stvDetailMeta"></div>
+          <p class="stv-detail-desc" id="stvDetailDesc"></p>
+          <div class="stv-detail-src" id="stvDetailSrc"></div>
+        </div>
+        <div class="stv-detail-actions">
+          <button class="stv-btn stv-btn-primary" id="stvDetailPlay"><svg class="ic ic-fill"><use href="#i-play"/></svg><span id="stvDetailPlayLbl">تشغيل</span></button>
+          <button class="stv-btn stv-btn-ghost" id="stvDetailFav"><svg class="ic"><use href="#i-heart"/></svg><span>المفضلة</span></button>
+        </div>
+        <div class="stv-detail-seasons" id="stvDetailSeasons"></div>
+        <div class="stv-detail-eps" id="stvDetailEps"></div>
+        <div class="stv-detail-similar" id="stvDetailSimilar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ التذييل ═══ -->
+  <footer class="stv-footer">
+    <div class="stv-container stv-footer-in">
+      <span class="stv-footer-brand">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="13" fill="#10b981"/><path d="M19 15.5v17a2 2 0 0 0 3 1.7l13.5-8.5a2 2 0 0 0 0-3.4L22 13.8a2 2 0 0 0-3 1.7Z" fill="#04241b"/></svg>
+        سوفتارا Movies &amp; Media
+      </span>
+      <div class="stv-footer-links">
+        <a href="https://softara.yoo7.com/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg> منتدى سوفتارا</a>
+        <a href="#" id="stvFooterCompanion" style="display:none"><svg class="ic"><use href="#i-tv"/></svg> البث المباشر</a>
+        <a href="#" id="stvFooterReport" target="_blank" rel="noopener" style="display:none"><svg class="ic"><use href="#i-info"/></svg> التقرير الفني</a>
+      </div>
+      <span class="stv-copy">نسخة تجريبية v2.2 · محتوى العرض التجريبي مرخّص أو مصادر عامة رسمية · © سوفتارا</span>
+    </div>
+  </footer>
+</div>
+
+<div class="stv-toasts" id="stvToasts" aria-live="polite"></div>
+<!-- ترتيب التحميل إلزامي: الأيقونات → النواة → المشغل → البيانات → منطق الصفحة -->
+<script src="../shared/js/softara-icons.js"></script>
+<script src="../shared/js/softara-shared.js"></script>
+<script src="../shared/js/softara-player.js"></script>
+<script src="data/softara-media-data.js"></script>
+<script src="js/softara-media-app.js"></script>
+</body>
+</html>

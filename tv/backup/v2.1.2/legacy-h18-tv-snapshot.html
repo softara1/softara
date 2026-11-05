@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+  تلفزيون سوفتارا | Softara TV  —  صفحة تلفزيون وترفيه متكاملة لمنتدى سوفتارا
+  منصة النشر المقترحة: صفحة HTML مستقلة في أحلى منتدى (Forumotion / AwesomeBB)
+  رابط الصفحة بعد إنشائها يكون بالشكل:  https://softara.yoo7.com/h1-tv
+───────────────────────────────────────────────────────────────────────────────
+  طريقة التثبيت باختصار (التفاصيل الكاملة في التقرير):
+    1) لوحة الإدارة ← عناصر إضافية ← إدارة صفحات HTML ← إنشاء صفحة جديدة.
+    2) اجعل خيار "استعمال أعلى وأسفل منتداك" = لا  (صفحة مستقلة تمامًا).
+    3) الصق هذا الملف كاملًا ثم احفظ.
+  تحديث المحتوى مستقبلًا بدون تعديل الصفحة:
+    - ارفع ملف JSON إلى مستودع GitHub الخاص بالمنتدى (softara1/softara)
+      وضَع رابطه jsDelivr في STV_CONFIG.remoteDataUrl وسيتحمّل تلقائيًا.
+───────────────────────────────────────────────────────────────────────────────
+  توزيع الملف (للتقسيم لاحقًا إلى ملفات خارجية إن رغبت):
+    /* STV:CSS-START */ ... /* STV:CSS-END */     ← يمكن نقله لملف CSS خارجي
+    // STV:JS-START ... // STV:JS-END             ← يمكن نقله لملف JS خارجي
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0713">
+<title>تلفزيون سوفتارا | Softara TV</title>
+
+<!-- ══════════════ STV:CSS-START ══════════════ -->
+<style>
+/* ===================== 1) الأساسيات والهوية ===================== */
+:root{
+  --stv-accent:#8b5cf6;            /* لون هوية سوفتارا */
+  --stv-accent-soft:rgba(139,92,246,.18);
+  --stv-bg:#0b0713;                /* خلفية الصفحة */
+  --stv-card:#141020;              /* بطاقات */
+  --stv-line:rgba(255,255,255,.09);
+  --stv-text:#f3f0fa;
+  --stv-muted:#a79fc0;
+  --stv-radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(900px 480px at 85% -10%, rgba(139,92,246,.22), transparent 60%),
+    radial-gradient(700px 420px at 10% 110%, rgba(139,92,246,.12), transparent 60%),
+    var(--stv-bg);
+  color:var(--stv-text);
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+}
+.stv-wrap{max-width:960px;margin:0 auto;padding:14px 12px calc(20px + env(safe-area-inset-bottom))}
+
+/* رأس الصفحة */
+.stv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.stv-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.stv-brand-badge{
+  width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--stv-accent),#6d28d9);color:#fff;font-weight:800;font-size:15px;
+  box-shadow:0 6px 18px rgba(139,92,246,.35);
+}
+.stv-brand h1{font-size:clamp(16px,3.6vw,22px);margin:0;font-weight:800;letter-spacing:.2px}
+.stv-brand p{margin:2px 0 0;font-size:11px;color:var(--stv-muted)}
+.stv-live-pill{
+  flex:none;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  background:rgba(239,68,68,.14);color:#fca5a5;border:1px solid rgba(239,68,68,.35);
+  padding:6px 11px;border-radius:999px;
+}
+.stv-live-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:stv-blink 1.4s infinite}
+@keyframes stv-blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ===================== 2) شاشة العرض (نسبة 16:9 دائمًا) ===================== */
+.stv-screen{
+  position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:var(--stv-radius);
+  overflow:hidden;direction:ltr;touch-action:manipulation;cursor:none;
+  box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 0 1px var(--stv-line);
+  user-select:none;-webkit-user-select:none;
+}
+.stv-screen.user-active{cursor:default}
+
+/* طبقة الفيديو/المشغل (أسفل كل شيء) */
+.stv-player-host{position:absolute;inset:0;z-index:1;background:#000}
+.stv-player-host video,.stv-player-host iframe{width:100%;height:100%;border:0;display:block;background:#000;object-fit:cover}
+
+/* الخلفية المتحركة (الاستاد) — تظهر فقط في وضع الرئيسية */
+.stv-stage{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    /* المصابيح */
+    radial-gradient(60% 42% at 50% -6%, rgba(255,255,255,.30), transparent 55%),
+    /* السماء */
+    linear-gradient(180deg,#1d2440 0%,#2b3358 34%,#3b2f52 60%,#20423a 100%);
+}
+.stv-stage::before{ /* المدرجات والجمهور */
+  content:"";position:absolute;left:0;right:0;top:26%;height:38%;
+  background:
+    radial-gradient(150% 90% at 50% -20%, rgba(255,255,255,.28), transparent 55%),
+    repeating-radial-gradient(circle at 50% 130%, rgba(255,255,255,.17) 0 2px, transparent 2px 13px),
+    radial-gradient(120% 100% at 50% 0%, rgba(139,92,246,.45), rgba(20,16,32,.25) 72%),
+    linear-gradient(180deg,#5a4d80,#2a2340);
+  box-shadow:inset 0 14px 34px rgba(0,0,0,.5);
+  animation:stv-crowd 7s ease-in-out infinite alternate;
+}
+@keyframes stv-crowd{from{filter:brightness(.85)}to{filter:brightness(1.08)}}
+.stv-stage::after{ /* أرضية الملعب بخطوط */
+  content:"";position:absolute;left:-12%;right:-12%;bottom:-6%;height:42%;
+  background:repeating-linear-gradient(90deg,#1f7a3d 0 46px,#1a6b35 46px 92px);
+  border-radius:50% 50% 0 0/100% 100% 0 0;
+  box-shadow:inset 0 14px 34px rgba(0,0,0,.5),0 -8px 24px rgba(0,0,0,.25);
+}
+.stv-stage-glow{ /* وميض أعمدة الإضاءة */
+  position:absolute;top:8%;left:14%;width:9px;height:34%;border-radius:6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.85),transparent);filter:blur(1px);
+  animation:stv-flood 5s ease-in-out infinite alternate;
+}
+.stv-stage-glow.g2{left:auto;right:14%;animation-delay:1.8s}
+@keyframes stv-flood{from{opacity:.25}to{opacity:.9}}
+
+/* ===================== 3) الشعار داخل منطقة الفيديو (أعلى اليمين) =====================
+   نفس تقنية الصفحة المرجعية: عنصر مطلق التموضع فوق طبقة الفيديو داخل طبقة
+   ثابتة pointer-events:none حتى لا يعيق الضغط على المشغل. */
+#stvStaticUI{position:absolute;inset:0;z-index:10;pointer-events:none}
+.stv-logo{
+  position:absolute;top:14px;right:16px;direction:ltr;
+  color:#fff;font-weight:800;font-size:19px;letter-spacing:.5px;
+  text-shadow:0 2px 6px rgba(0,0,0,.85);
+  display:flex;align-items:flex-start;gap:3px;line-height:1;
+}
+.stv-logo b{color:#fff}
+.stv-logo i{font-style:normal;color:var(--stv-accent);font-size:10px;transform:translateY(-2px)}
+.stv-logo img{max-height:30px;width:auto;display:block}
+
+/* نص الإرشاد الأوسط */
+.stv-hint{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  color:rgba(255,255,255,.85);font-size:clamp(11px,2.4vw,14px);direction:rtl;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(4px);padding:8px 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);white-space:nowrap;transition:opacity .5s;
+}
+.user-active .stv-hint{opacity:0}
+
+/* ===================== 4) الشريط الإخباري + الساعة ===================== */
+.stv-bottombar{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  width:min(72%,460px);min-width:230px;height:26px;border-radius:999px;overflow:hidden;
+  background:rgba(0,0,0,.82);display:flex;align-items:center;pointer-events:auto;
+  border:1px solid rgba(255,255,255,.10);
+}
+.stv-ticker{flex:1;overflow:hidden;white-space:nowrap}
+.stv-ticker span{
+  display:inline-block;white-space:nowrap;direction:rtl;padding-right:100%;
+  color:#fff;font-size:10.5px;animation:stv-ticker 28s linear infinite;
+}
+@keyframes stv-ticker{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.stv-clock{flex:none;background:var(--stv-accent);height:100%;display:flex;align-items:center;gap:4px;padding:0 11px;color:#fff;font-weight:700;font-size:11.5px;direction:ltr}
+.stv-clock small{font-size:8px;opacity:.85;font-weight:600}
+
+/* ===================== 5) طبقة اللمس وإخفاء الواجهة تلقائيًا ===================== */
+#stvTouchLayer{position:absolute;inset:0;z-index:20;cursor:pointer;display:none}
+
+/* ===================== 6) القوائم العلوية الأفقية ===================== */
+.stv-menu{
+  position:absolute;left:50%;top:10px;transform:translate(-50%,-16px);
+  max-width:calc(100% - 18px);z-index:25;opacity:0;pointer-events:none;
+  display:flex;flex-direction:row;align-items:stretch;white-space:nowrap;
+  background:rgba(10,7,19,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;overflow-x:auto;overflow-y:hidden;
+  transition:transform .45s ease,opacity .45s ease;scrollbar-width:thin;scrollbar-color:var(--stv-accent) rgba(255,255,255,.08);
+  padding-bottom:3px;
+}
+.user-active .stv-menu{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.stv-menu::-webkit-scrollbar{height:5px}
+.stv-menu::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:0 0 30px 30px}
+.stv-menu::-webkit-scrollbar-thumb{background:var(--stv-accent);border-radius:10px}
+.stv-chip{
+  appearance:none;border:0;background:transparent;color:rgba(255,255,255,.82);
+  font-family:inherit;font-size:11.5px;font-weight:600;direction:rtl;
+  padding:11px 13px;cursor:pointer;flex:none;display:flex;align-items:center;gap:5px;
+  border-left:1px solid rgba(255,255,255,.08);min-height:44px; /* هدف لمس مريح */
+}
+.stv-chip:last-child{border-left:none}
+.stv-chip:hover,.stv-chip.is-active{background:rgba(255,255,255,.10);color:#fff;box-shadow:inset 0 -3px 0 var(--stv-accent)}
+.stv-chip.is-back{color:#fca5a5}
+.stv-chip.is-back .stv-uturn{width:15px;height:10px;border:2.5px solid #f87171;border-left:0;border-radius:0 8px 8px 0;position:relative;margin-right:7px;flex:none}
+.stv-chip.is-back .stv-uturn::before{content:"";position:absolute;right:-8px;top:-5px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:7px solid #f87171;transform:scaleX(-1)}
+
+/* ===================== 7) اللوحة (أفلام/مسلسلات/بحث) ===================== */
+.stv-panel{
+  position:absolute;inset:auto 8px 8px 8px;top:52px;z-index:26;direction:rtl;
+  background:rgba(10,7,19,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.12);border-radius:16px;
+  display:none;flex-direction:column;overflow:hidden;
+}
+.stv-panel.is-open{display:flex}
+.stv-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 13px;border-bottom:1px solid var(--stv-line)}
+.stv-panel-head h3{margin:0;font-size:13px;font-weight:700}
+.stv-panel-close{appearance:none;border:1px solid var(--stv-line);background:rgba(255,255,255,.06);color:#fff;font-family:inherit;font-size:11px;font-weight:700;border-radius:999px;padding:6px 12px;cursor:pointer;min-height:32px}
+.stv-panel-close:hover{background:rgba(255,255,255,.14)}
+.stv-panel-body{padding:11px;overflow-y:auto;max-height:100%;-webkit-overflow-scrolling:touch}
+.stv-panel-body::-webkit-scrollbar{width:5px}
+.stv-panel-body::-webkit-scrollbar-thumb{background:var(--stv-accent);border-radius:10px}
+
+/* شبكة البطاقات للأفلام والمسلسلات ونتائج البحث */
+.stv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+.stv-card{
+  position:relative;border:1px solid var(--stv-line);border-radius:11px;overflow:hidden;
+  background:var(--stv-card);cursor:pointer;padding:0;text-align:right;font-family:inherit;
+  transition:transform .18s,border-color .18s;
+}
+.stv-card:hover{transform:translateY(-2px);border-color:var(--stv-accent)}
+.stv-card-poster{aspect-ratio:2/3;width:100%;display:grid;place-items:center;font-size:26px;font-weight:800;color:#fff;
+  background:linear-gradient(145deg,var(--stv-accent),#4c1d95)}
+.stv-card-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.stv-card-name{padding:7px 8px 8px;font-size:10.5px;font-weight:700;color:var(--stv-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stv-card-sub{font-size:9px;color:var(--stv-muted);padding:0 8px 8px;font-weight:600}
+
+/* حقل البحث */
+.stv-search-row{display:flex;gap:8px;margin-bottom:11px}
+.stv-search-row input{
+  flex:1;appearance:none;border:1px solid var(--stv-line);border-radius:999px;background:rgba(255,255,255,.07);
+  color:#fff;font-family:inherit;font-size:12.5px;padding:10px 14px;outline:none;min-height:44px;
+}
+.stv-search-row input::placeholder{color:var(--stv-muted)}
+.stv-search-row input:focus{border-color:var(--stv-accent);background:rgba(255,255,255,.1)}
+.stv-empty{padding:18px 8px;text-align:center;color:var(--stv-muted);font-size:12px}
+
+/* ===================== 8) تنبيهات (توست) ===================== */
+.stv-toast{
+  position:absolute;bottom:48px;left:50%;transform:translate(-50%,8px);z-index:40;direction:rtl;
+  background:rgba(10,7,19,.94);border:1px solid var(--stv-line);border-radius:999px;
+  color:#fff;font-size:11.5px;font-weight:700;padding:9px 15px;opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.stv-toast.is-show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:600px){.stv-toast{bottom:42px}}
+.stv-toast.is-err{border-color:rgba(248,113,113,.5);color:#fecaca}
+
+/* ===================== 9) التجاوب — الهاتف أولًا ===================== */
+@media (max-width:600px){
+  .stv-wrap{padding:10px 8px calc(16px + env(safe-area-inset-bottom))}
+  .stv-logo{top:9px;right:11px;font-size:14px}
+  .stv-logo i{font-size:8px}
+  .stv-logo img{max-height:22px}
+  .stv-menu{top:8px;border-radius:22px}
+  .stv-chip{padding:9px 10px;font-size:10.5px;min-height:40px}
+  .stv-bottombar{width:86%;min-width:200px;height:23px;bottom:8px}
+  .stv-ticker span{font-size:9.5px}
+  .stv-clock{font-size:10px;padding:0 9px}
+  .stv-panel{top:46px;inset-inline:6px;bottom:6px}
+  .stv-grid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+}
+@media (max-width:380px){
+  .stv-chip{padding:8px 8px;font-size:10px}
+  .stv-grid{grid-template-columns:repeat(auto-fill,minmax(76px,1fr))}
+}
+/* حركة أقل لمن يفضلها (إتاحة) */
+@media (prefers-reduced-motion:reduce){
+  .stv-ticker span,.stv-stage::before,.stv-stage-glow,.stv-live-dot{animation:none}
+}
+/* في وضع ملء الشاشة: الشاشة تأخذ كامل المساحة */
+.stv-screen:fullscreen{aspect-ratio:auto;border-radius:0}
+.stv-screen:-webkit-full-screen{aspect-ratio:auto;border-radius:0}
+</style>
+<!-- ══════════════ STV:CSS-END ══════════════ -->
+</head>
+<body><div class="stv-wrap">
+
+  <!-- رأس الصفحة -->
+  <header class="stv-head">
+    <div class="stv-brand">
+      <div class="stv-brand-badge">STV</div>
+      <div>
+        <h1>تلفزيون سوفتارا</h1>
+        <p>مركز القنوات والأفلام والمسلسلات — منتدى سوفتارا</p>
+      </div>
+    </div>
+    <span class="stv-live-pill"><span class="stv-live-dot"></span> LIVE</span>
+  </header>
+
+  <!-- شاشة التلفزيون -->
+  <main>
+  <div class="stv-screen" id="stvScreen" aria-label="مشغل تلفزيون سوفتارا">
+
+    <!-- طبقة المشغل (فيديو/يوتيوب/HLS) -->
+    <div class="stv-player-host" id="stvPlayerHost"></div>
+
+    <!-- الخلفية المتحركة (تظهر في الوضع الرئيسي فقط) -->
+    <div class="stv-stage" id="stvStage" aria-hidden="true">
+      <div class="stv-stage-glow"></div>
+      <div class="stv-stage-glow g2"></div>
+    </div>
+
+    <!-- الطبقة الثابتة: الشعار + الإرشاد + الشريط (نفس تقنية K4S: pointer-events:none) -->
+    <div id="stvStaticUI">
+      <div class="stv-logo" id="stvLogo"><b>SOFTARA</b><i>TV</i></div>
+      <div class="stv-hint" id="stvHint">اضغط في أي مكان لإظهار القنوات</div>
+      <div class="stv-bottombar" id="stvBottomBar">
+        <div class="stv-ticker"><span id="stvTickerText">أهلًا بكم في تلفزيون سوفتارا • استمتعوا بالمشاهدة</span></div>
+        <div class="stv-clock" id="stvClock"><small id="stvCity">DXB</small><span id="stvTime">--:--</span></div>
+      </div>
+    </div>
+
+    <!-- طبقة اللمس: تلتقط الضغطة الأولى عند إخفاء الواجهة (حماية من التشغيل الخاطئ) -->
+    <div id="stvTouchLayer" aria-hidden="true"></div>
+
+    <!-- القائمة الرئيسية العلوية -->
+    <nav class="stv-menu" id="stvMainMenu" aria-label="قائمة الأقسام"></nav>
+
+    <!-- قائمة فرعية أفقية (قنوات التصنيف / حلقات المسلسل) -->
+    <nav class="stv-menu" id="stvSubMenu" aria-label="قائمة فرعية" style="display:none"></nav>
+
+    <!-- لوحة الأفلام/المسلسلات/البحث -->
+    <section class="stv-panel" id="stvPanel" aria-label="لوحة المحتوى">
+      <div class="stv-panel-head">
+        <h3 id="stvPanelTitle">المحتوى</h3>
+        <button class="stv-panel-close" id="stvPanelClose" type="button">إغلاق ✕</button>
+      </div>
+      <div class="stv-panel-body" id="stvPanelBody"></div>
+    </section>
+
+    <!-- التوست -->
+    <div class="stv-toast" id="stvToast" role="status" aria-live="polite"></div>
+  </div>
+  </main>
+
+  <!-- معلومات أسفل الشاشة -->
+  <p style="text-align:center;color:var(--stv-muted);font-size:11px;margin:12px 0 0;direction:rtl">
+    تلفزيون سوفتارا © منتدى سوفتارا — يتم عرض المحتوى من مصادرها المصرح بها
+  </p>
+</div>
+
+<!-- ══════════════ STV:JS-START ══════════════ -->
+<script>
+(function(){
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════════
+   1) الإعدادات — عدِّل هنا فقط
+   ═══════════════════════════════════════════════════════════════════ */
+var STV_CONFIG = {
+  /* الشعار داخل منطقة الفيديو: نص أو صورة (ضع رابط صورة في logoImg ليحل محل النص) */
+  brand: { name:'SOFTARA', accent:'TV', logoImg:'' },
+
+  /* شريط الأخبار المتحرك — أضف أي عدد من الجُمل */
+  ticker: [
+    'أهلًا بكم في تلفزيون سوفتارا • استمتعوا بالمشاهدة',
+    'تابعوا أهم الأخبار والأفلام والمسلسلات من مكان واحد',
+    'شعارنا: SOFTARA TV • من المنتدى… إلى الشاشة'
+  ],
+
+  /* تسمية الساعة بجانب التوقيت (مدينتك) */
+  city: 'DXB',
+
+  /* الوسائط الافتراضية عند فتح الصفحة:
+     type:'stage' → خلفية استاد متحركة بالكامل بـ CSS (0 كيلوبايت)
+     type:'video' → فيديو افتراضي متكرر (ارفع فيديو استاد بحجم صغير ~2MB
+                     إلى مستودع GitHub الخاص بك وضع رابط jsDelivr هنا)   */
+  defaultMedia: { type:'stage' },
+  /* defaultMedia: { type:'video', src:'https://cdn.jsdelivr.net/gh/USER/REPO@main/tv/stadium-loop.mp4' }, */
+
+  /* مصدر بيانات خارجي اختياري (JSON على jsDelivr) لتحديث المحتوى
+     دون تعديل الصفحة. اتركه فارغًا لاستخدام البيانات المدمجة أدناه. */
+  remoteDataUrl: ''
+
+  /* مثال شكل ملف JSON الخارجي (نفس بنية STV_DATA تمامًا):
+     {
+       "categories":[{"id":"news","name":"الإخبارية","items":[{"name":"الجزيرة","type":"yt","id":"bNyUyrR0PHo"}]}],
+       "movies":[{"name":"فيلم","type":"yt","id":"xxxx","year":"2025"}],
+       "series":[{"name":"مسلسل","episodes":[{"name":"حلقة 1","type":"yt","id":"xxxx"}]}]
+     }                                                                    */
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   2) بيانات المحتوى — أضف/عدِّل القنوات والأفلام والمسلسلات هنا
+   ───────────────────────────────────────────────────────────────────
+   أنواع المصادر المدعومة لكل عنصر:
+     {type:'yt',  id:'معرف_يوتيوب'}            بث مباشر أو فيديو يوتيوب
+     {type:'mp4', src:'رابط_ملف.mp4'}           فيديو MP4 مباشر
+     {type:'hls', src:'رابط_بث.m3u8'}           بث HLS (يُحمَّل المشغل تلقائيًا)
+     {type:'link',url:'رابط'}                   فتح موقع خارجي في تبويب جديد
+   ⚠ استخدم مصادر مصرح بها فقط (قنوات رسمية على يوتيوب أو بث تملك حقوقه).
+   ═══════════════════════════════════════════════════════════════════ */
+var STV_DATA = {
+  categories: [
+    { id:'news', name:'الإخبارية', items:[
+      { name:'الجزيرة',       type:'yt', id:'bNyUyrR0PHo' },
+      { name:'العربية',       type:'yt', id:'n7eQejkXbnM' },
+      { name:'سكاي نيوز',     type:'yt', id:'ppgTP8xQQsM' },
+      { name:'BBC عربي',      type:'yt', id:'MtDYtXIPOtY' },
+      { name:'الحدث',         type:'yt', id:'EEHXzLNS6o' },
+      { name:'فرانس 24',      type:'yt', id:'93g513Uth98' }
+    ]},
+    { id:'sports', name:'الرياضية', items:[
+      { name:'قناة رياضية 1', type:'yt', id:'sCPPk25bgfQ' },
+      { name:'قناة رياضية 2', type:'yt', id:'4WtuZ-oHW2Y' }
+    ]},
+    { id:'doc', name:'الوثائقية', items:[
+      { name:'NASA',          type:'yt', id:'0FBiyFpV__g' },
+      { name:'earthTV',       type:'yt', id:'HfgIFGbdGJ0' }
+    ]},
+    { id:'kids', name:'الأطفال', items:[
+      { name:'كرتون 1',       type:'yt', id:'21hAlnDFTLw' },
+      { name:'كرتون 2',       type:'yt', id:'rEKifG2XUZg' }
+    ]},
+    { id:'islamic', name:'الإسلامية', items:[
+      { name:'القرآن الكريم', type:'yt', id:'wawzF8i5yAo' },
+      { name:'السنة النبوية', type:'yt', id:'rHWSRMcGGBQ' }
+    ]}
+  ],
+  movies: [
+    { name:'فيلم تجريبي مفتوح',  type:'yt', id:'aqz-KE-bpKQ', year:'مشروع بلندر' },
+    { name:'سينتل',              type:'yt', id:'eRsGyueVLvQ', year:'مشروع بلندر' },
+    { name:'دموع الفولاذ',       type:'yt', id:'R6MlUcmOul8', year:'مشروع بلندر' }
+  ],
+  series: [
+    { name:'مسلسل تجريبي', episodes:[
+      { name:'الحلقة 1', type:'yt', id:'aqz-KE-bpKQ' },
+      { name:'الحلقة 2', type:'yt', id:'eRsGyueVLvQ' }
+    ]}
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   3) المحرك — لا تعدِّل ما تحت هذا السطر إلا إذا كنت تعرف ما تفعل
+   ═══════════════════════════════════════════════════════════════════ */
+var $=function(id){return document.getElementById(id);};
+var screen=$('stvScreen'),host=$('stvPlayerHost'),stage=$('stvStage'),
+    menu=$('stvMainMenu'),subMenu=$('stvSubMenu'),panel=$('stvPanel'),
+    panelBody=$('stvPanelBody'),panelTitle=$('stvPanelTitle'),
+    hint=$('stvHint'),bottomBar=$('stvBottomBar'),touch=$('stvTouchLayer'),
+    toastEl=$('stvToast'),tickerEl=$('stvTickerText');
+var hideTimer=null,toastTimer=null,hlsLibState=0,currentHls=null,activeMenuBtn=null;
+
+/* ── الساعة ── */
+function tickClock(){
+  var d=new Date();
+  $('stvTime').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+setInterval(tickClock,1000);tickClock();$('stvCity').textContent=STV_CONFIG.city;
+
+/* ── الشريط الإخباري ── */
+function startTicker(){
+  var txt=STV_CONFIG.ticker||[];
+  tickerEl.textContent=txt.length?txt.join('  •  '):'أهلًا بكم في تلفزيون سوفتارا';
+}
+
+/* ── الشعار ── */
+(function buildLogo(){
+  var logo=$('stvLogo'),b=STV_CONFIG.brand;
+  if(b.logoImg){logo.innerHTML='<img src="'+b.logoImg+'" alt="شعار '+b.name+'">';}
+  else{logo.innerHTML='<b></b><i></i>';logo.firstChild.textContent=b.name;logo.lastChild.textContent=b.accent;}
+})();
+
+/* ── إظهار/إخفاء الواجهة (نفس فكرة K4S: 4 ثوان ثم إخفاء + طبقة لمس) ── */
+function userActivity(){
+  screen.classList.add('user-active');
+  touch.style.display='none';
+  clearTimeout(hideTimer);
+  hideTimer=setTimeout(function(){
+    screen.classList.remove('user-active');
+    if(!panel.classList.contains('is-open')) touch.style.display='block';
+  },4000);
+}
+function wake(){userActivity();}
+touch.addEventListener('click',wake);
+screen.addEventListener('mousemove',wake);
+screen.addEventListener('touchstart',wake,{passive:true});
+screen.addEventListener('click',wake);
+
+/* ── توست ── */
+function toast(msg,isErr){
+  toastEl.textContent=msg;
+  toastEl.className='stv-toast is-show'+(isErr?' is-err':'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){toastEl.className='stv-toast';},3200);
+}
+
+/* ── بناء القائمة الرئيسية ── */
+function chip(label,onclick,cls){
+  var b=document.createElement('button');
+  b.type='button';b.className='stv-chip'+(cls?' '+cls:'');b.textContent=label;
+  if(onclick)b.addEventListener('click',function(e){e.stopPropagation();onclick(b);});
+  return b;
+}
+function buildMainMenu(){
+  menu.innerHTML='';
+  menu.appendChild(chip('الرئيسية',function(b){selectMain(b);}));
+  (DATA.categories||[]).forEach(function(cat){
+    menu.appendChild(chip(cat.name,function(b){openCategory(cat,b);}));
+  });
+  menu.appendChild(chip('???? أفلام',function(b){openMovies(b);}));
+  menu.appendChild(chip('???? مسلسلات',function(b){openSeries(b);}));
+  menu.appendChild(chip('???? بحث',function(b){openSearch(b);}));
+  menu.appendChild(chip('⛶',function(){toggleFullscreen();},'stv-chip-full'));
+}
+function setActive(btn){
+  if(activeMenuBtn)activeMenuBtn.classList.remove('is-active');
+  activeMenuBtn=btn||null;
+  if(btn)btn.classList.add('is-active');
+}
+
+/* ── القائمة الفرعية (شرائح أفقية مثل K4S) ── */
+function showSubMenu(items){
+  closePanel();
+  subMenu.innerHTML='';
+  var back=chip('',function(){hideSubMenu();},'is-back');
+  back.innerHTML='<span class="stv-uturn"></span>رجوع';
+  subMenu.appendChild(back);
+  (items||[]).forEach(function(it){
+    subMenu.appendChild(chip(it.name,function(){playItem(it);}));
+  });
+  subMenu.style.display='flex';
+  userActivity();
+}
+function hideSubMenu(){subMenu.style.display='none';}
+
+/* ── اللوحة (أفلام/مسلسلات/بحث) ── */
+function openPanel(title){panelTitle.textContent=title;panel.classList.add('is-open');touch.style.display='none';userActivity();}
+function closePanel(){panel.classList.remove('is-open');if(screen.classList.contains('user-active'))touch.style.display='none';userActivity();}
+$('stvPanelClose').addEventListener('click',function(e){e.stopPropagation();closePanel();hideSubMenu();});
+
+function card(item,onpick){
+  var c=document.createElement('button');
+  c.type='button';c.className='stv-card';
+  var poster='';
+  if(item.poster){poster='<span class="stv-card-poster"><img src="'+item.poster+'" alt="" loading="lazy"></span>';}
+  else{poster='<span class="stv-card-poster">'+(item.name||'?').charAt(0)+'</span>';}
+  c.innerHTML=poster+'<span class="stv-card-name"></span>'+(item.year?'<span class="stv-card-sub"></span>':'');
+  c.querySelector('.stv-card-name').textContent=item.name||'بدون اسم';
+  if(item.year)c.querySelector('.stv-card-sub').textContent=item.year;
+  c.addEventListener('click',function(e){e.stopPropagation();onpick(item);});
+  return c;
+}
+
+/* ── أقسام ── */
+function selectMain(btn){
+  setActive(btn);hideSubMenu();closePanel();
+  playDefault();
+}
+function openCategory(cat,btn){
+  setActive(btn);
+  if((cat.items||[]).length===1){playItem(cat.items[0]);return;}
+  showSubMenu(cat.items);
+}
+function openMovies(btn){
+  setActive(btn);hideSubMenu();
+  openPanel('???? الأفلام');
+  panelBody.innerHTML='';
+  var g=document.createElement('div');g.className='stv-grid';
+  var list=DATA.movies||[];
+  if(!list.length){panelBody.innerHTML='<p class="stv-empty">لا توجد أفلام بعد — أضفها من بيانات الصفحة.</p>';return;}
+  list.forEach(function(m){g.appendChild(card(m,playItem));});
+  panelBody.appendChild(g);
+}
+function openSeries(btn){
+  setActive(btn);hideSubMenu();
+  openPanel('???? المسلسلات');
+  renderSeries(DATA.series||[]);
+}
+function renderSeries(list){
+  panelBody.innerHTML='';
+  if(!list.length){panelBody.innerHTML='<p class="stv-empty">لا توجد مسلسلات بعد — أضفها من بيانات الصفحة.</p>';return;}
+  var g=document.createElement('div');g.className='stv-grid';
+  list.forEach(function(s){
+    g.appendChild(card({name:s.name,poster:s.poster,year:(s.episodes||[]).length+' حلقات'},function(){
+      showSubMenu(s.episodes||[]);
+    }));
+  });
+  panelBody.appendChild(g);
+}
+function openSearch(btn){
+  setActive(btn);hideSubMenu();
+  openPanel('???? البحث في كل المحتوى');
+  panelBody.innerHTML='';
+  var row=document.createElement('div');row.className='stv-search-row';
+  var inp=document.createElement('input');
+  inp.type='search';inp.placeholder='اكتب اسم قناة أو فيلم أو مسلسل…';
+  inp.setAttribute('aria-label','بحث');
+  row.appendChild(inp);panelBody.appendChild(row);
+  var res=document.createElement('div');res.className='stv-grid';
+  panelBody.appendChild(res);
+  var empty=document.createElement('p');empty.className='stv-empty';empty.textContent='اكتب كلمة للبحث…';
+  panelBody.appendChild(empty);
+  inp.addEventListener('click',function(e){e.stopPropagation();});
+  inp.addEventListener('input',function(){
+    var q=inp.value.trim().toLowerCase();
+    res.innerHTML='';
+    if(!q){res.style.display='none';empty.style.display='block';empty.textContent='اكتب كلمة للبحث…';return;}
+    var hits=[];
+    (DATA.categories||[]).forEach(function(c){(c.items||[]).forEach(function(it){if((it.name||'').toLowerCase().indexOf(q)>-1)hits.push(it);});});
+    (DATA.movies||[]).forEach(function(m){if((m.name||'').toLowerCase().indexOf(q)>-1)hits.push(m);});
+    (DATA.series||[]).forEach(function(s){if((s.name||'').toLowerCase().indexOf(q)>-1)hits.push({name:s.name+' (مسلسل)',isSeries:s});});
+    if(!hits.length){res.style.display='none';empty.style.display='block';empty.textContent='لا توجد نتائج مطابقة.';return;}
+    res.style.display='grid';empty.style.display='none';
+    hits.forEach(function(h){
+      if(h.isSeries){res.appendChild(card({name:h.name},function(){renderSeries([h.isSeries]);}));}
+      else res.appendChild(card(h,playItem));
+    });
+  });
+  setTimeout(function(){try{inp.focus({preventScroll:true});}catch(_){}},60);
+}
+
+/* ── التشغيل: قلب النظام ──
+   يعتمد على مبدأ الصفحة المرجعية: مشغّل واحد فقط، عند تبديل القناة يُفرَّغ
+   host بالكامل (innerHTML='') فيتوقف البث القديم ويُحرَّر الموارد فورًا. */
+function stopAndClear(){
+  if(currentHls){try{currentHls.destroy();}catch(_){}}currentHls=null;
+  host.innerHTML=''; /* إيقاف أي iframe/video سابق وإتلافه */
+}
+function playDefault(){
+  stopAndClear();hideSubMenu();
+  var dm=STV_CONFIG.defaultMedia||{type:'stage'};
+  stage.style.display='block';hint.style.display='block';bottomBar.style.display='flex';
+  screen.classList.remove('is-yt');
+  if(dm.type==='video'&&dm.src){
+    stage.style.display='none';
+    host.innerHTML='';
+    var v=document.createElement('video');
+    v.setAttribute('playsinline','');v.setAttribute('muted','');v.autoplay=true;v.loop=true;
+    v.style.cssText='width:100%;height:100%;object-fit:cover;background:#000';
+    v.src=dm.src;v.addEventListener('error',function(){toast('تعذر تحميل الفيديو الافتراضي — سيتم عرض الخلفية المتحركة',true);stage.style.display='block';});
+    host.appendChild(v);
+    var p=v.play();if(p&&p.catch)p.catch(function(){});
+  }
+  toast('الشاشة الرئيسية — اختر قسمًا من الأعلى');
+}
+function playYouTube(id){
+  stopAndClear();stage.style.display='none';hint.style.display='none';
+  bottomBar.style.display='none'; /* شريط يوتيوب السفلي يحتاج المساحة (كما في K4S) */
+  screen.classList.add('is-yt');
+  var f=document.createElement('iframe');
+  f.src='https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&mute=1&controls=1&rel=0&fs=1&playsinline=1&enablejsapi=1';
+  f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen');
+  f.setAttribute('allowfullscreen','');
+  f.setAttribute('title','مشغل يوتيوب');
+  host.appendChild(f);
+}
+function playVideo(src,useHls){
+  stopAndClear();stage.style.display='none';hint.style.display='none';
+  bottomBar.style.display='flex';screen.classList.remove('is-yt');
+  var v=document.createElement('video');
+  v.setAttribute('playsinline','');v.controls=true;v.autoplay=true;v.preload='auto';
+  v.style.cssText='width:100%;height:100%;object-fit:contain;background:#000';
+  v.addEventListener('error',function(){toast('تعذر تشغيل هذا المصدر — جرّب قناة أخرى',true);});
+  host.appendChild(v);
+  if(useHls){
+    if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=src;var p=v.play();if(p&&p.catch)p.catch(function(){});return;}
+    loadHls(function(Hls){
+      if(!Hls.isSupported()){v.src=src;var p2=v.play();if(p2&&p2.catch)p2.catch(function(){});return;}
+      var h=new Hls({maxBufferLength:20,backBufferLength:30});
+      h.loadSource(src);h.attachMedia(v);
+      h.on(Hls.Events.ERROR,function(_,data){
+        if(data&&data.fatal){toast('انقطع البث — سيُعاد المحاولة',true);try{h.startLoad();}catch(_){}}
+      });
+      currentHls=h;var p3=v.play();if(p3&&p3.catch)p3.catch(function(){});
+    });
+  }else{
+    v.src=src;var p=v.play();if(p&&p.catch)p.catch(function(){});
+  }
+}
+function playItem(it){
+  hideSubMenu();closePanel();userActivity();
+  if(!it)return;
+  if(it.type==='link'){window.open(it.url,'_blank','noopener');toast('فتحنا الرابط في تبويب جديد');return;}
+  if(it.type==='yt'){playYouTube(it.id);toast('جارٍ تشغيل: '+it.name);return;}
+  if(it.type==='mp4'){playVideo(it.src,false);toast('جارٍ تشغيل: '+it.name);return;}
+  if(it.type==='hls'){playVideo(it.src,true);toast('جارٍ تشغيل البث: '+it.name);return;}
+  toast('نوع مصدر غير معروف',true);
+}
+
+/* ── تحميل HLS.js عند الحاجة فقط (Lazy) — لا يُحمَّل أبدًا إن لم تستخدم m3u8 ── */
+function loadHls(cb){
+  if(hlsLibState===2){cb(window.Hls);return;}
+  if(hlsLibState===1){var t=setInterval(function(){if(hlsLibState===2){clearInterval(t);cb(window.Hls);}},120);return;}
+  hlsLibState=1;
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
+  s.onload=function(){hlsLibState=2;cb(window.Hls);};
+  s.onerror=function(){hlsLibState=0;toast('تعذر تحميل مشغل HLS',true);};
+  document.head.appendChild(s);
+}
+
+/* ── ملء الشاشة ── */
+function toggleFullscreen(){
+  var doc=document,el=screen;
+  if(doc.fullscreenElement||doc.webkitFullscreenElement){(doc.exitFullscreen||doc.webkitExitFullscreen).call(doc);return;}
+  var req=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(req){req.call(el).catch?req.call(el):null;try{req.call(el);}catch(_){iosFs();}}
+  else iosFs();
+}
+function iosFs(){
+  var v=host.querySelector('video');
+  if(v&&v.webkitEnterFullscreen){try{v.webkitEnterFullscreen();}catch(_){toast('ملء الشاشة غير مدعوم هنا',true);}}
+  else toast('ملء الشاشة غير مدعوم على هذا المتصفح',true);
+}
+
+/* ── البيانات الخارجية (إدارة المحتوى بدون تعديل الصفحة) ── */
+var DATA=STV_DATA;
+function mergeData(remote){
+  if(remote&&remote.categories)DATA=remote;
+}
+
+/* ── إقلاع ── */
+function boot(){
+  startTicker();buildMainMenu();playDefault();userActivity();
+  if(STV_CONFIG.remoteDataUrl){
+    fetch(STV_CONFIG.remoteDataUrl,{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(j){mergeData(j);buildMainMenu();playDefault();toast('تم تحديث المحتوى من المصدر الخارجي ✔');})
+      .catch(function(){/* بيانات مدمجة احتياطًا */});
+  }
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+
+/* فضح دوال التشخيص (اختياري) */
+window.STV={play:playItem,home:playDefault,data:function(){return DATA;}};
+})();
+</script>
+<!-- ══════════════ STV:JS-END ══════════════ -->
+</body>
+</html>

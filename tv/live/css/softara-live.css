@@ -1,0 +1,48 @@
+/* ════════════════════════════════════════════════════════════════
+   سوفتارا TV v2.2.0 — أنماط صفحة Softara Live TV (البث المباشر)
+   قوائم القنوات: الهاتف لوحة سفلية · الحاسب لوح جانبي ثابت
+   الأساسيات المشتركة في tv/shared/css/softara-shared.css
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── قائمة القنوات (الهاتف: أسفل المشغل · الحاسب: جانبية) ── */
+.stv-chpanel{
+  margin-top:10px;max-height:0;overflow:hidden;transition:max-height .3s ease;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+}
+.stv-chpanel.open{max-height:min(54vh,460px)}
+.stv-chpanel-in{padding:12px;max-height:min(54vh,460px);overflow-y:auto;overscroll-behavior:contain}
+.stv-chlist{display:flex;flex-direction:column;gap:4px}
+.stv-ch{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:right;min-height:56px;
+  padding:7px 10px;border-radius:12px;border:1px solid transparent;transition:background .15s,border-color .15s;
+}
+.stv-ch:hover{background:var(--panel2)}
+.stv-ch.on{background:color-mix(in srgb,var(--accent) 12%,var(--panel2));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.stv-ch-av{
+  width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:900;font-size:16px;text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.stv-ch-meta{min-width:0;flex:1}
+.stv-ch-meta b{display:block;font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stv-ch-meta small{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:700}
+.stv-ch-meta .dotl{width:6px;height:6px;border-radius:50%;background:var(--danger)}
+.stv-ch .ic{width:18px;height:18px;color:var(--faint)}
+.stv-ch.on .ic{color:var(--accent)}
+.stv-ch-count{font-size:10.5px;font-weight:800;color:var(--faint);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+/* الحاسب: اللوحة الجانبية */
+.stv-aside{display:none}
+@media(min-width:1024px){
+  .stv-chpanel{display:none}
+  .stv-aside{
+    display:block;position:sticky;top:calc(var(--header-h) + 14px);
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  }
+  .stv-aside-h{display:flex;align-items:center;gap:8px;padding:13px 15px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:900}
+  .stv-aside-h .ic{width:18px;height:18px;color:var(--accent)}
+  .stv-aside-h .stv-ch-count{margin-inline-start:auto}
+  .stv-aside-b{max-height:calc(100dvh - var(--header-h) - 150px);overflow-y:auto;overscroll-behavior:contain;padding:10px}
+}
+/* نتائج البحث داخل صفحة البث */
+.stv-live-results{margin-top:12px}
+.stv-live-results .stv-sechead{margin-top:0}
+.stv-live-hint{margin-top:12px}
