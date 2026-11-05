@@ -1,0 +1,18 @@
+# ═══════════════════════════════════════════════════════════════
+# Softara Media v3.0.0 — بصمات SHA-256 للملفات المنشورة
+# الوسم: v3.0.0 (commit c97b888 + docs) · صفحة المنتدى: h33-media
+# GitHub: https://github.com/softara1/softara/tree/v3.0.0/tv/movies
+# jsDelivr: https://cdn.jsdelivr.net/gh/softara1/softara@v3.0.0/tv/movies/...
+# ───────────────────────────────────────────────────────────────
+c423cb92ebd1da89a4d85fb0095d693c24dabbb72e587dcf86e2e9428f671dd7  tv/movies/css/softara-movies.css
+653548af496973c1427919a89eec2f92f3fd13d8b386c11b3af7cc5c11c73ac8  tv/movies/js/softara-movies-player.js
+876e0d3c9eb0b1a657cd9f6e52617ea961927d8ae265b34f10588da26d5db6fa  tv/movies/js/softara-movies-app.js
+02a6fba433d1d205ceb71fc1d13d81506c1caaec19efa9f9f72574585274eee6  tv/movies/data/softara-movies-data.js
+036a92e5966a948193a642182d437f2801ee6492399caf96cfae4a25766dfe98  tv/movies/data/softara-movies-channels.js
+b81cc473aff0275690573449941820d2cce8fa2ccd89691ac9ad49c6d744c25b  tv/movies/movies.html
+6021f96c439387a436806e0425be440643ecafe48766dc56778a5ae970cbe8cf  tv/movies/forum/softara-movies-forum.html
+03e9790535f89675a9eea43529edf3310cfadcc651dbb58a7a95bc02f02774d4  tv/movies/docs/report-development.html
+0127780ed8d5ee12437e1c8944eb806c9bee6d6a561482297eb087b814e1ebbe  tv/movies/docs/guide-installation.html
+
+# لقطة كود صفحة المنتدى h33 كما نُشرت فعليًا (بعد تطبيع الأحرف الجديدة من أحلى منتدى):
+2dcbc86a429fb8938e15d804dec19d454c12fd16093ae73e1c1e46704cf8b6d2   h33-media-as-published.html

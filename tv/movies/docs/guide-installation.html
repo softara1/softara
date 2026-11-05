@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="دليل تركيب Softara Media على أي منتدى وإضافة الأفلام والحلقات والقنوات خطوة بخطوة">
+<title>دليل التركيب والإضافة — Softara Media v3.0.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+<style>
+:root{--bg:#0a0f0d;--bg2:#0d1411;--panel:#101a15;--panel2:#16221c;--line:#1e2d26;--line2:#2a3d34;--txt:#eaf5ef;--muted:#9db4a8;--faint:#5f7a6d;--accent:#10b981;--accent3:#34d399;--warn:#f59e0b;--danger:#ef4444;--r:14px;--grad:linear-gradient(135deg,#10b981,#14b8a6)}
+html[data-theme="light"]{--bg:#f3f7f5;--bg2:#eef4f1;--panel:#fff;--panel2:#f0f5f2;--line:#dce8e2;--line2:#c8dcd2;--txt:#122019;--muted:#4d6a5c;--faint:#7d998c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Cairo,'Segoe UI',Tahoma,sans-serif;line-height:1.9}
+.wrap{max-width:920px;margin-inline:auto;padding:24px 16px 60px}
+header.hero{background:linear-gradient(140deg,#0c1712,#0a1410 60%),var(--grad);border:1px solid var(--line);border-radius:20px;padding:28px 24px;margin-bottom:22px}
+h1{margin:0 0 6px;font-size:clamp(21px,4.5vw,30px);font-weight:900}
+h1 i{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:normal}
+.hero p{margin:0;color:var(--muted);font-weight:700;font-size:14px}
+nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin:18px 0}
+nav.toc b{display:block;margin-bottom:6px;color:var(--accent3)}
+nav.toc a{display:block;color:var(--muted);font-size:13px;font-weight:800;padding:3px 0}
+h2{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:900;margin:34px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h2 .n{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;background:var(--grad);color:#032018;font-size:15px;flex:none}
+h3{font-size:15.5px;font-weight:900;margin:20px 0 8px;color:var(--accent3)}
+p{margin:8px 0;font-size:14px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:12px 0;font-size:13.5px}
+.box.ok{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.box.warn{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.box b.t{display:block;margin-bottom:6px;font-weight:900}
+.step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+.step .num{flex:none;width:30px;height:30px;border-radius:10px;background:var(--panel2);border:1px solid var(--line2);color:var(--accent3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;margin-top:2px}
+.step div{min-width:0}
+.step b{display:block;font-weight:900;font-size:14px}
+.step p{margin:2px 0;font-size:13px;color:var(--muted)}
+ul,ol{margin:8px 0;padding-inline-start:22px;font-size:13.5px}
+li{margin:5px 0}
+li::marker{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px;background:var(--panel);border-radius:var(--r);overflow:hidden}
+th{background:var(--panel2);color:var(--accent3);font-weight:900;padding:10px;text-align:right;border-bottom:1px solid var(--line2)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tscroll{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line)}
+.tscroll table{margin:0;border-radius:0;border:0}
+code{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:1px 8px;font-size:12px;direction:ltr;display:inline-block;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+pre{background:#07100c;border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;direction:ltr;text-align:left;font-size:12px;line-height:1.7}
+pre code{background:none;border:0;padding:0;word-break:normal}
+footer{margin-top:36px;border-top:1px solid var(--line);padding-top:14px;color:var(--faint);font-size:12px;font-weight:700}
+a{color:var(--accent3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>دليل <i>التركيب والإضافة</i> — Softara Media v3.0.0</h1>
+  <p>كيف تركّب المنصة على أي منتدى أحلى منتدى؟ وأين يكون التعديل: داخل الصفحة أم بالملفات الخارجية؟ وكيف تضيف أفلامًا وحلقات وقوائم وقنوات من كل منصة؟</p>
+</header>
+
+<nav class="toc">
+  <b>محتويات الدليل</b>
+  <a href="#s1">1) القاعدة الذهبية: أين يكون التعديل؟</a>
+  <a href="#s2">2) تركيب المنصة على منتدى آخر (خطوة بخطوة)</a>
+  <a href="#s3">3) إضافة فيلم أو حلقة (mp4 / m3u8 / تضمين)</a>
+  <a href="#s4">4) إضافة مسلسل كامل أو قائمة تشغيل من كل منصة</a>
+  <a href="#s5">5) إضافة قناة يوتيوب كاملة كمكتبة تتحدث تلقائيًا</a>
+  <a href="#s6">6) جدول المنصات المدعومة وأنواعها</a>
+  <a href="#s7">7) نشر التحديث (وسم جديد jsDelivr)</a>
+  <a href="#s8">8) نسخة احتياطية واستعادة</a>
+  <a href="#s9">9) أسئلة شائعة</a>
+</nav>
+
+<h2 id="s1"><span class="n">1</span>القاعدة الذهبية: أين يكون التعديل؟</h2>
+<div class="box ok"><b class="t">المنصة مصممة بفصل كامل: صفحة المنتدى «جميدة» وكل المحتوى في الملفات الخارجية</b><br>
+صفحة المنتدى (h33) تحتوي الهيكل فقط + روابط jsDelivr. <b>لا تعدّل صفحة المنتدى إلا في حالة واحدة</b>: تغيير رقم الإصدار @v3.0.0 في الروابط بعد نشر وسم جديد. كل ما عدى ذلك يكون في الملفات على GitHub.</div>
+<div class="tscroll"><table>
+<tr><th>أريد أن…</th><th>أين التعديل؟</th><th>الملف بالتحديد</th></tr>
+<tr><td>أضيف فيلمًا أو حلقة أو وثائقيًا</td><td>الملفات الخارجية</td><td><code>data/softara-movies-data.js</code> ← مصفوفة <code>items</code></td></tr>
+<tr><td>أضيف مسلسلًا/قائمة/مجموعة حلقات</td><td>الملفات الخارجية</td><td><code>data/softara-movies-data.js</code> ← مصفوفة <code>collections</code></td></tr>
+<tr><td>أضيف قناة يوتيوب كمكتبة متجددة</td><td>الملفات الخارجية</td><td><code>data/softara-movies-channels.js</code> + مجموعة في data</td></tr>
+<tr><td>أعدّل الأخبار المتحركة أو الروابط أو نصوص الواجهة</td><td>الملفات الخارجية</td><td><code>data/softara-movies-data.js</code> ← <code>news</code> / <code>links</code> / <code>page</code></td></tr>
+<tr><td>أغيّر الألوان أو الشكل</td><td>الملفات الخارجية</td><td><code>css/softara-movies.css</code></td></tr>
+<tr><td>أضيف منصة تضمين جديدة أو منطق مشغل</td><td>الملفات الخارجية</td><td><code>js/softara-movies-player.js</code> (PLATFORMS + builders)</td></tr>
+<tr><td>أغيّر ترتيب/سلوك الواجهة</td><td>الملفات الخارجية</td><td><code>js/softara-movies-app.js</code></td></tr>
+<tr><td>أضيف شعارًا أو نص ترحيبي للبطاقة الافتتاحية</td><td>الملفات الخارجية</td><td><code>data/softara-movies-data.js</code> ← <code>page.idleTitle/idleText</code></td></tr>
+<tr><td>أرقّي الإصدار بعد تعديل أي ملف</td><td>صفحة المنتدى فقط</td><td>استبدال <code>@v3.0.0</code> بالوسم الجديد في روابط h33 (6 مواضع)</td></tr>
+<tr><td>أضيف مكتبة تصنيف جديدة</td><td>الملفات الخارجية</td><td><code>data</code> ← <code>libraries</code> ثم استخدم <code>lib</code> الجديد في المجموعات/العناصر</td></tr>
+</table></div>
+
+<h2 id="s2"><span class="n">2</span>تركيب المنصة على منتدى آخر (خطوة بخطوة)</h2>
+<div class="step"><span class="num">1</span><div><b>اجلب كود نسخة المنتدى</b><p>من المستودع: <code>tv/movies/forum/softara-movies-forum.html</code> (عبر صفحة GitHub الخام أو jsDelivr). هذا الكود يشتغل كما هو على أي منتدى — الروابط فيه مطلقة لا تحتاج استضافة.</p></div></div>
+<div class="step"><span class="num">2</span><div><b>افتح لوحة إدارة منتداك</b><p>العناصر الإضافية ← إدارة صفحات HTML ← «إنشاء صفحة HTML جديدة بوضع المتقدم (HTML)».</p></div></div>
+<div class="step"><span class="num">3</span><div><b>الصق الكود في وضع المصدر</b><p>مهم جدًا: الصق في محرر HTML (Source) لا في المحرر المرئي WYSIWYG — المحرر المرئي يشوّه الكود. ولصق كود كبير: استخدم حيلة لصق عبر شريط أدوات المتصفح أو أجزاء.</p></div></div>
+<div class="step"><span class="num">4</span><div><b>العنوان والخيارات</b><p>العنوان: <code>media</code> (يصبح الرابط hXX-media). الخيارات: <b>«لا» لاستعمال أعلى وأسفل منتداك</b> + «لا» لصفحة البداية. ثم «قدّم».</p></div></div>
+<div class="step"><span class="num">5</span><div><b>تحقق من الصفحة</b><p>افتح رابط الصفحة الجديدة: يجب أن تظهر شاشة البداية ثم 43 بطاقة و9 تبويبات مكتبات بدون أخطاء. لو لم تظهر البطاقات فالسبب غالبًا: لصق بالمحرر المرئي أو تعديل غير مقصود في روابط CDN.</p></div></div>
+<div class="box warn"><b class="t">تنبيهات مهمة للتركيب</b><br>① لا تستبدل <code>@v3.0.0</code> بـ <code>main</code> — الوسم الثابت يضمن ألا تنكسر صفحتك يومًا بسبب تعديل مستقبلي. ② لا تحذف <code>&lt;meta name="referrer" content="no-referrer"&gt;</code> — يفيد بعض المصادر. ③ على المنتدى الأصلي الصفحة المنشورة رسميًا هي h33-media.</div>
+
+<h2 id="s3"><span class="n">3</span>إضافة فيلم أو حلقة (mp4 / m3u8 / تضمين)</h2>
+<p>افتح <code>tv/movies/data/softara-movies-data.js</code> وابحث عن مصفوفة <code>items</code> وأضف عنصرًا بنفس النمط:</p>
+<pre><code>// فيلم ملف مباشر (يفضل ملكية عامة أو رسمي):
+{"id":"mv-myfilm","name":"اسم الفيلم (1960)","lib":"movies-world","kind":"movie",
+ "type":"mp4","src":"https://archive.org/download/XXXX/file.mp4",
+ "poster":"https://archive.org/services/img/XXXX",
+ "year":"1960","cat":"كلاسيكي","durText":"1:35:00","lang":"en",
+ "desc":"وصف مختصر","srcNote":"ملكية عامة عبر archive.org"}
+
+// بث م3u8:
+{"id":"mv-myhls","name":"قناة/فيلم HLS","lib":"docs-world","kind":"movie",
+ "type":"hls","src":"https://example.com/stream/master.m3u8","poster":"…","srcNote":"…"}
+
+// فيديو يوتيوب (المعرف فقط):
+{"id":"dc-x","name":"وثائقي","lib":"docs-ar","kind":"movie",
+ "type":"youtube","src":"XXXXXXXXXXX","poster":"https://i.ytimg.com/vi/XXXXXXXXXXX/hqdefault.jpg"}
+
+// MP4 بعدة جودات + ترجمة:
+{"id":"mv-q","name":"فيلم بجودات","lib":"movies-world","kind":"movie","type":"mp4",
+ "src":"https://…/720p.mp4",
+ "variants":[{"label":"1080p","src":"https://…/1080p.mp4"},{"label":"720p","src":"https://…/720p.mp4"}],
+ "subs":[{"label":"العربية","lang":"ar","src":"https://…/ar.vtt"}],
+ "poster":"…","srcNote":"…"}</code></pre>
+<p>بعد الحفظ: ارفع الملف لـ GitHub → أنشئ وسمًا جديدًا → حدّث رابط <b>ملف البيانات فقط</b> في صفحة المنتدى إلى الوسم الجديد (أو رقِّ كل الروابط — القسم 7).</p>
+
+<h2 id="s4"><span class="n">4</span>إضافة مسلسل كامل أو قائمة تشغيل من كل منصة</h2>
+<h3>أ) مسلسل بحلقات مضمنة (الأنسب والأصمد)</h3>
+<pre><code>// في collections داخل softara-movies-data.js:
+{"id":"sr-mys","name":"اسم المسلسل","lib":"series-world","kind":"series",
+ "poster":"https://i.ytimg.com/vi/ID1/hqdefault.jpg",
+ "note":"وصف العمل","source":"القناة الرسمية على يوتيوب — فُحصت الحلقات",
+ "episodes":[
+   {"type":"youtube","src":"ID1","title":"الحلقة 1","thumb":"https://i.ytimg.com/vi/ID1/hqdefault.jpg"},
+   {"type":"youtube","src":"ID2","title":"الحلقة 2","thumb":"https://i.ytimg.com/vi/ID2/hqdefault.jpg"}
+ ],
+ "full":{"type":"yt-playlist","src":"PLxxxxxxxx","title":"القائمة الأصلية الكاملة"}}</code></pre>
+<h3>ب) قوائم منصات جاهزة (سطر واحد)</h3>
+<div class="tscroll"><table>
+<tr><th>المنصة</th><th>نوع المجموعة الكاملة</th><th>مثال قيمة src</th></tr>
+<tr><td>يوتيوب</td><td><code>full.type = "yt-playlist"</code></td><td><code>PLbpi6ZahtOH6…</code> أو قائمة قناة <code>UUxxxxxxxx…</code></td></tr>
+<tr><td>ديلي موشن</td><td><code>full.type = "dm-playlist"</code></td><td><code>xe1w36</code> (من رابط dailymotion.com/playlist/…)</td></tr>
+<tr><td>أرشيف الإنترنت</td><td>حلقات <code>type:"archive"</code></td><td><code>identifier?file=name.mp4</code> لاختيار الملف</td></tr>
+<tr><td>OK.ru / VK</td><td>حلقات فردية</td><td><code>okru:"16321332513493"</code> · <code>vk:"-22822305_456241795"</code></td></tr>
+</table></div>
+<h3>ج) عمل غير متاح مجانًا؟ (كتالوج رسمي)</h3>
+<pre><code>{"id":"sr-x","name":"اسم العمل","lib":"series-world","kind":"series","catalog":true,
+ "poster":"…","year":"2010","country":"الولايات المتحدة",
+ "note":"كتالوج تعريفي — الحلقات عبر المنصات الرسمية",
+ "source":"المقطع من القناة الرسمية",
+ "official":[{"label":"شاهد رسميًا على Netflix","url":"https://…"}],
+ "trailer":{"type":"youtube","src":"TrailerID","title":"المقطع الدعائي الرسمي"},
+ "seasons":[{"name":"الموسم 1","count":22}]}</code></pre>
+
+<h2 id="s5"><span class="n">5</span>إضافة قناة يوتيوب كاملة كمكتبة تتحدث تلقائيًا</h2>
+<div class="step"><span class="num">1</span><div><b>اجلب معرف القناة UC…</b><p>افتح صفحة القناة واستخرج <code>channelId</code> من مصدر الصفحة (ابحث عن <code>"channelId":"UC…</code>).</p></div></div>
+<div class="step"><span class="num">2</span><div><b>مُشتق قائمة الرفع تلقائيًا</b><p>قائمة رفع أي قناة = <code>UU</code> + معرف القناة بدون <code>UC</code>. مثال: قناة <code>UCabc123…</code> ← قائمة <code>UUabc123…</code>. تأكد منها بفتح: <code>https://www.youtube.com/playlist?list=UU…</code></p></div></div>
+<div class="step"><span class="num">3</span><div><b>أضف لقطة أحدث الفيديوهات</b><p>اجلب: <code>https://www.youtube.com/feeds/videos.xml?channel_id=UC…</code> واستخرج أول 10-15 فيديو (id + title) — أضِفها في <code>softara-movies-channels.js</code>:</p>
+<pre><code>{"id":"my-channel","cid":"UCxxx…","uploads":"UUxxx…","name":"اسم القناة",
+ "handle":"@handle","lib":"docs-ar","note":"وصف","author":"اسم القناة","videos":[
+   {"src":"VideoID","title":"العنوان","thumb":"https://i.ytimg.com/vi/VideoID/hqdefault.jpg"}
+ ]}</code></pre></div></div>
+<div class="step"><span class="num">4</span><div><b>أضف مجموعة تقرأ من القناة</b><p>في <code>collections</code> داخل data:</p>
+<pre><code>{"id":"ch-my-channel","name":"اسم القناة","lib":"docs-ar","kind":"channel",
+ "poster":"https://i.ytimg.com/vi/ID/hqdefault.jpg","note":"وصف",
+ "source":"قناة رسمية على يوتيوب",
+ "episodes":[{"type":"youtube","src":"ID","title":"العنوان","thumb":"…"}],
+ "full":{"type":"yt-playlist","src":"UUxxx…","title":"كل فيديوهات القناة (تتحدث تلقائيًا)"}}</code></pre>
+<p>ملاحظة: معرف المجموعة يبدأ بـ <code>ch-</code> + نفس id القناة ليكتشف النظام التحديث التلقائي.</p></div></div>
+<div class="box ok"><b class="t">لماذا هذه الطريقة أفضل؟</b> زر «القائمة الكاملة» يعرض كل فيديوهات القناة بما ينشر يومًا ما — عبر مشغل يوتيوب الرسمي، بلا مفاتيح API وبلا بروكسيات هشة، وبضمن شروط يوتيوب 100%.</div>
+
+<h2 id="s6"><span class="n">6</span>جدول المنصات المدعومة وأنواعها</h2>
+<div class="tscroll"><table>
+<tr><th>المنصة / الصيغة</th><th>type</th><th>مثال src (ما يوضع في البيانات)</th></tr>
+<tr><td>يوتيوب — فيديو</td><td><code>youtube</code></td><td><code>dQw4w9WgXcQ</code> (المعرف فقط)</td></tr>
+<tr><td>يوتيوب — قائمة</td><td><code>yt-playlist</code></td><td><code>PLxxx…</code> / <code>UUxxx…</code></td></tr>
+<tr><td>ديلي موشن — فيديو</td><td><code>dailymotion</code></td><td><code>x2eo6sp</code></td></tr>
+<tr><td>ديلي موشن — قائمة</td><td><code>dm-playlist</code></td><td><code>xe1w36</code></td></tr>
+<tr><td>Vimeo</td><td><code>vimeo</code></td><td><code>76979871</code></td></tr>
+<tr><td>OK.ru</td><td><code>okru</code></td><td><code>16321332513493</code></td></tr>
+<tr><td>VK / vkvideo</td><td><code>vk</code></td><td><code>-22822305_456241795</code> (oid_id)</td></tr>
+<tr><td>Rutube</td><td><code>rutube</code></td><td><code>معرف_سداسي</code></td></tr>
+<tr><td>Streamable</td><td><code>streamable</code></td><td><code>khy86q</code></td></tr>
+<tr><td>Facebook</td><td><code>facebook</code></td><td>رابط الفيديو العام كاملًا</td></tr>
+<tr><td>Archive.org</td><td><code>archive</code></td><td><code>BigBuckBunny_124</code> أو <code>id?file=x.mp4</code></td></tr>
+<tr><td>MP4/WebM</td><td><code>mp4</code></td><td>رابط الملف المباشر (+variants/subs اختيارية)</td></tr>
+<tr><td>HLS</td><td><code>hls</code></td><td>رابط .m3u8</td></tr>
+<tr><td>sendvid · mp4plus</td><td>—</td><td class="tag-warn" style="color:#fbbf24">ممنوعة التضمين رسميًا (XFO) — لا تضفها كمشغل</td></tr>
+<tr><td>uqload · dood · mixdrop/miixdrop · voe · filemoon · vidmoly · streamtape · larhu</td><td><code>external</code></td><td>الرابط كاملًا — ستظهر بطاقة «شاهده على منصته» بدل مشغل وهمي</td></tr>
+</table></div>
+<p>يمكن أيضًا لصق <b>أي رابط جاهز</b> في محلل <code>STMPlayer.parseSource()</code> من كونسول المتصفح للتحقق من تصنيفه قبل إضافته للبيانات.</p>
+
+<h2 id="s7"><span class="n">7</span>نشر التحديث (وسم جديد jsDelivr)</h2>
+<div class="step"><span class="num">1</span><div><b>عدّل الملف محليًا واختبر</b><p>عدّل data/css/js ثم جرّب على نسخة المعاينة قبل الرفع.</p></div></div>
+<div class="step"><span class="num">2</span><div><b>ارفع إلى GitHub وأنشئ وسمًا</b><pre><code>git add -A && git commit -m "Softara Media v3.0.1 — وصف التعديل"
+git tag v3.0.1 && git push origin main --tags</code></pre></div></div>
+<div class="step"><span class="num">3</span><div><b>حدّث صفحة المنتدى</b><p>لوحة الإدارة ← صفحات HTML ← h33 ← استبدل <code>@v3.0.0</code> بـ <code>@v3.0.1</code> في الروابط (إما كلها أو رابط الملف المعدل فقط — مثلًا ملف البيانات وحده). احفظ بوضع المصدر.</p></div></div>
+<div class="step"><span class="num">4</span><div><b>تحقق</b><p>افتح الصفحة بتجاوز الكاش (Ctrl+F5) وتأكد أن التعديل ظهر وأن الكونسول بلا أخطاء.</p></div></div>
+
+<h2 id="s8"><span class="n">8</span>نسخة احتياطية واستعادة</h2>
+<ul>
+  <li><b>الوسم هو النسخة الاحتياطية الأصل</b>: كل إصدار مثبت على GitHub ويمكن جلبه من <code>cdn.jsdelivr.net/gh/softara1/softara@v3.0.0/…</code> أصلًا بأصل للأبد.</li>
+  <li>نسخة ما قبل إعادة البناء: <code>tv-backups/movies-before-rebuild-20261106/</code> (ملفات v2.2.0 + SHA256SUMS).</li>
+  <li>نسخة النشر: <code>download/softara-movies-v3.0.0/</code> + لقطة كود صفحة المنتدى كما نُشرت.</li>
+  <li><b>استعادة كاملة</b>: أنشئ صفحة HTML جديدة والصق كود <code>forum/softara-movies-forum.html</code> من النسخة الاحتياطية — انتهت.</li>
+</ul>
+
+<h2 id="s9"><span class="n">9</span>أسئلة شائعة</h2>
+<div class="box"><b class="t">أضفت عنصرًا في data لكنه لا يظهر؟</b> تحقق: فاصلة JSON صحيحة، لا فواصل زائدة قبل <code>]</code>، ورقّيت وسمًا جديدًا وحديث رابط ملف البيانات. افتح الكونسول — أي خطأ JSON سيظهر هناك.</div>
+<div class="box"><b class="t">فيديو يوتيوب يظهر «الفيديو غير متاح»؟</b> صاحب الفيديو منع التضمين أو الفيديو مقيد العمر — تحقق بفتح الرابط في متصفح عادي. استبدله بمصدر آخر أو أدرجه كتالوجًا.</div>
+<div class="box"><b class="t">أريد أفاتار/غلاف لأعمال بلا صورة؟</b> اترك <code>poster</code> فارغًا — تُبنى بطاقة SVG تلقائيًا باسم العمل.</div>
+<div class="box"><b class="t">هل أستطيع إضافة منصة جديدة للتضمين؟</b> نعم: أضف بناءً لها في <code>softara-movies-player.js</code> (دالة mount + مطابقة في parseSource) — لكن تحقق أولًا من رؤوس X-Frame-Options/CSP في المتصفح قبل الإعلان عنها.</div>
+<div class="box"><b class="t">هل الصفحة تؤثر على صفحة Live TV؟</b> لا إطلاقًا — لا تشارك معها أي ملف معدل؛ استخدم أيقونات مشتركة بالقراءة فقط، وبصمة بيانات Live TV متطابقة بين الوسمين.</div>
+
+<footer>دليل التركيب والإضافة — Softara Media v3.0.0 · <a href="report-development.html">← التقرير الفني الكامل</a></footer>
+</div>
+</body>
+</html>

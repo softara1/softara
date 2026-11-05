@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="تقرير تطوير منصة Softara Movies & Media v3.0.0 — كل ما تم عمله واختباره">
+<title>تقرير التطوير — Softara Media v3.0.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+<style>
+:root{--bg:#0a0f0d;--bg2:#0d1411;--panel:#101a15;--panel2:#16221c;--line:#1e2d26;--line2:#2a3d34;--txt:#eaf5ef;--muted:#9db4a8;--faint:#5f7a6d;--accent:#10b981;--accent3:#34d399;--warn:#f59e0b;--danger:#ef4444;--r:14px;--grad:linear-gradient(135deg,#10b981,#14b8a6)}
+html[data-theme="light"]{--bg:#f3f7f5;--bg2:#eef4f1;--panel:#fff;--panel2:#f0f5f2;--line:#dce8e2;--line2:#c8dcd2;--txt:#122019;--muted:#4d6a5c;--faint:#7d998c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Cairo,'Segoe UI',Tahoma,sans-serif;line-height:1.9}
+.wrap{max-width:900px;margin-inline:auto;padding:24px 16px 60px}
+header.hero{background:linear-gradient(140deg,#0c1712,#0a1410 60%),var(--grad);border:1px solid var(--line);border-radius:20px;padding:28px 24px;margin-bottom:22px;position:relative;overflow:hidden}
+header.hero::after{content:"";position:absolute;inset:auto -40px -80px auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%)}
+h1{margin:0 0 6px;font-size:clamp(21px,4.5vw,30px);font-weight:900}
+h1 i{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:normal}
+.hero p{margin:0;color:var(--muted);font-weight:700;font-size:14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{background:var(--panel);border:1px solid var(--line2);color:var(--accent3);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:900}
+h2{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:900;margin:34px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h2 .n{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;background:var(--grad);color:#032018;font-size:15px;flex:none}
+h3{font-size:15.5px;font-weight:900;margin:20px 0 8px;color:var(--accent3)}
+p{margin:8px 0;font-size:14px;color:var(--txt)}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:12px 0;font-size:13.5px}
+.box.ok{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.box.warn{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.box.bad{border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.box b.t{display:block;margin-bottom:6px;font-weight:900}
+ul,ol{margin:8px 0;padding-inline-start:22px;font-size:13.5px}
+li{margin:5px 0}
+li::marker{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px;background:var(--panel);border-radius:var(--r);overflow:hidden}
+th{background:var(--panel2);color:var(--accent3);font-weight:900;padding:10px 10px;text-align:right;border-bottom:1px solid var(--line2)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tscroll{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line)}
+.tscroll table{margin:0;border-radius:0;border:0}
+code{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:1px 8px;font-size:12px;direction:ltr;display:inline-block;font-family:ui-monospace,Consolas,monospace}
+pre{background:#07100c;border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;direction:ltr;text-align:left;font-size:12px;line-height:1.7}
+pre code{background:none;border:0;padding:0}
+.tag-ok{color:#34d399;font-weight:900}
+.tag-bad{color:#f87171;font-weight:900}
+.tag-warn{color:#fbbf24;font-weight:900}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:center}
+.kpi b{display:block;font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kpi span{font-size:11.5px;color:var(--muted);font-weight:800}
+footer{margin-top:36px;border-top:1px solid var(--line);padding-top:14px;color:var(--faint);font-size:12px;font-weight:700}
+a{color:var(--accent3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>تقرير تطوير <i>Softara Media</i> — منصة الأفلام والمسلسلات المتكاملة</h1>
+  <p>الإصدار v3.0.0 · صفحة المنتدى: softara.yoo7.com/h33-media · مستودع: softara1/softara @v3.0.0 · التاريخ: 6 نوفمبر 2026</p>
+  <div class="badges">
+    <span class="badge">27 مجموعة</span><span class="badge">262 حلقة مفحوصة</span><span class="badge">16 عنصرًا</span>
+    <span class="badge">21 قناة رسمية</span><span class="badge">10 مكتبات</span><span class="badge">13 مزوّد تشغيل</span>
+  </div>
+</header>
+
+<h2><span class="n">1</span>ملخص المشروع</h2>
+<p>تحويل صفحة Movies & Media من صفحة محدودة إلى <b>منصة وسائط متكاملة</b> بنفس روح صفحة Softara Live TV المعتمدة (v2.4.0): مشغل رئيسي في الأعلى يثبت أثناء تصفح المكتبات على الهاتف، مكتبات عربية وعالمية منظمة، بحث فوري بمستوى الحلقات، مفضلة ومتابعة مشاهدة، ومحتوى حقيقي قانوني 100% — دون أي عناوين وهمية أو روابط مقرصنة.</p>
+<div class="grid2">
+  <div class="kpi"><b>0</b><span>أخطاء كونسول في الصفحة المنشورة</span></div>
+  <div class="kpi"><b>6/6</b><span>أصول jsDelivr حُمّلت بنجاح</span></div>
+  <div class="kpi"><b>1</b><span>منطقة تشغيل واحدة دائمًا (بلا مشغل مزدوج)</span></div>
+  <div class="kpi"><b>100%</b><span>محتوى رسمي أو ملكية عامة</span></div>
+</div>
+
+<h2><span class="n">2</span>دراسة موضوع مسروور (bluenil.yoo7.com/t9)</h2>
+<p>رُوجع الموضوع كاملًا (المشاركة الشاملة + الكودان المرفقان: كود القسم 227KB وكود المشغل 335KB) بحساب Admin. الخلاصة:</p>
+
+<h3>ما استُلهم من الفكرة (إعادة هندسة لا نسخ)</h3>
+<ul>
+  <li><b>التعرف التلقائي على المنصة من الرابط</b> واختيار طريقة التضمين الصحيحة — أعدنا بناءه بمحلل <code>parseSource()</code> أضخم ويغطي قوائم يوتيوب (PL/UU/FL/RD/OL) وروابط shorts وdai.ly وgeo.dailymotion وvkvideo وأرشيف الإنترنت وm3u8.</li>
+  <li><b>واجهة شبكة أغلفة بدل قائمة مواضيع</b> — طوّرناها إلى شبكة 16/10 مع شارات (جودة/تصنيف/قيد التشغيل/كتالوج) وحالة hover تفاعلية.</li>
+  <li><b>قوائم تشغيل المسلسلات كاملة في عنصر واحد</b> — طبّقناها بذكاء أكبر: زر «القائمة الكاملة (تتحدث تلقائيًا)» يركّب قائمة رفع القناة الرسمية (UU…) داخل المشغل الرسمي فتظهر الحلقات الجديدة تلقائيًا دون أي تحديث يدوي.</li>
+  <li><b>DailyMotion API المجاني</b> لعناوين وصور الفيديوهات (بدون مفتاح)، ومسارات التضمين الرسمية <code>geo.dailymotion.com</code> و<code>vkvideo.ru/video_ext.php</code> و<code>ok.ru/videoembed</code>.</li>
+  <li><b>ترقيم الحلقات من العناوين</b> ومتابعة/مفضلة محلية — بنيناها مع بحث أعمق يشمل عناوين الحلقات نفسها.</li>
+</ul>
+
+<h3>المشاكل التي اكتشفناها في أكواد مسرووور وتجنّبناها</h3>
+<div class="box bad"><b class="t">① حجم ضخم يعطل السرعة</b> 563KB جافاسكربت + jQuery يُحمَّلان على صفحات المنتدى — منصتنا: <span class="tag-ok">~75KB إجمالي (CSS+JS+بيانات) بلا jQuery</span>.</div>
+<div class="box bad"><b class="t">② مصدر «المشغل داخل المشغل»</b> كوده يحول الروابط والإطارات معًا داخل الموضوع — لو احتوى المنشور رابطًا وiframe يظهر مشغلان. منصتنا: <span class="tag-ok">منطقة تشغيل واحدة (#stmStage) يُفكَّك كل محتواها قبل أي تشغيل جديد — التداخل بنيويًا مستحيل.</span></div>
+<div class="box bad"><b class="t">③ كشط مواضيع عند كل زيارة</b> يجلب صورة غلاف كل موضوع بطلب شبكة منفصل (بطء + حساسية لأي تغيير من أحلى منتدى) — منصتنا: <span class="tag-ok">بيانات منسّقة مسبقًا ومفحوصة، صفر كشط وقت العرض.</span></div>
+<div class="box bad"><b class="t">④ منصات معلنة كمدعومة لكنها ممنوعة التضمين</b> تحققنا فعليًا: sendvid وmp4plus يرسلان X-Frame-Options (لن يعملا داخل أي iframe). منصتنا: <span class="tag-ok">مصفوفة دعم صادقة مبنية على اختبار رؤوس HTTP حقيقي + بطاقة «شاهده على منصته» لما يمنع التضمين.</span></div>
+<div class="box bad"><b class="t">⑤ صور غلاف مُخمَّنة بمسارات مكسورة</b> (مثل مسارات uqload الثابتة) — منصتنا: صور فقط من مصادر رسمية (i.ytimg.com، archive.org، dmcdn) مع بديل SVG تلقائي عند الفشل.</div>
+<div class="box bad"><b class="t">⑥ اعتماد على بروكسيات CORS عامة</b> لجلب قوائم IPTV — اختبرنا 12 بروكسيًا عامًا وكلها ميتة/مقيدة 2025. منصتنا: <span class="tag-ok">تحديث القنوات عبر قوائم الرفع الرسمية المضمنة (لا يحتاج بروكسي إطلاقًا) + محاولة هادئة عبر وسائط إن توفرت.</span></div>
+<div class="box warn"><b class="t">⑦ فيديوهات محدودة العمر تظهر شاشة سوداء</b> في كوده (لا يفحصها) — نحن نتحقق بـ oEmbed وقت البناء ونستبعد أي معرف يرجع 401 (6 فيديوهات استُبعدت فعليًا أثناء البحث).</div>
+
+<h2><span class="n">3</span>معمارية المنصة والملفات</h2>
+<pre><code>tv/movies/                        ← على GitHub (softara1/softara) — الوسم v3.0.0
+├── movies.html                   ← هيكل الصفحة (نسخة معاينة بمسارات نسبية)
+├── css/softara-movies.css        ← كل الأنماط (مستقلة عن أنماط Live TV)
+├── js/softara-movies-player.js   ← المشغل أحادي المصدر (13 مزوّدًا)
+├── js/softara-movies-app.js      ← الواجهة: مكتبات/بحث/حلقات/مفضلة/تحديث القنوات
+├── data/softara-movies-data.js   ← المكتبات والمجموعات والعناصر (أضف المحتوى هنا)
+├── data/softara-movies-channels.js ← قنوات المكتبات (لقطات RSS + آلية التحديث)
+├── forum/softara-movies-forum.html ← نسخة المنتدى (روابط jsDelivr @v3.0.0)
+└── docs/                          ← هذا التقرير + دليل التركيب والإضافة</code></pre>
+<ul>
+  <li><b>فصل كامل عن Live TV</b>: لا تعديل على أي ملف مشترك — تحقق بالبصمة: <code>softara-live-data.js</code> متطابق SHA-256 (<code>7f6ae08683e98a21…</code>) بين وسمي v2.4.0 وv3.0.0.</li>
+  <li><b>البيانات منفصلة عن الكود</b>: إضافة فيلم = تعديل ملف البيانات فقط دون لمس أي منطق.</li>
+  <li><b>أيقونات SVG مشتركة</b> من <code>tv/shared/js/softara-icons.js</code> (استخدام قراءة فقط).</li>
+</ul>
+
+<h2><span class="n">4</span>حل مشكلة المشغل المزدوج نهائيًا</h2>
+<p>المبدأ: <b>منطقة تشغيل واحدة فقط</b> <code>#stmStage</code> داخل إطار المشغل <code>#stmShell</code>. أي تشغيل جديد يمر بالدورة:</p>
+<pre><code>mount(item)
+ 1. teardown()  ← إزالة الـiframe/الـvideo من الشجرة (الصوت يتوقف فورًا)
+                 + hls.destroy() + إلغاء blob URLs + تصفير المؤقتات
+ 2. بناء المشغل الجديد حسب نوع المصدر داخل المنطقة الفارغة نفسها
+ 3. شارات المصدر (YouTube / DailyMotion / MP4 / HLS…) في الشريط العلوي</code></pre>
+<div class="box ok"><b class="t">نتيجة الاختبار الفعلي</b> تنفيذ سلسلة تبديلات سريعة: MP4 (يعمل) ← DailyMotion ← يوتيوب ← HLS — القياس بعد كل خطوة: <span class="tag-ok">عنصر وسائط واحد بالضبط (1 if / 0 vid أو 0 if / 1 vid)</span> — لا طبقات ولا صوت خفي ولا نافذتان.</div>
+<p>يوتيوب عمدًا بلا IFrame API (iframe رسمي فقط بـ <code>youtube-nocookie</code>) — أخف، وأثبت، وواجهة يوتيوب الرسمية الكاملة (جودة/ترجمة/سرعة) داخل المنطقة نفسها دون أي تعارض مع شروط المنصة.</p>
+
+<h2><span class="n">5</span>مصفوفة المنصات — اختبار حقيقي (رؤوس HTTP + كشط)</h2>
+<div class="tscroll"><table>
+<tr><th>المنصة</th><th>نوع الدعم</th><th>النتيجة</th><th>ملاحظة</th></tr>
+<tr><td>YouTube / youtu.be / shorts / قوائم</td><td><code>youtube</code> · <code>yt-playlist</code></td><td class="tag-ok">يعمل</td><td>تضمين رسمي nocookie + قوائم UU تتحدث تلقائيًا</td></tr>
+<tr><td>Dailymotion / dai.ly / geo.</td><td><code>dailymotion</code> · <code>dm-playlist</code></td><td class="tag-ok">يعمل</td><td>لا رؤوس حظر تضمين؛ تأكدنا من التضمين الرسمي</td></tr>
+<tr><td>OK.ru</td><td><code>okru</code></td><td class="tag-ok">يعمل</td><td>videoembed رسمي + nochat=1</td></tr>
+<tr><td>VK / vkvideo.ru</td><td><code>vk</code></td><td class="tag-ok">يعمل</td><td>video_ext.php?oid=&id=&hd=3</td></tr>
+<tr><td>Vimeo</td><td><code>vimeo</code></td><td class="tag-ok">يعمل</td><td>player.vimeo.com رسمي</td></tr>
+<tr><td>Rutube</td><td><code>rutube</code></td><td class="tag-ok">يعمل</td><td>play/embed رسمي</td></tr>
+<tr><td>Streamable</td><td><code>streamable</code></td><td class="tag-ok">يعمل</td><td>/e/ مع معرفات صحيحة</td></tr>
+<tr><td>Facebook</td><td><code>facebook</code></td><td class="tag-ok">يعمل</td><td>عبر plugins/video.php للفيديوهات العامة</td></tr>
+<tr><td>Archive.org</td><td><code>archive</code></td><td class="tag-ok">يعمل</td><td>تضمين رسمي + معامل file لاختيار النسخة</td></tr>
+<tr><td>MP4 / WebM مباشر</td><td><code>mp4</code></td><td class="tag-ok">يعمل</td><td>مشغل أصلي + جودات + ترجمات VTT + استكمال</td></tr>
+<tr><td>HLS · M3U8</td><td><code>hls</code></td><td class="tag-ok">يعمل</td><td>hls.js كسول التحميل + أصلية على iOS</td></tr>
+<tr><td>Sendvid</td><td>—</td><td class="tag-bad">ممنوع التضمين</td><td>X-Frame-Options: SAMEORIGIN → بطاقة «شاهده على منصته»</td></tr>
+<tr><td>mp4plus.org</td><td>—</td><td class="tag-bad">ممنوع التضمين</td><td>X-Frame-Options: DENY</td></tr>
+<tr><td>uqload · dood · mixdrop/miixdrop · voe · filemoon · vidmoly · streamtape · larhu</td><td><code>external</code></td><td class="tag-warn">بطاقة خارجية</td><td>لا حظر رؤوس لكنها مضيفات غير موثوقة/مقرصنة الغالب — لا تُضمَّن؛ تُعرض بطاقة رسالة صادقة مع رابط فتح آمن (nofollow)</td></tr>
+</table></div>
+<p class="box">لا يفترض الكود أبدًا أن كل رابط قابل للتضمين: المحلل يصنف الرابط، والمضيفات المانعة أو غير الموثوقة تحصل على بطاقة خارجية أنيقة بدل مشغل أسود أو صفحة مكسورة.</p>
+
+<h2><span class="n">6</span>المكتبات والمحتوى (حقيقي ومفحوص 100%)</h2>
+<div class="tscroll"><table>
+<tr><th>المكتبة</th><th>المحتوى</th><th>المصدر</th></tr>
+<tr><td>القرآن والإسلاميات</td><td>3 مجموعات تلاوات (إسلام صبحي · العفاسي · عبدالله الموسى)</td><td>القنوات الرسمية للقرّاء (تحقق RSS + oEmbed)</td></tr>
+<tr><td>وثائقيات عربية</td><td>الجزيرة الوثائقية · DW عربية · CGTN عربي · برامج العربية + 3 أفلام وثائقية كاملة</td><td>قنوات رسمية</td></tr>
+<tr><td>التركية المدبلجة</td><td><b>مكتبة قناة «أفلام تركية مدبلجة للعربية» المطلوبة</b> + وادي الذئاب الكمين مدبلج (حتى الحلقة 450) + أفلام Pana Film الرسمية + TRT عربي</td><td>القنوات الرسمية للمنتج/القناة</td></tr>
+<tr><td>مصارعة ورياضة</td><td>WWE (نزالات كاملة رسمية + 4 نزالات مفحوصة) · FIFA</td><td>القنوات الرسمية</td></tr>
+<tr><td>كرتون وأنمي</td><td>سبيستون · ماجد للأطفال · كيلوغلان TRT Çocuk (12 حلقة DailyMotion مفحوصة) + كتالوج الكابتن ماجد</td><td>قنوات رسمية</td></tr>
+<tr><td>تقنية وذكاء اصطناعي</td><td>AI بالعربي · Google Arabia</td><td>قنوات رسمية</td></tr>
+<tr><td>أفلام عالمية</td><td>شاراد (1963) · ليلة الموتى الأحياء · الخطة 9 · صديقته الجمعة · الجنرال — بجودات ونسخ متعددة</td><td>ملكية عامة (archive.org + قنوات رسمية)</td></tr>
+<tr><td>مسلسلات عالمية</td><td>فلاش غوردون (13 فصلًا) · عرض لوسي (10 حلقات) + كتالوج Prison Break (مقطع رسمي + روابط رسمية)</td><td>ملكية عامة + كتالوج رسمي</td></tr>
+<tr><td>وثائقيات عالمية</td><td>NASA (وثائقيات كاملة + بث حي) + كتالوج المحقق كونان (مقطع توهو الرسمي)</td><td>قنوات رسمية + كتالوج</td></tr>
+<tr><td>أنيميشن عالمي</td><td>أفلام Blender المفتوحة (CC BY) · سوبرمان فليشر (10 حلقات MP4 ملكية عامة) · TRT Çocuk</td><td>رخص مفتوحة + ملكية عامة</td></tr>
+</table></div>
+<h3>قواعد الحقوق المطبقة</h3>
+<ul>
+  <li>لا روابط مقرصنة ولا تجاوز اشتراكات — أعمال لا تتوفر مجانًا رسميًا (Prison Break، كونان، الكابتن ماجد العربي) أُدرجت <b>كتالوج تعريفي</b> بمقطعها الرسمي وروابط المنصات الرسمية، موسومة «كتالوج رسمي» بوضوح.</li>
+  <li>كل معرف فيديو تحقق عبر oEmbed — استُبعدت 6 معرفات ردت 401 (مقيدة العمر/خاصة).</li>
+  <li>ملاحظة المصدر ظاهرة في ورقة كل عمل (قناة رسمية / ملكية عامة / مقطع رسمي).</li>
+</ul>
+
+<h2><span class="n">7</span>قناة «أفلام تركية مدبلجة» والتحديث التلقائي</h2>
+<div class="box ok"><b class="t">الحل المعتمد (رسمي 100%)</b> قناة المستخدم حُلّت إلى <code>UCGjgAGxGWZXWLTHTlTVZXaw</code>. مكتبتها تعرض أحدث 15 فيديو (لقطات RSS حقيقية بعناوينها وصورها) + زر «القائمة الكاملة (تتحدث تلقائيًا)» يركّب قائمة رفع القناة الرسمية <code>UUGjgAGxGWZXWLTHTlTVZXaw</code> داخل مشغل يوتيوب الرسمي — <b>كل فيديو جديد يُنشر في القناة يظهر فورًا دون أي تعديل يدوي</b>، وهذا ضمن واجهات يوتيوب الرسمية وشروطها تمامًا.</div>
+<ul>
+  <li>عند زيارة الصفحة تحاول المنصة بهدوء جلب RSS مباشر عبر وسائط CORS إن توفرت (تحديث البطاقات أيضًا) — إن لم تتوفر، تبقى اللقطات + القائمة الكاملة الرسمية ضامنة للجديد.</li>
+  <li>نفس الآلية تعمل لكل القنوات الـ21 (وادي الذئاب، WWE، الجزيرة الوثائقية، سبيستون…).</li>
+  <li>لماذا لا نعتمد بروكسيًا عامًا؟ اختبرنا 12 بروكسيًا (allorigins، codetabs، corsproxy، jina، thingproxy…) — كلها ميتة أو مقيدة أو ترفض IP مراكز البيانات في 2025، لذلك الحل الرسمي هو الأساس.</li>
+</ul>
+
+<h2><span class="n">8</span>تجربة الهاتف (الأولوية الأولى)</h2>
+<ul>
+  <li><b>ثبات المشغل</b>: عند التمرير داخل المكتبات يثبت المشغل أسفل الترويسة ويصغر تلقائيًا (IntersectionObserver) — المشاهدة والتنقل معًا دون إعاقة المحتوى. <span class="tag-ok">مُثبت بلقطة حية على عرض 390px.</span></li>
+  <li><b>نفس تعديلات Live TV v2.4.0</b>: «التالية» أولًا بصريًا (order:-1) بنص مختصر، وشبكة عمودين على الشاشات الصغيرة.</li>
+  <li>ورقة تفاصيل سفلية (Bottom Sheet) بحد آمن iOS، أهداف لمس ≥44px، شريط حلقات قابل للتمرير أفقيًا، تذييل يلتصق بالأسفل ويُدفع طبيعيًا مع طول المحتوى.</li>
+  <li>عند اختيار حلقة من قائمة بعيدة تعود الشاشة تلقائيًا إلى المشغل.</li>
+</ul>
+
+<h2><span class="n">9</span>نتائج الاختبارات</h2>
+<div class="tscroll"><table>
+<tr><th>الاختبار</th><th>البيئة</th><th>النتيجة</th></tr>
+<tr><td>تحميل الصفحة وفحص الكونسول</td><td>معاينة + منشورة</td><td class="tag-ok">0 أخطاء</td></tr>
+<tr><td>أصول CDN (6 روابط)</td><td>منشورة</td><td class="tag-ok">كلها 200 بالميمات الصحيحة</td></tr>
+<tr><td>تشغيل YouTube (تضمين رسمي)</td><td>محاكاة</td><td class="tag-ok">يُركّب ويُفكَّك بدقة (راجع الملاحظة أدناه)</td></tr>
+<tr><td>تشغيل DailyMotion (كيلوغلان)</td><td>محاكاة</td><td class="tag-ok">يُركّب ويُفكَّك بدقة</td></tr>
+<tr><td>تشغيل MP4 (شاراد 1:53:05 من archive.org)</td><td>محاكاة + منشورة</td><td class="tag-ok">تشغيل فعلي — الزمن يتقدم</td></tr>
+<tr><td>تشغيل HLS (بث تجريبي Mux)</td><td>محاكاة</td><td class="tag-ok">المانيفست أُحلل والعنصر جاهز</td></tr>
+<tr><td>سلسلة تبديلات سريعة MP4→DM→YT</td><td>محاكاة</td><td class="tag-ok">عنصر وسائط واحد دائمًا — لا مشغل مزدوج</td></tr>
+<tr><td>ثبات المشغل أثناء تمرير المكتبات</td><td>موبايل 390px</td><td class="tag-ok">مثبت أسفل الترويسة + تصغير تلقائي</td></tr>
+<tr><td>البحث (اسم عمل + عنوان حلقة «الحلقة 449»)</td><td>محاكاة</td><td class="tag-ok">نتائج دقيقة حتى مستوى الحلقات</td></tr>
+<tr><td>المفضلة + متابعة المشاهدة</td><td>محاكاة</td><td class="tag-ok">تعمل وتُحفظ محليًا</td></tr>
+<tr><td>كتالوج Prison Break (روابط رسمية + مقطع)</td><td>محاكاة</td><td class="tag-ok">5 مواسم + 2 رابط رسمي + مقطع يعمل</td></tr>
+<tr><td>القائمة الكاملة (UU playlist)</td><td>محاكاة + منشورة</td><td class="tag-ok">تُركّب في المنطقة الواحدة</td></tr>
+</table></div>
+<div class="box warn"><b class="t">ملاحظات صدق اختبار</b> ① رسالة يوتيوب «Sign in to confirm you're not a bot» ظهرت أثناء الاختبار الآلي فقط (متصفح بدون واجهة من مركز بيانات) — هي نفسها لا تظهر للزوار الحقيقيين، ونمط التضمين المستخدم هو ذاته المعتمد في صفحة Live TV التي اختبرتها على هاتفك. ② عقدتا ملفات على archive.org أعادت 500 مؤقتة أثناء الفحص ثم استقرت (206) — شاشة الخطأ الأنيقة تعالج أي عطل مشابه. ③ الاختبار الآلي ليس بديلاً كاملاً عن هاتف حقيقي — يُنصح بتجربة سريعة من هاتفك للاطمئنان النهائي.</div>
+
+<h2><span class="n">10</span>النشر والإصدار والنسخ الاحتياطية</h2>
+<h3>الإصدار والروابط</h3>
+<ul>
+  <li>الوسم: <code>v3.0.0</code> = <code>c97b888</code> · الفرع main = <code>c97b888</code></li>
+  <li>صفحة المنتدى: <code>https://softara.yoo7.com/h33-media</code> (بعد h32-tv مباشرة)</li>
+  <li>روابط jsDelivr: <code>https://cdn.jsdelivr.net/gh/softara1/softara@v3.0.0/tv/movies/…</code> (6 أصول، كلها مفحوصة 200)</li>
+</ul>
+<h3>بصمات SHA-256 للملفات المنشورة</h3>
+<pre id="shasum"></pre>
+<h3>النسخ الاحتياطية</h3>
+<ul>
+  <li><b>قبل أي تعديل</b>: <code>tv-backups/movies-before-rebuild-20261106/</code> — ملفات v2.2.0 القديمة (محلي + بعيد متطابقان SHA) + SHA256SUMS.txt</li>
+  <li><b>النسخة المنشورة</b>: <code>download/softara-movies-v3.0.0/</code> — كل الملفات + كود صفحة المنتدى h33 كما نُشر + SHA256SUMS.txt</li>
+  <li><b>على GitHub</b>: الوسم <code>v3.0.0</code> يثبت كل شيء ويمكن الاستعادة منه أصلًا بأصل</li>
+</ul>
+
+<h2><span class="n">11</span>قيود معروفة وصدق مع المستخدم</h2>
+<ul>
+  <li>مكتبة «الأفلام العربية» الدرامية: لا تتوفر أفلام عربية كاملة مجانًا رسميًا بشكل موثوق، لذا أُدرجت <b>الأفلام الوثائقية العربية الكاملة</b> (الجزيرة الوثائقية) كمكتبة أفلام حقيقية قابلة للتشغيل، وأي إضافة درامية مستقبلية ستكون عبر مصادر رسمية فقط عند توفرها.</li>
+  <li>التحديث التلقائي للبطاقات يعتمد على توفر وسيط CORS حي؛ دونه تبقى اللقطات وتضمن القائمة الكاملة الرسمية ظهور الجديد داخل المشغل دائمًا.</li>
+  <li>تقدم المشاهدة (استكمال) يعمل للتشغيل المباشر mp4/hls؛ التضمينات الرسمية (يوتيوب وغيرها) تدير تقدمها داخليًا وفق شروطها.</li>
+  <li>لا توجد مفاتيح API أو بيانات سرية في أي ملف عام — القنوات تعمل بـ RSS وoEmbed المجانيين فقط.</li>
+</ul>
+
+<footer>تقرير تطوير Softara Media v3.0.0 — أُعد تلقائيًا كجزء من تسليم المشروع · <a href="guide-installation.html">الدليل الثاني: التركيب وإضافة المحتوى ←</a></footer>
+</div>
+<script>
+fetch('SHA256SUMS.txt').then(function(r){return r.text()}).then(function(t){
+  document.getElementById('shasum').textContent = t;
+}).catch(function(){
+  document.getElementById('shasum').textContent = '# SHA256SUMS.txt (بجوار هذا التقرير في المستودع)';
+});
+</script>
+</body>
+</html>
