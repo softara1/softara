@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════
-   سوفتارا TV v2.2.0 — منطق صفحة Softara Live TV (البث المباشر)
+   سوفتارا TV v3.0.3 — منطق صفحة Softara Live TV (البث المباشر)
    هذه الصفحة للقنوات المباشرة فقط:
    تصنيفات مشتقة آليًا من البيانات · بحث فوري · تنقّل سابق/تالي ·
    لوحة قنوات للهاتف ولوح جانبي للحاسب · تشغيل تلقائي مكتوم للقناة المميزة
@@ -18,8 +18,23 @@ if(!S||!DATA){
 var d=S.d,w=S.w,$=S.$,esc=S.esc,icon=S.icon,fmtT=S.fmtT;
 
 /* ─────────── الحالة ─────────── */
-var state={ query:'', chFilter:'الكل' };
+var state={ query:'', chFilter:'الكل', grp:'عربية' };
+
+/* ─── فصل القنوات: عربية / أجنبية (v3.0.3) ───
+   عربية إذا: اسمها بالعربية، أو حقل اللغة يبدأ بعربي، أو اسمها ينتهي بـArabic/Arabia،
+   أو دولتها عربية (مع مراعاة «الإمارات · بث أمريكا»)، أو اسمها ضمن قائمة قنوات عربية معروفة بأسماء لاتينية */
+var ARAB_COUNTRIES=['السعودية','الإمارات','قطر','مصر','العراق','الأردن','لبنان','سوريا','فلسطين','الكويت','البحرين','عُمان','عمان','اليمن','ليبيا','تونس','الجزائر','المغرب','السودان','موريتانيا','الصومال','جيبوتي','جزر القمر','المنطقة العربية','الشرق الأوسط'];
+var ARAB_NAMES=['Mekameleen TV','Almahriah TV','Al Wilayah','Elsharq TV','Arabi TV','Ahlulbayt TV','Al-Mahdi TV','Alkarma TV Australia','Alkarma TV Family','Alkarma TV Middle East','Alkarma TV North America & Canada','Alkarma TV Praise','Alkarma TV Talmaza Discipleship','ATVSat','ABN Bible Movies Channel'];
+function isArabicCh(c){
+  if(/[\u0600-\u06FF]/.test(c.name))return true;
+  if((c.lang||'').indexOf('عربي')===0)return true;
+  if(/arab(ic|ia)\b/i.test(c.name))return true;
+  var co=(c.country||'').split('·');
+  for(var i=0;i<co.length;i++){if(ARAB_COUNTRIES.indexOf(co[i].trim())>-1)return true}
+  return ARAB_NAMES.indexOf(c.name)>-1;
+}
 var channels=(DATA.items||[]).filter(function(i){return i.kind==='channel'&&!i.soon});
+channels.forEach(function(c){c._ar=isArabicCh(c)});
 
 /* ─────────── المشغل ─────────── */
 var player=S.createPlayer({
@@ -37,18 +52,38 @@ var player=S.createPlayer({
 function matches(c){
   var q=(state.query||'').trim().toLowerCase();
   var okCat=state.chFilter==='الكل'||c.cat===state.chFilter;
-  if(!q)return okCat;
+  var okGrp=(state.grp==='عربية')===!!c._ar;
+  if(!q)return okGrp&&okCat;
+  /* البحث يشمل كل القنوات بغض النظر عن مجموعة عربية/أجنبية */
   var hay=(c.name+' '+(c.cat||'')+' '+(c.country||'')+' '+(c.desc||'')).toLowerCase();
   return okCat&&hay.indexOf(q)>-1;
 }
 function filtered(){return channels.filter(matches)}
 
 function renderChLists(){
+  var inGrp=channels.filter(function(c){return (state.grp==='عربية')===!!c._ar});
   var cats=['الكل'];
-  channels.forEach(function(c){if(cats.indexOf(c.cat)<0)cats.push(c.cat)});
-  /* أزرار التصنيفات — تُشتق آليًا من البيانات (إضافة تصنيف جديد في البيانات تظهر فورًا) */
+  inGrp.forEach(function(c){if(cats.indexOf(c.cat)<0)cats.push(c.cat)});
+  if(cats.indexOf(state.chFilter)<0)state.chFilter='الكل';
+  /* شريط المجموعة (عربية/أجنبية) + أزرار التصنيفات — تُشتق آليًا من البيانات */
   ['stvChFiltersM','stvChFiltersD'].forEach(function(fid){
-    var box=d.getElementById(fid);if(!box)return;box.innerHTML='';
+    var box=d.getElementById(fid);if(!box)return;
+    var wrap=box.parentNode&&box.parentNode.classList&&box.parentNode.classList.contains('stv-fwrap')?box.parentNode:null;
+    if(!wrap){
+      wrap=d.createElement('div');wrap.className='stv-fwrap';
+      box.parentNode.insertBefore(wrap,box);wrap.appendChild(box);
+      var g0=d.createElement('div');g0.className='stv-grpbar';wrap.insertBefore(g0,box);
+    }
+    var gb=wrap.querySelector('.stv-grpbar');gb.innerHTML='';
+    ['عربية','أجنبية'].forEach(function(g){
+      var n=channels.filter(function(c){return (g==='عربية')===!!c._ar}).length;
+      var b=d.createElement('button');b.className='stv-chip-f stv-grp'+(state.grp===g?' on':'');
+      b.textContent=g+' · '+n;
+      b.setAttribute('aria-pressed',state.grp===g);
+      b.addEventListener('click',function(){if(state.grp!==g){state.grp=g;state.chFilter='الكل';renderChLists()}});
+      gb.appendChild(b);
+    });
+    box.innerHTML='';
     cats.forEach(function(cat){
       var b=d.createElement('button');b.className='stv-chip-f'+(state.chFilter===cat?' on':'');b.textContent=cat;
       b.setAttribute('aria-pressed',state.chFilter===cat);
