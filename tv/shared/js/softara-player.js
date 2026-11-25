@@ -195,8 +195,12 @@ function createPlayer(cfg){
          فلا يمكن معرفة لغات الفيديو برمجيًا — لذا يُعرض زر CC دائمًا ليوتيوب ويطبّق التفضيل عند الإنشاء. */
       var pv={autoplay:1,mute:muted?1:0,playsinline:1,rel:0,enablejsapi:1,origin:w.location.origin,cc_load_policy:ccPref.on?1:0};
       if(ccPref.on&&ccPref.lang)pv.cc_lang_pref=ccPref.lang;
-      ytPlayer=new YT.Player('stvYtMount',{
-        videoId:it.src,host:'https://www.youtube.com',playerVars:pv,
+      var _qs=Object.keys(pv).map(function(k){return k+'='+encodeURIComponent(pv[k])}).join('&');
+      var _m=document.getElementById('stvYtMount'),_f=document.createElement('iframe');
+      _f.id='stvYtMount';_f.referrerPolicy='strict-origin-when-cross-origin';_f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';_f.setAttribute('allowfullscreen','');_f.style.cssText='width:100%;height:100%;border:0';
+      _f.src='https://www.youtube.com/embed/'+encodeURIComponent(it.src)+'?'+_qs;
+      _m.parentNode.replaceChild(_f,_m);
+      ytPlayer=new YT.Player(_f,{
         events:{
           onReady:function(e){
             if(seq!==mountSeq||state.current!==it)return;
